@@ -1,6 +1,6 @@
-#include "mainwindow.h"
+ #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+#include "findFiles.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -88,6 +88,15 @@ void MainWindow::update()
 
  ////////////////////////////////////////
 //   LOAD PICTURE AND GRAPHICS INIT   //
+
+
+void MainWindow::on_pushButton_setFilesList_clicked()
+{
+    FindFiles findWindow;
+    findWindow.show();
+    findWindow.closeEvent(QCloseEvent* copyListOfFiles);
+}
+
 void MainWindow::on_actionLoad_picture_triggered()
 {
     QString filePath = QFileDialog::getOpenFileName(this, tr("Load Picture"), QDir::currentPath(), tr("JPEG(*.jpg)"));
@@ -981,5 +990,4 @@ void MainWindow::on_actionLast_Setup_triggered()
         boolBuffer = lastBoolBuffer;
     }
 }
-
 

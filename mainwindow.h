@@ -142,6 +142,8 @@ private slots:
 
     void on_pushButton_pseudoContrast_clicked();
 
+    void on_pushButton_setFilesList_clicked();
+
 private:
     Ui::MainWindow *ui;
     QGraphicsScene *sc_orig;
@@ -161,6 +163,7 @@ private:
     QList <int> intBuffer, lastIntBuffer;
     QList <double> doubleBuffer, lastDoubleBuffer;
     QList <bool> boolBuffer, lastBoolBuffer;
+    QList <QString> listOfFiles;
 };
 
 #endif // MAINWINDOW_H
