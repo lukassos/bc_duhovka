@@ -43,25 +43,6 @@
      <string>Run Setup</string>
     </property>
    </widget>
-   <widget class="QLCDNumber" name="actualTime">
-    <property name="geometry">
-     <rect>
-      <x>543</x>
-      <y>10</y>
-      <width>141</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="smallDecimalPoint">
-     <bool>false</bool>
-    </property>
-    <property name="numDigits">
-     <number>14</number>
-    </property>
-    <property name="intValue" stdset="0">
-     <number>0</number>
-    </property>
-   </widget>
    <widget class="QTabWidget" name="tabWidget">
     <property name="geometry">
      <rect>
@@ -268,7 +249,7 @@ p, li { white-space: pre-wrap; }
      </sizepolicy>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="page_proc">
      <property name="geometry">
@@ -2087,6 +2068,32 @@ Threshold</string>
     </property>
     <property name="text">
      <string>Undo Setup</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_massRun">
+    <property name="geometry">
+     <rect>
+      <x>650</x>
+      <y>10</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Mass Run</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_setFilesList">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>10</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set Files List</string>
     </property>
    </widget>
   </widget>
