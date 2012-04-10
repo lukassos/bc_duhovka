@@ -58,17 +58,17 @@ QT_END_NAMESPACE
 class FindFiles : public QDialog
 {
     Q_OBJECT
-
+    //QStringList filesFoundList;
 public:
     FindFiles(QWidget *parent = 0);
     //~FindFiles();
 public slots:
-    QStringList find();
-    //QStringList getFiles(){return find;}
+
+    //QStringList getFiles(){return filesFoundList;}
 
 private slots:
     void browse();
-
+    void find();
     void openFileOfItem(int row, int column);
     //void setFiles(QStringList files){filesFoundList=files;}
 
@@ -88,6 +88,8 @@ private:
     QLabel *filesFoundLabel;
     QPushButton *browseButton;
     QPushButton *findButton;
+    //QPushButton *confirmButton;
+    //QPushButton *cancelButton;
     QTableWidget *filesTable;
     //QString filesFoundList;
     QDir currentDir;

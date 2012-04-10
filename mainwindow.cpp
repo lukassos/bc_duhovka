@@ -93,8 +93,12 @@ void MainWindow::on_pushButton_setFilesList_clicked()
 {
     FindFiles f(this);
     f.exec();// == QDialog::done){
-    listOfFiles = f.find();
+//    f.show();
+//    f.raise();
+//    f.activateWindow();
+    //listOfFiles = f.getFiles();
     //multithread here
+
     while(listOfFiles.isEmpty()){
         ui->textEdit_setup->append(listOfFiles.first());
         listOfFiles.removeFirst();

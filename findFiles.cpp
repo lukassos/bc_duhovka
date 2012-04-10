@@ -48,6 +48,8 @@ FindFiles::FindFiles(QWidget *parent)
 {
     browseButton = createButton(tr("&Browse..."), SLOT(browse()));
     findButton = createButton(tr("&Find"), SLOT(find()));
+    //confirmButton = createButton(tr("&Confirm"), SLOT(accept()));
+    //cancelButton = createButton(tr("&Cancel"), SLOT(reject()));
 
     fileComboBox = createComboBox(tr("*"));
     textComboBox = createComboBox();
@@ -72,7 +74,9 @@ FindFiles::FindFiles(QWidget *parent)
     mainLayout->addWidget(browseButton, 2, 2);
     mainLayout->addWidget(filesTable, 3, 0, 1, 3);
     mainLayout->addWidget(filesFoundLabel, 4, 0, 1, 2);
-    mainLayout->addWidget(findButton, 4, 2);
+    mainLayout->addWidget(findButton, 2, 3);
+   // mainLayout->addWidget(confirmButton, 4, 1);
+   // mainLayout->addWidget(cancelButton, 4, 2);
     setLayout(mainLayout);
 
     setWindowTitle(tr("Find Files"));
@@ -103,7 +107,7 @@ static void updateComboBox(QComboBox *comboBox)
 }
 
 //! [3]
-QStringList FindFiles::find()
+void FindFiles::find()
 {
     filesTable->setRowCount(0);
 
@@ -128,7 +132,7 @@ QStringList FindFiles::find()
         files = findFilesList(files, text);
     //setFiles(files);
     showFiles(files);
-    return files;
+    //return files;
 }
 //! [4]
 
