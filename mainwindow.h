@@ -7,6 +7,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
 #include "imagemanip.h"
+#include "findFiles.h"
 
 
 namespace Ui {
@@ -20,6 +21,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    FindFiles findWindow;
 
     QString imagePath;
     QStringList openedCVWindowNames;
@@ -163,7 +165,7 @@ private:
     QList <int> intBuffer, lastIntBuffer;
     QList <double> doubleBuffer, lastDoubleBuffer;
     QList <bool> boolBuffer, lastBoolBuffer;
-    QList <QString> listOfFiles;
+    QStringList listOfFiles;
 };
 
 #endif // MAINWINDOW_H

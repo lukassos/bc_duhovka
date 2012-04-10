@@ -1,6 +1,5 @@
- #include "mainwindow.h"
+#include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "findFiles.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -92,9 +91,15 @@ void MainWindow::update()
 
 void MainWindow::on_pushButton_setFilesList_clicked()
 {
-    FindFiles findWindow;
-    findWindow.show();
-    findWindow.closeEvent(QCloseEvent* copyListOfFiles);
+    FindFiles f(this);
+    f.exec();// == QDialog::done){
+    listOfFiles = f.find();
+    //multithread here
+    while(listOfFiles.isEmpty()){
+        ui->textEdit_setup->append(listOfFiles.first());
+        listOfFiles.removeFirst();
+    //}
+    }
 }
 
 void MainWindow::on_actionLoad_picture_triggered()
@@ -548,7 +553,7 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 
     default:;
     }
-    ui->actualTime->display(ui->actualTime->value()+algTime);
+    ui->actualTime->setText(QString().number(ui->actualTime->text().toFloat()+algTime));
 
 }
 
@@ -588,7 +593,7 @@ void MainWindow::on_pushButton_run_clicked()
         lastDoubleBuffer = doubleBuffer;
         lastBoolBuffer = boolBuffer;
     }
-    ui->actualTime->display(0);
+    ui->actualTime->setText("0");
     if(imagePath.isEmpty()){
        on_actionLoad_picture_triggered();
     }else{

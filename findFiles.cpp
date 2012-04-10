@@ -38,13 +38,13 @@
 **
 ****************************************************************************/
 
-#include <QtGui>
+
 
 #include "findFiles.h"
 
 //! [0]
 FindFiles::FindFiles(QWidget *parent)
-    : QWidget(parent)
+    : QDialog(parent)
 {
     browseButton = createButton(tr("&Browse..."), SLOT(browse()));
     findButton = createButton(tr("&Find"), SLOT(find()));
@@ -57,7 +57,6 @@ FindFiles::FindFiles(QWidget *parent)
     textLabel = new QLabel(tr("Containing text:"));
     directoryLabel = new QLabel(tr("In directory:"));
     filesFoundLabel = new QLabel;
-
     createFilesTable();
 //! [0]
 
@@ -104,7 +103,7 @@ static void updateComboBox(QComboBox *comboBox)
 }
 
 //! [3]
-void FindFiles::find()
+QStringList FindFiles::find()
 {
     filesTable->setRowCount(0);
 
@@ -127,7 +126,9 @@ void FindFiles::find()
 
     if (!text.isEmpty())
         files = findFilesList(files, text);
+    //setFiles(files);
     showFiles(files);
+    return files;
 }
 //! [4]
 

@@ -40,8 +40,9 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
+#include <QtGui>
 #include <QWidget>
+#include <QtGui/qdialog.h>
 #include <QDir>
 
 QT_BEGIN_NAMESPACE
@@ -50,20 +51,26 @@ class QLabel;
 class QPushButton;
 class QTableWidget;
 class QTableWidgetItem;
+class QStringList;
 QT_END_NAMESPACE
 
 //! [0]
-class FindFiles : public QWidget
+class FindFiles : public QDialog
 {
     Q_OBJECT
 
 public:
     FindFiles(QWidget *parent = 0);
+    //~FindFiles();
+public slots:
+    QStringList find();
+    //QStringList getFiles(){return find;}
 
 private slots:
     void browse();
-    void find();
+
     void openFileOfItem(int row, int column);
+    //void setFiles(QStringList files){filesFoundList=files;}
 
 private:
     QStringList findFilesList(const QStringList &files, const QString &text);
@@ -82,9 +89,9 @@ private:
     QPushButton *browseButton;
     QPushButton *findButton;
     QTableWidget *filesTable;
-
+    //QString filesFoundList;
     QDir currentDir;
+
 };
 //! [0]
-
 #endif // FINDFILES_H
