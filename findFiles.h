@@ -63,19 +63,20 @@ public:
     FindFiles(QWidget *parent = 0);
     //~FindFiles();
 public slots:
-
+    void find();
     //QStringList getFiles(){return filesFoundList;}
 
 private slots:
     void browse();
-    void find();
+
     void openFileOfItem(int row, int column);
-    //void setFiles(QStringList files){filesFoundList=files;}
+    void setFiles(QStringList files);
 
 private:
     QStringList findFilesList(const QStringList &files, const QString &text);
     void showFiles(const QStringList &files);
     QPushButton *createButton(const QString &text, const char *member);
+    QPushButton *createButton(const QString &text);
     QComboBox *createComboBox(const QString &text = QString());
     void createFilesTable();
 

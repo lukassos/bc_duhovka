@@ -92,6 +92,8 @@ void MainWindow::update()
 void MainWindow::on_pushButton_setFilesList_clicked()
 {
     FindFiles f(this);
+    connect( f, SIGNAL(setFiles(QStringList)), this, SLOT(setListOfFiles(QStringList)));
+
     f.exec();// == QDialog::done){
 //    f.show();
 //    f.raise();

@@ -47,7 +47,7 @@ FindFiles::FindFiles(QWidget *parent)
     : QDialog(parent)
 {
     browseButton = createButton(tr("&Browse..."), SLOT(browse()));
-    findButton = createButton(tr("&Find"), SLOT(find()));
+    findButton = createButton(tr("&Find"));
     //confirmButton = createButton(tr("&Confirm"), SLOT(accept()));
     //cancelButton = createButton(tr("&Cancel"), SLOT(reject()));
 
@@ -130,9 +130,9 @@ void FindFiles::find()
 
     if (!text.isEmpty())
         files = findFilesList(files, text);
-    //setFiles(files);
+    emit setFiles(files);
     showFiles(files);
-    //return files;
+  //return files;
 }
 //! [4]
 
@@ -212,6 +212,13 @@ QPushButton *FindFiles::createButton(const QString &text, const char *member)
 {
     QPushButton *button = new QPushButton(text);
     connect(button, SIGNAL(clicked()), this, member);
+    return button;
+}
+
+QPushButton *FindFiles::createButton(const QString &text)
+{
+    QPushButton *button = new QPushButton(text);
+    //connect(button, SIGNAL(clicked()), this, member);
     return button;
 }
 //! [9]
