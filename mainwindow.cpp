@@ -92,19 +92,29 @@ void MainWindow::update()
 void MainWindow::on_pushButton_setFilesList_clicked()
 {
     FindFiles f(this);
-    connect( f, SIGNAL(setFiles(QStringList)), this, SLOT(setListOfFiles(QStringList)));
+    QObject::connect( &f, SIGNAL(signalFiles(QStringList)), this, SLOT(setListOfFiles(QStringList)));
+    f.init(listOfFiles);
+    f.exec();
+    //multithread should be here
+    QStringList temp = listOfFiles;
+    ui->textEdit_setup->append("---------------\nFor processing: ");
+    while(!temp.isEmpty()){
+        ui->textEdit_setup->append(temp.first());
+        temp.removeFirst();
+    }
+    ui->textEdit_setup->append("---------------");
+}
 
-    f.exec();// == QDialog::done){
-//    f.show();
-//    f.raise();
-//    f.activateWindow();
-    //listOfFiles = f.getFiles();
-    //multithread here
-
-    while(listOfFiles.isEmpty()){
-        ui->textEdit_setup->append(listOfFiles.first());
-        listOfFiles.removeFirst();
-    //}
+void MainWindow::on_actionSet_Mass_Save_Directory_triggered()
+{
+    QString filePath = QFileDialog::getExistingDirectory(this, tr("Set Save Directory"), QDir::currentPath());
+    if (!filePath.isEmpty()){
+        imageSaveDir = filePath;
+        workImg = imread(filePath.toStdString(),0);
+    }else{
+        QMessageBox msg;
+        msg.setText("Failed opening directory");
+        msg.exec();
     }
 }
 
@@ -114,7 +124,6 @@ void MainWindow::on_actionLoad_picture_triggered()
     if (!filePath.isEmpty()){
         imagePath = filePath;
         workImg = imread(filePath.toStdString(),0);
-        imwrite("tempImage.jpg",workImg);
         initGraphicsImages(filePath);
     }else{
         QMessageBox msg;
@@ -393,7 +402,8 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
         namedWindow("Blur");
         openedCVWindowNames.append("Blur");
         imshow("Blur",workImg);
-        ui->textEdit_setup->append(QString::number(algTime)+"ms : Blur { "+QString::number(intBuffer.at(0))+"; }");
+        if(!massRun)
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Blur { "+QString::number(intBuffer.at(0))+"; }");
         intBuffer.pop_front();
         break;
 
@@ -402,7 +412,8 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
         namedWindow("MedianBlur");
         openedCVWindowNames.append("MedianBlur");
         imshow("MedianBlur",workImg);
-        ui->textEdit_setup->append(QString::number(algTime)+"ms : Median Blur { "+QString::number(intBuffer.at(0))+"; }");
+        if(!massRun)
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Median Blur { "+QString::number(intBuffer.at(0))+"; }");
         intBuffer.pop_front();
         break;
 
@@ -411,7 +422,8 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
         namedWindow("GausianBlur");
         openedCVWindowNames.append("GausianBlur");
         imshow("GausianBlur",workImg);
-        ui->textEdit_setup->append(QString::number(algTime)+"ms : Gausian Blur { "+QString::number(intBuffer.at(0))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
+        if(!massRun)
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Gausian Blur { "+QString::number(intBuffer.at(0))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
         intBuffer.pop_front();
         doubleBuffer.pop_front();
         doubleBuffer.pop_front();
@@ -422,7 +434,8 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
         namedWindow("ThresholdUnder");
         openedCVWindowNames.append("ThresholdUnder");
         imshow("ThresholdUnder",workImg);
-        ui->textEdit_setup->append(QString::number(algTime)+"ms : Threshold Under { "+QString::number(intBuffer.at(0))+"; }");
+        if(!massRun)
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Threshold Under { "+QString::number(intBuffer.at(0))+"; }");
         intBuffer.pop_front();
         break;
 
@@ -431,7 +444,8 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
         namedWindow("ThresholdAbove");
         openedCVWindowNames.append("ThresholdAbove");
         imshow("ThresholdAbove",workImg);
-        ui->textEdit_setup->append(QString::number(algTime)+"ms : Threshold Above { "+QString::number(intBuffer.at(0))+"; }");
+        if(!massRun)
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Threshold Above { "+QString::number(intBuffer.at(0))+"; }");
         intBuffer.pop_front();
         break;
 
@@ -440,11 +454,13 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
         namedWindow("Canny");
         openedCVWindowNames.append("Canny");
         imshow("Canny",workImg);
-        if(boolBuffer.at(0))
-        {
-            ui->textEdit_setup->append(QString::number(algTime)+"ms : Canny edge dettection {"+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(intBuffer.at(2))+"; "+"true"+"; }");
-        }else{
-            ui->textEdit_setup->append(QString::number(algTime)+"ms : Canny edge dettection {"+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(intBuffer.at(2))+"; "+"false"+"; }");
+        if(!massRun){
+            if(boolBuffer.at(0))
+            {
+                ui->textEdit_setup->append(QString::number(algTime)+"ms : Canny edge dettection {"+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(intBuffer.at(2))+"; "+"true"+"; }");
+            }else{
+                ui->textEdit_setup->append(QString::number(algTime)+"ms : Canny edge dettection {"+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(intBuffer.at(2))+"; "+"false"+"; }");
+            }
         }
         intBuffer.pop_front();
         intBuffer.pop_front();
@@ -457,7 +473,8 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
         namedWindow("Laplacian");
         openedCVWindowNames.append("Laplacian");
         imshow("Laplacian",workImg);
-        ui->textEdit_setup->append(QString::number(algTime)+"ms : Laplacian { "+QString::number(intBuffer.at(0))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
+        if(!massRun)
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Laplacian { "+QString::number(intBuffer.at(0))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
         intBuffer.pop_front();
         doubleBuffer.pop_front();
         doubleBuffer.pop_front();
@@ -468,7 +485,8 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
         namedWindow("Scharr");
         openedCVWindowNames.append("Scharr");
         imshow("Scharr",workImg);
-        ui->textEdit_setup->append(QString::number(algTime)+"ms : Scharr { "+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
+        if(!massRun)
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Scharr { "+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
         intBuffer.pop_front();
         intBuffer.pop_front();
         doubleBuffer.pop_front();
@@ -480,7 +498,8 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
         namedWindow("Sobel");
         openedCVWindowNames.append("Sobel");
         imshow("Sobel",workImg);
-        ui->textEdit_setup->append(QString::number(algTime)+"ms : Sobel { "+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(intBuffer.at(2))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
+        if(!massRun)
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Sobel { "+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(intBuffer.at(2))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
         intBuffer.pop_front();
         intBuffer.pop_front();
         intBuffer.pop_front();
@@ -493,7 +512,8 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
         namedWindow("Harris");
         openedCVWindowNames.append("Harris");
         imshow("Harris",workImg);
-        ui->textEdit_setup->append(QString::number(algTime)+"ms : Harris { "+ui->spinBox_harris_blockSize->text()+"; "+ui->comboBox_harris_appertureSize->currentText()+"; "+ui->doubleSpinBox_harris_kFreeParam->text()+"; }");
+        if(!massRun)
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Harris { "+ui->spinBox_harris_blockSize->text()+"; "+ui->comboBox_harris_appertureSize->currentText()+"; "+ui->doubleSpinBox_harris_kFreeParam->text()+"; }");
         intBuffer.pop_front();
         intBuffer.pop_front();
         doubleBuffer.pop_front();
@@ -504,7 +524,8 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
         namedWindow("Pre-corner Detection");
         openedCVWindowNames.append("Pre-corner Detection");
         imshow("Pre-corner Detection",workImg);
-        ui->textEdit_setup->append(QString::number(algTime)+"ms : Pre-corner Detection { "+ui->comboBox_preCornerDetect_appertureSize->currentText()+"; }");
+        if(!massRun)
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Pre-corner Detection { "+ui->comboBox_preCornerDetect_appertureSize->currentText()+"; }");
         intBuffer.pop_front();
         break;
 
@@ -519,9 +540,12 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 //        namedWindow("Hough Transform2");
 //        openedCVWindowNames.append("Hough Transform2");
 //        imshow("Hough Transform2",origImg);
-        ui->textEdit_setup->append(QString::number(algTime)+"ms : Hough Transform { "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; "+QString::number(doubleBuffer.at(2))+"; "+QString::number(doubleBuffer.at(3))+"; "+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; }\nFound Circles: ");
-        for(uint i=0; i<circles.size(); i++){
-            ui->textEdit_setup->append("("+QString::number(circles[i][0])+","+QString::number(circles[i][1])+","+QString::number(circles[i][2])+")");
+        if(!massRun)
+        {
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Hough Transform { "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; "+QString::number(doubleBuffer.at(2))+"; "+QString::number(doubleBuffer.at(3))+"; "+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; }\nFound Circles: ");
+            for(uint i=0; i<circles.size(); i++){
+                ui->textEdit_setup->append("("+QString::number(circles[i][0])+","+QString::number(circles[i][1])+","+QString::number(circles[i][2])+")");
+            }
         }
         doubleBuffer.pop_front();
         doubleBuffer.pop_front();
@@ -536,7 +560,8 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
         namedWindow("Inverse intensity");
         openedCVWindowNames.append("Inverse intensity");
         imshow("Inverse intensity",workImg);
-        ui->textEdit_setup->append(QString::number(algTime)+"ms : Inverse intensity { ; }");
+        if(!massRun)
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Inverse intensity { ; }");
         break;
 
     case ImageManip::PlusIntensity_flag:
@@ -544,7 +569,8 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
         namedWindow("Intensity addition");
         openedCVWindowNames.append("Intensity addition");
         imshow("Intensity addition",workImg);
-        ui->textEdit_setup->append(QString::number(algTime)+"ms : Intensity addition { "+QString::number(intBuffer.at(0))+"; }");
+        if(!massRun)
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Intensity addition { "+QString::number(intBuffer.at(0))+"; }");
         intBuffer.pop_front();
         break;
 
@@ -553,7 +579,8 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
         namedWindow("Pseudo-Contrast");
         openedCVWindowNames.append("Pseudo-Contrast");
         imshow("Pseudo-Contrast",workImg);
-        ui->textEdit_setup->append(QString::number(algTime)+"ms : Pseudo-Contrast { "+QString::number(intBuffer.at(0))+"; }");
+        if(!massRun)
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Pseudo-Contrast { "+QString::number(intBuffer.at(0))+"; }");
         intBuffer.pop_front();
         break;
 
@@ -590,6 +617,84 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 
  /////////////////////////
 //      RUN  SETUP     //
+void MainWindow::on_pushButton_massRun_clicked()
+{
+    destroyAllCVWindows();
+
+    QStringList temp = listOfFiles;
+
+    //init setup
+    if(!activeSetup.isEmpty()){
+        lastSetup = activeSetup;
+        lastIntBuffer = intBuffer;
+        lastDoubleBuffer = doubleBuffer;
+        lastBoolBuffer = boolBuffer;
+    }
+    if(imageSaveDir.isEmpty()){
+       on_actionSet_Mass_Save_Directory_triggered();
+    }else{
+        QMessageBox msg;
+        msg.setText("Actual save directory is:");
+        msg.setInformativeText(imageSaveDir);
+        QPushButton *okButton = msg.addButton(QMessageBox::Ok);
+        QPushButton *changeButton = msg.addButton(tr("Change"),QMessageBox::ActionRole);
+        msg.exec();
+        if (msg.clickedButton() == changeButton)
+        {
+            // change the directory
+            on_actionSet_Mass_Save_Directory_triggered();
+        } else if (msg.clickedButton() == okButton){
+            // it`s ok nothing done
+        }
+    }
+    int proc_number = 0;
+    QString subdir_name = "0000";
+    QDir dir;
+    dir.setCurrent(imageSaveDir);
+    while(!dir.mkdir(subdir_name))
+    {
+        if(proc_number<10){
+            subdir_name = "processed_images_run_000"+QString().number(proc_number);
+        }else if(proc_number<100){
+            subdir_name = "processed_images_run_00"+QString().number(proc_number);
+        }else if(proc_number<1000){
+            subdir_name = "processed_images_run_0"+QString().number(proc_number);
+        }else{
+            subdir_name = "processed_images_run_"+QString().number(proc_number);
+        }
+    }
+
+    QList <ImageManip::SetupFlags> temp_setup = activeSetup;
+    QString actual_file_prefix = imageSaveDir+"/"+subdir_name+"/processedImg_";
+
+    //for all is time counted together
+    ui->actualTime->setText("0");
+
+    while(!temp.isEmpty()){
+        ui->textEdit_setup->append("Processed: "+temp.first()+"\n------------");
+        //begin - processing of image from list
+        workImg = imread(imagePath.toStdString(),0);
+        origImg = workImg;
+
+        while(!temp_setup.empty()){
+            callCVoperation(temp_setup.at(0));
+            temp_setup.pop_front();
+        }
+        QString *actual_file = new QString(imageSaveDir+"/"+subdir_name+"/processedImg_"+temp.first()+".jpg");
+
+        imwrite(actual_file,workImg);
+        //show the resulting image processed
+            namedWindow("Active"+temp.first());
+            openedCVWindowNames.append("Active"+temp.first());
+            imshow("Active"+temp.first(),workImg);
+        //end - processing of image from list end
+        temp.removeFirst();
+    }
+
+    ui->textEdit_setup->append("\n-------------------------------\nSetup File\n-------------------------------");
+    updateGraphics_active();
+}
+
 void MainWindow::on_pushButton_run_clicked()
 {
     destroyAllCVWindows();
@@ -1001,4 +1106,3 @@ void MainWindow::on_actionLast_Setup_triggered()
         boolBuffer = lastBoolBuffer;
     }
 }
-

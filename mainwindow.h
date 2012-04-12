@@ -21,9 +21,8 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    FindFiles findWindow;
-
     QString imagePath;
+    QString imageSaveDir;
     QStringList openedCVWindowNames;
     Mat origImg, workImg;
     Mat histImg;
@@ -52,11 +51,12 @@ public:
     void destroyAllCVWindows();
     QPixmap* loadPictureToPixmap(QString filePath);
 
-
+public slots:
+    void setListOfFiles(){listOfFiles = QStringList();}
+    void setListOfFiles(QStringList s){listOfFiles.operator =(s);}
 private slots:
     //buttons and QT gui item calls
     void on_actionLoad_picture_triggered();
-    void setListOfFiles(QStringList s){listOfFiles.operator =(s);}
     void updateGraphics_orig();
     void updateGraphics_gray();
     void updateGraphics_active();
@@ -146,6 +146,10 @@ private slots:
 
     void on_pushButton_setFilesList_clicked();
 
+    void on_actionSet_Mass_Save_Directory_triggered();
+
+    void on_pushButton_massRun_clicked();
+
 private:
     Ui::MainWindow *ui;
     QGraphicsScene *sc_orig;
@@ -166,6 +170,7 @@ private:
     QList <double> doubleBuffer, lastDoubleBuffer;
     QList <bool> boolBuffer, lastBoolBuffer;
     QStringList listOfFiles;
+    bool massRun;
 };
 
 #endif // MAINWINDOW_H

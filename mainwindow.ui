@@ -2074,7 +2074,7 @@ Threshold</string>
        <enum>QFrame::Plain</enum>
       </property>
       <property name="text">
-       <string> </string>
+       <string/>
       </property>
      </widget>
     </widget>
@@ -2147,6 +2147,8 @@ Threshold</string>
     </property>
     <addaction name="actionLoad_picture"/>
     <addaction name="actionSave_picture"/>
+    <addaction name="separator"/>
+    <addaction name="actionSet_Mass_Save_Directory"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -2372,6 +2374,11 @@ Threshold</string>
   <action name="actionInverse_Intensity">
    <property name="text">
     <string>Inverse Intensity</string>
+   </property>
+  </action>
+  <action name="actionSet_Mass_Save_Directory">
+   <property name="text">
+    <string>Set Mass Save Directory</string>
    </property>
   </action>
  </widget>
