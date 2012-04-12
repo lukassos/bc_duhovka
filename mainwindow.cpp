@@ -632,6 +632,7 @@ void MainWindow::on_pushButton_massRun_clicked()
         lastDoubleBuffer = doubleBuffer;
         lastBoolBuffer = boolBuffer;
     }
+    if(activeSetup.size()>0){
     if(imageSaveDir.isEmpty()){
        while(!on_actionSet_Mass_Save_Directory_triggered());
     }else{
@@ -655,6 +656,7 @@ void MainWindow::on_pushButton_massRun_clicked()
     dir.setCurrent(imageSaveDir);
     while(!dir.mkdir(subdir_name))
     {
+        proc_number++;
         if(proc_number<10){
             subdir_name = "processed_images_run_000"+QString().number(proc_number);
         }else if(proc_number<100){
@@ -666,8 +668,9 @@ void MainWindow::on_pushButton_massRun_clicked()
         }
     }
 
+
     //QList <ImageManip::SetupFlags> temp_setup = activeSetup;
-    QString actual_file_prefix = imageSaveDir+"/"+subdir_name+"/processedImg_";
+    QString actual_file_prefix = imageSaveDir+"\\"+subdir_name+"\\processedImg_";
 
     //for all is time counted together
     ui->actualTime->setText("0");
@@ -676,41 +679,45 @@ void MainWindow::on_pushButton_massRun_clicked()
     progressDialog.setRange(0, listOfFiles.size());
     progressDialog.setWindowTitle(tr("Mass Run"));
 
-    for(int files=0; files< listOfFiles.size(); files++){
-        progressDialog.setValue(files);
-        progressDialog.setLabelText(tr("Processing file number %1 of %2...").arg(files).arg(listOfFiles.size()));
+        for(int files=0; files< listOfFiles.size(); files++){
+            progressDialog.setValue(files);
+            progressDialog.setLabelText(tr("Processing file number %1 of %2...").arg(files).arg(listOfFiles.size()));
 
-        qApp->processEvents();
+            qApp->processEvents();
 
-        if (progressDialog.wasCanceled())
-            break;
-
-        ui->textEdit_setup->append("Processed: "+listOfFiles.at(files)+"\n------------");
-        //begin - processing of image from list
-
-        workImg = imread(listOfFiles.at(files).toStdString(),0);
-        origImg = workImg;
-
-        for(int i=0; i<activeSetup.size(); i++){
-            intBuffer = lastIntBuffer;
-            doubleBuffer = lastDoubleBuffer;
-            boolBuffer = lastBoolBuffer;
             if (progressDialog.wasCanceled())
                 break;
-            callCVoperation(activeSetup.at(i));
+
+            ui->textEdit_setup->append("Processed: "+listOfFiles.at(files)+"\n------------");
+            //begin - processing of image from list
+
+            workImg = imread(listOfFiles.at(files).toStdString(),0);
+            origImg = workImg;
+
+            for(int i=0; i<activeSetup.size(); i++){
+                intBuffer = lastIntBuffer;
+                doubleBuffer = lastDoubleBuffer;
+                boolBuffer = lastBoolBuffer;
+                if (progressDialog.wasCanceled())
+                    break;
+                callCVoperation(activeSetup.at(i));
+            }
+
+            QString actual_file = actual_file_prefix+listOfFiles.at(files)+".jpg";
+            QString actual_window = "Active"+listOfFiles.at(files);
+            std::string actual_w = actual_window.toStdString();
+            imwrite(actual_file.toStdString(),workImg);
+            //show the resulting image processed
+            namedWindow(actual_w);
+            openedCVWindowNames.append(actual_window);
+            imshow(actual_w,workImg);
+
+            //end - processing of image from list end
+
         }
-        QString actual_file = actual_file_prefix+listOfFiles.at(files)+".jpg";
-        QString actual_window = "Active"+listOfFiles.at(files);
-        std::string actual_w = actual_window.toStdString();
-        imwrite(actual_file.toStdString(),workImg);
-        //show the resulting image processed
-        namedWindow(actual_w);
-        openedCVWindowNames.append(actual_window);
-        imshow(actual_w,workImg);
-        //end - processing of image from list end
-
+    }else{
+        ui->textEdit_setup->append("Processed nothing as no setup found\n------------");
     }
-
     ui->textEdit_setup->append("\n-------------------------------\nSetup File\n-------------------------------");
     updateGraphics_active();
 }
