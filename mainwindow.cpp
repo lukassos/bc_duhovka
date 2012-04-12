@@ -92,7 +92,7 @@ void MainWindow::update()
 void MainWindow::on_pushButton_setFilesList_clicked()
 {
     FindFiles f(this);
-    QObject::connect( &f, SIGNAL(signalFiles(QStringList)), this, SLOT(setListOfFiles(QStringList)));
+    QObject::connect( &f, SIGNAL(signalFiles(QStringList,QStringList)), this, SLOT(setListOfFiles(QStringList,QStringList)));
     f.init(listOfFiles);
     f.exec();
     //multithread should be here

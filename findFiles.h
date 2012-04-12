@@ -91,7 +91,7 @@ private:
     QTableWidget *filesTable;
     QDir currentDir;
 signals:
-    void signalFiles(QStringList);
+    void signalFiles(QStringList,QStringList);
 };
 //! [0]
 #endif // FINDFILES_H

@@ -53,7 +53,7 @@ public:
 
 public slots:
     void setListOfFiles(){listOfFiles = QStringList();}
-    void setListOfFiles(QStringList s){listOfFiles.operator =(s);}
+    void setListOfFiles(QStringList f,QStringList p){listOfFiles.operator =(f);listOfFilePaths.operator =(p);}
 private slots:
     //buttons and QT gui item calls
     void on_actionLoad_picture_triggered();
@@ -170,6 +170,7 @@ private:
     QList <double> doubleBuffer, lastDoubleBuffer;
     QList <bool> boolBuffer, lastBoolBuffer;
     QStringList listOfFiles;
+    QStringList listOfFilePaths;
     bool massRun;
 };
 

@@ -51,7 +51,7 @@ FindFiles::FindFiles(QWidget *parent)
     //confirmButton = createButton(tr("&Confirm"), SLOT(accept()));
     //cancelButton = createButton(tr("&Cancel"), SLOT(reject()));
 
-    fileComboBox = createComboBox(tr("*"));
+    fileComboBox = createComboBox(tr("*.jpg"));
     textComboBox = createComboBox();
     directoryComboBox = createComboBox(QDir::currentPath());
 
@@ -150,7 +150,7 @@ void FindFiles::find()
 
     if (!text.isEmpty())
         files = findFilesList(files, text);
-    emit signalFiles(filePaths);
+    emit signalFiles(files,filePaths);
     showFiles(files);
   //return files;
 }
