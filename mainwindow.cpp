@@ -648,7 +648,7 @@ void MainWindow::on_pushButton_massRun_clicked()
         }
     }
     int proc_number = 0;
-    QString subdir_name = "0000";
+    QString subdir_name = "processed_images_run_0000";
     QDir dir;
     dir.setCurrent(imageSaveDir);
     while(!dir.mkdir(subdir_name))
@@ -680,13 +680,14 @@ void MainWindow::on_pushButton_massRun_clicked()
             callCVoperation(temp_setup.at(0));
             temp_setup.pop_front();
         }
-        QString *actual_file = new QString(imageSaveDir+"/"+subdir_name+"/processedImg_"+temp.first()+".jpg");
-
-        imwrite(actual_file,workImg);
+        QString actual_file = actual_file_prefix+temp.first()+".jpg";
+        QString actual_window = "Active"+temp.first();
+        std::string actual_w = actual_window.toStdString();
+        imwrite(actual_file.toStdString(),workImg);
         //show the resulting image processed
-            namedWindow("Active"+temp.first());
-            openedCVWindowNames.append("Active"+temp.first());
-            imshow("Active"+temp.first(),workImg);
+            namedWindow(actual_w);
+            openedCVWindowNames.append(actual_window);
+            imshow(actual_w,workImg);
         //end - processing of image from list end
         temp.removeFirst();
     }
