@@ -150,6 +150,8 @@ private slots:
 
     void on_pushButton_massRun_clicked();
 
+    void messageOutStringList(const QString listName, QStringList list);
+
 private:
     Ui::MainWindow *ui;
     QGraphicsScene *sc_orig;

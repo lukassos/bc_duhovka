@@ -181,7 +181,7 @@ QStringList FindFiles::findFilesList(const QFileInfoList &filesInfo, const QStri
 
 //! [7]
         QFile file(filesInfo.at(i).absoluteFilePath());
-        QMessageBox msg;
+//        QMessageBox msg;
 //        msg.setText("filesInfo.at(i).absoluteFilePath():");
 //        msg.setInformativeText(filesInfo.at(i).absoluteFilePath());
 //        msg.exec();

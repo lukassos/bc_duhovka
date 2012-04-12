@@ -612,6 +612,16 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 //    on_horizontalSlider_sliderMoved(value);
 //}
 
+void MainWindow::messageOutStringList(const QString listName, QStringList list){
+    QMessageBox msg;
+    msg.setText(listName);
+    QString info;
+    for(int i = 0; i< list.size(); i++){
+        info.append(list.at(i));
+    }
+    msg.setInformativeText(info);
+}
+
 
  //////////////////////////
 //     SETUP BUTTONS    //
@@ -622,9 +632,12 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 void MainWindow::on_pushButton_massRun_clicked()
 {
     destroyAllCVWindows();
-
+    while(listOfFiles.isEmpty()){
+        on_pushButton_setFilesList_clicked();
+    }
     //QStringList temp = listOfFiles;
-
+    messageOutStringList("listOFiles",listOfFiles);
+    //messageOutStringList("activeSetup",QStringList(activeSetup));
     //init setup
     if(!activeSetup.isEmpty()){
         lastSetup = activeSetup;
