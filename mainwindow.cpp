@@ -105,7 +105,7 @@ void MainWindow::on_pushButton_setFilesList_clicked()
     ui->textEdit_setup->append("---------------");
 }
 
-void MainWindow::on_actionSet_Mass_Save_Directory_triggered()
+bool MainWindow::on_actionSet_Mass_Save_Directory_triggered()
 {
     QString filePath = QFileDialog::getExistingDirectory(this, tr("Set Save Directory"), QDir::currentPath());
     if (!filePath.isEmpty()){
@@ -115,7 +115,9 @@ void MainWindow::on_actionSet_Mass_Save_Directory_triggered()
         QMessageBox msg;
         msg.setText("Failed opening directory");
         msg.exec();
+        return false;
     }
+    return true;
 }
 
 void MainWindow::on_actionLoad_picture_triggered()
@@ -621,7 +623,7 @@ void MainWindow::on_pushButton_massRun_clicked()
 {
     destroyAllCVWindows();
 
-    QStringList temp = listOfFiles;
+    //QStringList temp = listOfFiles;
 
     //init setup
     if(!activeSetup.isEmpty()){
@@ -631,7 +633,7 @@ void MainWindow::on_pushButton_massRun_clicked()
         lastBoolBuffer = boolBuffer;
     }
     if(imageSaveDir.isEmpty()){
-       on_actionSet_Mass_Save_Directory_triggered();
+       while(!on_actionSet_Mass_Save_Directory_triggered());
     }else{
         QMessageBox msg;
         msg.setText("Actual save directory is:");
@@ -642,7 +644,7 @@ void MainWindow::on_pushButton_massRun_clicked()
         if (msg.clickedButton() == changeButton)
         {
             // change the directory
-            on_actionSet_Mass_Save_Directory_triggered();
+            while(!on_actionSet_Mass_Save_Directory_triggered());
         } else if (msg.clickedButton() == okButton){
             // it`s ok nothing done
         }
@@ -664,32 +666,44 @@ void MainWindow::on_pushButton_massRun_clicked()
         }
     }
 
-    QList <ImageManip::SetupFlags> temp_setup = activeSetup;
+    //QList <ImageManip::SetupFlags> temp_setup = activeSetup;
     QString actual_file_prefix = imageSaveDir+"/"+subdir_name+"/processedImg_";
 
     //for all is time counted together
     ui->actualTime->setText("0");
+    QProgressDialog progressDialog(this);
+    progressDialog.setCancelButtonText(tr("&Cancel"));
+    progressDialog.setRange(0, listOfFiles.size());
+    progressDialog.setWindowTitle(tr("Mass Run"));
 
-    while(!temp.isEmpty()){
-        ui->textEdit_setup->append("Processed: "+temp.first()+"\n------------");
+    for(int files=0; files< listOfFiles.size(); files++){
+        progressDialog.setValue(files);
+        progressDialog.setLabelText(tr("Processing file number %1 of %2...").arg(files).arg(listOfFiles.size()));
+
+        qApp->processEvents();
+
+        if (progressDialog.wasCanceled())
+            break;
+
+        ui->textEdit_setup->append("Processed: "+listOfFiles.at(files)+"\n------------");
         //begin - processing of image from list
-        workImg = imread(imagePath.toStdString(),0);
+
+        workImg = imread(listOfFiles.at(files).toStdString(),0);
         origImg = workImg;
 
-        while(!temp_setup.empty()){
-            callCVoperation(temp_setup.at(0));
-            temp_setup.pop_front();
+        for(int i=0; i<activeSetup.size(); i++){
+            callCVoperation(activeSetup.at(i));
         }
-        QString actual_file = actual_file_prefix+temp.first()+".jpg";
-        QString actual_window = "Active"+temp.first();
+        QString actual_file = actual_file_prefix+listOfFiles.at(files)+".jpg";
+        QString actual_window = "Active"+listOfFiles.at(files);
         std::string actual_w = actual_window.toStdString();
         imwrite(actual_file.toStdString(),workImg);
         //show the resulting image processed
-            namedWindow(actual_w);
-            openedCVWindowNames.append(actual_window);
-            imshow(actual_w,workImg);
+//        namedWindow(actual_w);
+//        openedCVWindowNames.append(actual_window);
+//        imshow(actual_w,workImg);
         //end - processing of image from list end
-        temp.removeFirst();
+
     }
 
     ui->textEdit_setup->append("\n-------------------------------\nSetup File\n-------------------------------");

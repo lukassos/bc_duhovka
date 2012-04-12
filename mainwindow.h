@@ -146,7 +146,7 @@ private slots:
 
     void on_pushButton_setFilesList_clicked();
 
-    void on_actionSet_Mass_Save_Directory_triggered();
+    bool on_actionSet_Mass_Save_Directory_triggered();
 
     void on_pushButton_massRun_clicked();
 
