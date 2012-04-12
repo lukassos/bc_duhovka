@@ -692,16 +692,19 @@ void MainWindow::on_pushButton_massRun_clicked()
         origImg = workImg;
 
         for(int i=0; i<activeSetup.size(); i++){
+            if (progressDialog.wasCanceled())
+                break;
             callCVoperation(activeSetup.at(i));
+
         }
         QString actual_file = actual_file_prefix+listOfFiles.at(files)+".jpg";
         QString actual_window = "Active"+listOfFiles.at(files);
         std::string actual_w = actual_window.toStdString();
         imwrite(actual_file.toStdString(),workImg);
         //show the resulting image processed
-//        namedWindow(actual_w);
-//        openedCVWindowNames.append(actual_window);
-//        imshow(actual_w,workImg);
+        namedWindow(actual_w);
+        openedCVWindowNames.append(actual_window);
+        imshow(actual_w,workImg);
         //end - processing of image from list end
 
     }

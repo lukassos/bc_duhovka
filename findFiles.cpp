@@ -168,6 +168,7 @@ QStringList FindFiles::findFilesList(const QStringList &files, const QString &te
                     break;
                 line = in.readLine();
                 if (line.contains(text)) {
+                    foundFiles << currentDir.absoluteFilePath(files[i]);
                     foundFiles << files[i];
                     break;
                 }
