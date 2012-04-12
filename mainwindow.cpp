@@ -692,10 +692,12 @@ void MainWindow::on_pushButton_massRun_clicked()
         origImg = workImg;
 
         for(int i=0; i<activeSetup.size(); i++){
+            intBuffer = lastIntBuffer;
+            doubleBuffer = lastDoubleBuffer;
+            boolBuffer = lastBoolBuffer;
             if (progressDialog.wasCanceled())
                 break;
             callCVoperation(activeSetup.at(i));
-
         }
         QString actual_file = actual_file_prefix+listOfFiles.at(files)+".jpg";
         QString actual_window = "Active"+listOfFiles.at(files);

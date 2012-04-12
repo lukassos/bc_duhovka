@@ -122,19 +122,86 @@ void FindFiles::find()
 
 //! [4]
     currentDir = QDir(path);
-    QStringList files;
+    //QStringList files;
     if (fileName.isEmpty())
         fileName = "*";
-    files = currentDir.entryList(QStringList(fileName),
+    //QFileInfoList filesInfo = currentDir.entryInfoList(QStringList(fileName),
+    //                                                   QDir::Files | QDir::Readable | QDir::NoSymLinks);
+    QStringList files = currentDir.entryList(QStringList(fileName),
                                  QDir::Files | QDir::NoSymLinks);
+    QStringList filePaths = files;
+    //files = filesInfo
+//    QMessageBox msg;
+////    msg.setText("filesInfo.at(0).absoluteFilePath():");
+////    msg.setInformativeText(filesInfo.at(0).absoluteFilePath());
+////    msg.exec();
+//    msg.setText("file.at(0):");
+//    msg.setInformativeText(files.at(0));
+//    msg.exec();
+//    msg.setText("currentDir.absoluteFilePath(files[i]):");
+//    msg.setInformativeText(currentDir.absoluteFilePath(files[0]));
+//    msg.exec();
+    for(int i=0; i< files.size(); i++){
+        filePaths[i] = currentDir.absoluteFilePath(files[i]);
+    }
+//    msg.setText("file.at(0):");
+//    msg.setInformativeText(files.at(0));
+//    msg.exec();
 
     if (!text.isEmpty())
         files = findFilesList(files, text);
-    emit signalFiles(files);
+    emit signalFiles(filePaths);
     showFiles(files);
   //return files;
 }
 //! [4]
+
+QStringList FindFiles::findFilesList(const QFileInfoList &filesInfo, const QString &text)
+{
+    QProgressDialog progressDialog(this);
+    progressDialog.setCancelButtonText(tr("&Cancel"));
+    progressDialog.setRange(0, filesInfo.size());
+    progressDialog.setWindowTitle(tr("Find Files"));
+
+//! [5] //! [6]
+    QStringList foundFiles;
+//    QMessageBox msg;
+//    msg.setText(">inside filesInfo.at(0).absoluteFilePath():");
+//    msg.setInformativeText(filesInfo.at(0).absoluteFilePath());
+//    msg.exec();
+    for (int i = 0; i < filesInfo.size(); ++i) {
+        progressDialog.setValue(i);
+        progressDialog.setLabelText(tr("Searching file number %1 of %2...")
+                                    .arg(i).arg(filesInfo.size()));
+        qApp->processEvents();
+//! [6]
+
+        if (progressDialog.wasCanceled())
+            break;
+
+//! [7]
+        QFile file(filesInfo.at(i).absoluteFilePath());
+        QMessageBox msg;
+//        msg.setText("filesInfo.at(i).absoluteFilePath():");
+//        msg.setInformativeText(filesInfo.at(i).absoluteFilePath());
+//        msg.exec();
+        if (file.open(QIODevice::ReadOnly)) {
+            QString line;
+            QTextStream in(&file);
+            while (!in.atEnd()) {
+                if (progressDialog.wasCanceled())
+                    break;
+                line = in.readLine();
+                if (line.contains(text)) {
+                    //foundFiles << QString(currentDir.absolutePath()+currentDir.absoluteFilePath(files[i]));
+                    foundFiles << filesInfo.at(i).absoluteFilePath();
+                    break;
+                }
+            }
+        }
+    }
+    return foundFiles;
+}
 
 //! [5]
 QStringList FindFiles::findFilesList(const QStringList &files, const QString &text)
@@ -168,7 +235,7 @@ QStringList FindFiles::findFilesList(const QStringList &files, const QString &te
                     break;
                 line = in.readLine();
                 if (line.contains(text)) {
-                    foundFiles << currentDir.absoluteFilePath(files[i]);
+                    //foundFiles << QString(currentDir.absolutePath()+currentDir.absoluteFilePath(files[i]));
                     foundFiles << files[i];
                     break;
                 }
@@ -188,6 +255,8 @@ void FindFiles::showFiles(const QStringList &files)
 
         QTableWidgetItem *fileNameItem = new QTableWidgetItem(files[i]);
         fileNameItem->setFlags(fileNameItem->flags() ^ Qt::ItemIsEditable);
+        QTableWidgetItem *filePathItem = new QTableWidgetItem(QDir().absoluteFilePath(files[i]));
+        filePathItem->setFlags(filePathItem->flags() ^ Qt::ItemIsEditable);
         QTableWidgetItem *sizeItem = new QTableWidgetItem(tr("%1 KB")
                                              .arg(int((size + 1023) / 1024)));
         sizeItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -196,14 +265,15 @@ void FindFiles::showFiles(const QStringList &files)
         int row = filesTable->rowCount();
         filesTable->insertRow(row);
         filesTable->setItem(row, 0, fileNameItem);
-        filesTable->setItem(row, 1, sizeItem);
+        filesTable->setItem(row, 1, filePathItem);
+        filesTable->setItem(row, 2, sizeItem);
     }
-    filesFoundLabel->setText(tr("%1 file(s) found").arg(files.size()) +
-#if defined(Q_OS_SYMBIAN) || defined(Q_WS_MAEMO_5)
-                             (" (Select file to open it)"));
-#else
-                             (" (Double click on a file to open it)"));
-#endif
+    filesTable->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+
+    filesTable->horizontalHeader()->resizeSection(1, filesTable->width()-20-filesTable->horizontalHeader()->sectionSize(0)-filesTable->horizontalHeader()->sectionSize(2));
+    //filesTable->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
+    filesFoundLabel->setText(tr("%1 file(s) found").arg(files.size())+(" (Double click on a file to open it)"));
+
     filesFoundLabel->setWordWrap(true);
 }
 //! [8]
@@ -241,13 +311,14 @@ QComboBox *FindFiles::createComboBox(const QString &text)
 //! [11]
 void FindFiles::createFilesTable()
 {
-    filesTable = new QTableWidget(0, 2);
+    filesTable = new QTableWidget(0, 3);
     filesTable->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     QStringList labels;
-    labels << tr("Filename") << tr("Size");
+    labels << tr("Filename") << tr("Filepath") << tr("Size");
     filesTable->setHorizontalHeaderLabels(labels);
-    filesTable->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
+    filesTable->horizontalHeader()->resizeSections(QHeaderView::Stretch);
+    filesTable->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
     filesTable->verticalHeader()->hide();
     filesTable->setShowGrid(false);
 
