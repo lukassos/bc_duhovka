@@ -523,9 +523,9 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 
     case ImageManip::PreCornerDetect_flag:
         algTime = ImageManip::doPreCornerDetect(workImg, intBuffer.at(0));
-        namedWindow("Pre-corner Detection");
-        openedCVWindowNames.append("Pre-corner Detection");
-        imshow("Pre-corner Detection",workImg);
+//        namedWindow("Pre-corner Detection");
+//        openedCVWindowNames.append("Pre-corner Detection");
+//        imshow("Pre-corner Detection",workImg);
         if(!massRun)
             ui->textEdit_setup->append(QString::number(algTime)+"ms : Pre-corner Detection { "+ui->comboBox_preCornerDetect_appertureSize->currentText()+"; }");
         intBuffer.pop_front();
@@ -617,11 +617,43 @@ void MainWindow::messageOutStringList(const QString listName, QStringList list){
     msg.setText(listName);
     QString info;
     for(int i = 0; i< list.size(); i++){
-        info.append(list.at(i));
+        info.append(QString().number(i)+" - "+list.at(i)+"\n");
     }
     msg.setInformativeText(info);
+    msg.exec();
 }
 
+void MainWindow::messageOutBuffersLists(const QString listName, QList<int> listInt, QList<double> listDouble, QList<bool> listBool){
+    QMessageBox msg;
+    msg.setText(listName);
+    QString info;
+    info.append(" ---- int buffer ---- \n");
+    for(int i = 0; i< listInt.size(); i++){
+        info.append(QString().number(i)+" - "+QString().number(listInt.at(i))+"\n");
+    }
+    info.append(" ---- double buffer ---- \n");
+    for(int i = 0; i< listDouble.size(); i++){
+        info.append(QString().number(i)+" - "+QString().number(listDouble.at(i))+"\n");
+    }
+    info.append(" ---- bool buffer ---- \n");
+    for(int i = 0; i< listBool.size(); i++){
+        if(listBool.at(i)){
+            info.append(QString().number(i)+" - true\n");
+        }else{
+            info.append(QString().number(i)+" - false\n");
+        }
+    }
+    msg.setInformativeText(info);
+    msg.exec();
+}
+
+
+void MainWindow::debugWindow(const QString text){
+    QMessageBox mess;
+    mess.setText(text);
+    mess.exec();
+
+}
 
  //////////////////////////
 //     SETUP BUTTONS    //
@@ -631,6 +663,7 @@ void MainWindow::messageOutStringList(const QString listName, QStringList list){
 //      RUN  SETUP     //
 void MainWindow::on_pushButton_massRun_clicked()
 {
+    massRun=true;
     destroyAllCVWindows();
     while(listOfFiles.isEmpty()){
         on_pushButton_setFilesList_clicked();
@@ -681,17 +714,19 @@ void MainWindow::on_pushButton_massRun_clicked()
         }
     }
 
-
+//debugWindow("directory created");
     //QList <ImageManip::SetupFlags> temp_setup = activeSetup;
     QString actual_file_prefix = imageSaveDir+"\\"+subdir_name+"\\processedImg_";
 
     //for all is time counted together
     ui->actualTime->setText("0");
     QProgressDialog progressDialog(this);
+    progressDialog.setWindowModality(Qt::WindowModal);
     progressDialog.setCancelButtonText(tr("&Cancel"));
     progressDialog.setRange(0, listOfFiles.size());
     progressDialog.setWindowTitle(tr("Mass Run"));
 
+//debugWindow("starting for cycle");
         for(int files=0; files< listOfFiles.size(); files++){
             progressDialog.setValue(files);
             progressDialog.setLabelText(tr("Processing file number %1 of %2...").arg(files).arg(listOfFiles.size()));
@@ -703,30 +738,34 @@ void MainWindow::on_pushButton_massRun_clicked()
 
             ui->textEdit_setup->append("Processed: "+listOfFiles.at(files)+"\n------------");
             //begin - processing of image from list
-
-            workImg = imread(listOfFiles.at(files).toStdString(),0);
+//debugWindow("work image will be : "+QString().fromStdString(listOfFiles.at(files).toStdString()));
+            //tempPath = listOfFilePaths.at(files);
+            workImg = imread(listOfFilePaths.at(files).toStdString(),0);
             origImg = workImg;
-
+//debugWindow("starting OpenCV functions");
+            intBuffer = lastIntBuffer;
+            doubleBuffer = lastDoubleBuffer;
+            boolBuffer = lastBoolBuffer;
             for(int i=0; i<activeSetup.size(); i++){
-                intBuffer = lastIntBuffer;
-                doubleBuffer = lastDoubleBuffer;
-                boolBuffer = lastBoolBuffer;
+//messageOutBuffersLists(QString().number(i)+" run "+QString().number(activeSetup.at(i)), intBuffer, doubleBuffer, boolBuffer);
+
                 if (progressDialog.wasCanceled())
                     break;
+
                 callCVoperation(activeSetup.at(i));
             }
 
             QString actual_file = actual_file_prefix+listOfFiles.at(files)+".jpg";
-            QString actual_window = "Active"+listOfFiles.at(files);
+            QString actual_window = "Processed image: "+listOfFiles.at(files);
             std::string actual_w = actual_window.toStdString();
+
             imwrite(actual_file.toStdString(),workImg);
             //show the resulting image processed
             namedWindow(actual_w);
             openedCVWindowNames.append(actual_window);
+//debugWindow("starting creation of window");
             imshow(actual_w,workImg);
-
             //end - processing of image from list end
-
         }
     }else{
         ui->textEdit_setup->append("Processed nothing as no setup found\n------------");
@@ -737,6 +776,7 @@ void MainWindow::on_pushButton_massRun_clicked()
 
 void MainWindow::on_pushButton_run_clicked()
 {
+    massRun=false;
     destroyAllCVWindows();
     if(!activeSetup.isEmpty()){
         lastSetup = activeSetup;
@@ -956,15 +996,35 @@ void MainWindow::on_pushButton_inverseIntensity_clicked()
 void MainWindow::on_pushButton_intensityAdd_clicked()
 {
     activeSetup.append(ImageManip::PlusIntensity_flag);
-    ui->textEdit_setup->append("Inverse Addition { "+ui->spinBox_intensityAdd->text()+"; }");
+    ui->textEdit_setup->append("Intensity Addition { "+ui->spinBox_intensityAdd->text()+"; }");
     intBuffer.append(ui->spinBox_intensityAdd->value());
 }
 
 void MainWindow::on_pushButton_pseudoContrast_clicked()
 {
     activeSetup.append(ImageManip::PseudoContrast_flag);
-    ui->textEdit_setup->append("Inverse Addition { "+ui->spinBox_pseudoContrast->text()+"; }");
+    ui->textEdit_setup->append("Pseudo Contrast { "+ui->spinBox_pseudoContrast->text()+"; }");
     intBuffer.append(ui->spinBox_pseudoContrast->value());
+}
+
+void MainWindow::on_pushButton_pupilFilterSetup_clicked()
+{
+    int setup[5]={60, 190, 3, 150, 160};
+    activeSetup.append(ImageManip::ThresholdUnder_flag);
+    activeSetup.append(ImageManip::ThresholdAbove_flag);
+    activeSetup.append(ImageManip::MedianBlur_flag);
+    activeSetup.append(ImageManip::PlusIntensity_flag);
+    activeSetup.append(ImageManip::ThresholdUnder_flag);
+    intBuffer.append(setup[0]);
+    intBuffer.append(setup[1]);
+    intBuffer.append(3);
+    intBuffer.append(setup[3]);
+    intBuffer.append(setup[4]);
+    ui->textEdit_setup->append("Threshold Under { "+QString().number(setup[0])+"; }");
+    ui->textEdit_setup->append("Threshold Above { "+QString().number(setup[1])+"; }");
+    ui->textEdit_setup->append("Median Blur { "+QString().number(setup[2])+"; }");
+    ui->textEdit_setup->append("Intensity Addition { "+QString().number(setup[3])+"; }");
+    ui->textEdit_setup->append("Threshold Under { "+QString().number(setup[4])+"; }");
 }
 
  //////////////////////////////
@@ -1025,6 +1085,10 @@ void MainWindow::on_actionHough_Transformation_triggered()
     on_pushButton_houghTransform_clicked();
 }
 
+void MainWindow::on_actionPupil_Filter_Setup_triggered()
+{
+    on_pushButton_pupilFilterSetup_clicked();
+}
 
  //////////////////////////
 //     GUI ACTIONS      //

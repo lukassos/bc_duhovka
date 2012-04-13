@@ -11,7 +11,7 @@
     <x>0</x>
     <y>0</y>
     <width>740</width>
-    <height>520</height>
+    <height>601</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -239,7 +239,7 @@ p, li { white-space: pre-wrap; }
       <x>10</x>
       <y>10</y>
       <width>150</width>
-      <height>481</height>
+      <height>561</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -249,7 +249,7 @@ p, li { white-space: pre-wrap; }
      </sizepolicy>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>5</number>
     </property>
     <widget class="QWidget" name="page_proc">
      <property name="geometry">
@@ -257,7 +257,7 @@ p, li { white-space: pre-wrap; }
        <x>0</x>
        <y>0</y>
        <width>150</width>
-       <height>346</height>
+       <height>399</height>
       </rect>
      </property>
      <attribute name="label">
@@ -765,7 +765,7 @@ p, li { white-space: pre-wrap; }
        <x>0</x>
        <y>0</y>
        <width>150</width>
-       <height>346</height>
+       <height>399</height>
       </rect>
      </property>
      <attribute name="label">
@@ -1355,7 +1355,7 @@ p, li { white-space: pre-wrap; }
        <x>0</x>
        <y>0</y>
        <width>150</width>
-       <height>346</height>
+       <height>399</height>
       </rect>
      </property>
      <attribute name="label">
@@ -1734,7 +1734,7 @@ p, li { white-space: pre-wrap; }
        <x>0</x>
        <y>0</y>
        <width>150</width>
-       <height>346</height>
+       <height>399</height>
       </rect>
      </property>
      <attribute name="label">
@@ -2001,7 +2001,7 @@ Threshold</string>
        <x>0</x>
        <y>0</y>
        <width>150</width>
-       <height>346</height>
+       <height>399</height>
       </rect>
      </property>
      <attribute name="label">
@@ -2075,6 +2075,24 @@ Threshold</string>
       </property>
       <property name="text">
        <string/>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="page_predefined">
+     <attribute name="label">
+      <string>Predefined</string>
+     </attribute>
+     <widget class="QPushButton" name="pushButton_pupilFilterSetup">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>0</y>
+        <width>111</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Pupil Filter</string>
       </property>
      </widget>
     </widget>
@@ -2196,9 +2214,16 @@ Threshold</string>
     <addaction name="separator"/>
     <addaction name="actionHough_Transformation"/>
    </widget>
+   <widget class="QMenu" name="menuPredefined">
+    <property name="title">
+     <string>Predefined</string>
+    </property>
+    <addaction name="actionPupil_Filter_Setup"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
    <addaction name="menuSetup"/>
+   <addaction name="menuPredefined"/>
   </widget>
   <action name="actionLoad_picture">
    <property name="text">
@@ -2379,6 +2404,11 @@ Threshold</string>
   <action name="actionSet_Mass_Save_Directory">
    <property name="text">
     <string>Set Mass Save Directory</string>
+   </property>
+  </action>
+  <action name="actionPupil_Filter_Setup">
+   <property name="text">
+    <string>Pupil Filter Setup</string>
    </property>
   </action>
  </widget>

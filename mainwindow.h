@@ -22,6 +22,7 @@ class MainWindow : public QMainWindow
 
 public:
     QString imagePath;
+    QString tempPath;
     QString imageSaveDir;
     QStringList openedCVWindowNames;
     Mat origImg, workImg;
@@ -151,6 +152,14 @@ private slots:
     void on_pushButton_massRun_clicked();
 
     void messageOutStringList(const QString listName, QStringList list);
+
+    void debugWindow(const QString text);
+
+    void messageOutBuffersLists(const QString listName, QList<int> listInt, QList<double> listDouble, QList<bool> listBool);
+
+    void on_pushButton_pupilFilterSetup_clicked();
+
+    void on_actionPupil_Filter_Setup_triggered();
 
 private:
     Ui::MainWindow *ui;
