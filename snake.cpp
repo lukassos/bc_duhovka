@@ -1,40 +1,50 @@
 #include "snake.h"
 
-snake::snake()
+Snake::snake()
 {
 
 }
 
 
-void snake::initSnakeContour(snake snakeToInit, int numberOfPoints, energyInternalTemplate::ContourType decision){
-    snakeToInit.contour.clear();
+void Snake::initSnakeContour(Snake snake, int numberOfPoints, EnergyInternalTemplate::ContourType decision){
+    snake.contour.clear();
     for(int i=0; i<numberOfPoints; i++){
-        snakePoint temp = new snakePoint();
-        snakeToInit.contour.append(temp);
+        SnakePoint temp = new SnakePoint();
+        snake.contour.append(temp);
     }
 
-    switch(){
+    switch(decision){
         case energyInternalTemplate::ClosedContour_Circle:
-            snakeToInit.contourTemplate->
+            snake.contourTemplate.;
         break;
-        default
+        default:
     }
 
 
 
 }
 
-void snake::initSnakeContour(snake snakeToInit, int numberOfPoints, energyInternalTemplate::ContourType decision,
-                             float offsetX, float offsety, float radius){
+void Snake::initSnakeContour(Snake snake, int numberOfPoints, EnergyInternalTemplate::ContourType decision,
+                             float offsetX, float offsetY){
+    snake.contourTemplate.type=decision;
+    snake.typeOfContour = decision;
 
+    if(snake.contour.isEmpty() || numberOfPoints!=snake.contour.size())
+        for(int i=0; i<numberOfPoints; i++){
+            SnakePoint temp = new SnakePoint();
+            snake.contour.append(temp);
+        }
 
-
-    switch(){
-        case energyInternalTemplate::ClosedContour_Circle:
-
+    switch(decision){
+    case EnergyInternalTemplate::ClosedContour_Circle:
+        cv::Point fastCenter;
+        EnergyInternalTemplate::fastCenterLocalizationAlgorithm(snake.fastCenter, radius);
+        float centerX = fastCenter.x + offsetX;
+        float centerY = fastCenter.y + offsetY;
+        EnergyInternalTemplate::setCirclePositions(snake.contour, centerX, centerY, radius);
         break;
+    default:
     }
-
 
 
 }

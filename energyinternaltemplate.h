@@ -9,20 +9,25 @@
 #include <qmath.h>
 #include "snake.h"
 
+
+using namespace cv;
+using namespace snakeNames;
+
+
 class EnergyInternalTemplate
 {
 protected:
-    ContourType type;
+    int type;
 
 public:
     EnergyInternalTemplate();
 
-    void setCirclePositions(QList <snakePoint> points, float radius);
-
+    void setCirclePositions(QList <SnakePoint> points, float centerX, float ceterY, float radius);
+    void fastCenterLocalizationAlgorithm(CvMat image, cv::Point fastCenter, float radius);
     float countPotentialPositionX(int pointNumber, Snake snake);
     float countPotentialPositionY(int pointNumber, Snake snake);
 
-    countTotalEnergyInt(Snake snake);
+    float countTotalEnergyInt(Snake snake);
     enum ContourType{
         ClosedContour_Circle,
         ClosedContour_Polygon,

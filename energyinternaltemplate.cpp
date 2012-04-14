@@ -5,7 +5,7 @@ EnergyInternalTemplate::EnergyInternalTemplate()
 
 }
 
-void EnergyInternalTemplate::setCirclePositions(QList <snakePoint> points, float centerX, float centerY, float radius){
+void EnergyInternalTemplate::setCirclePositions(QList <SnakePoint> points, float centerX, float centerY, float radius){
     int count = points.size();
     float angle = (2*M_PI)/count;
     for(int i=0; i<count ;i++){
@@ -15,5 +15,5 @@ void EnergyInternalTemplate::setCirclePositions(QList <snakePoint> points, float
 }
 
 void EnergyInternalTemplate::fastCenterLocalizationAlgorithm(CvMat image, cv::Point fastCenter, float radius){
-
+    CvMat
 }

@@ -11,16 +11,17 @@
 #include "energyinternaltemplate.h"
 
 using namespace std;
-namespace EI {
-    class energyInternalTemplate;
+using namespace cv;
 
-}
-namespace EE {
-    class energyExternalField;
-
+namespace snakeNames{
+    class Snake;
+    class SnakePoint;
 }
 
-class snakePoint
+
+#ifndef SNAKEPOINT_H
+#define SNAKEPOINT_H
+class SnakePoint
 {//one control point of entire contour
 protected:
     float x, y; // coordnates
@@ -28,22 +29,22 @@ protected:
     float E_int, E_ext, E_snake;
 
 public:
-    snakePoint();
+    SnakePoint();
 
 };
-
+#endif
 
 class Snake
 {//controller of all snake parts and fuctions
 
 
 protected:
-    QList<snakePoint> contour;
-    energyInternalTemplate contourTemplate;
-    energyExternalField vectorField;
+    QList<SnakePoint> contour;
+    EnergyInternalTemplate contourTemplate;
+    EnergyExternalField vectorField;
     float total_E_ext;
     float total_E_int;
-    EnergyInternalTemplate::ContourType type;
+    int typeOfContour;
 
 public:
     Snake();
@@ -53,7 +54,7 @@ public:
 
             //set`s coordinates to snakePoints and sets radius circle/polygon created by those points
     void initSnakeContour(Snake snakeToInit, int numberOfPoints, EnergyInternalTemplate::ContourType decision,
-                          float offsetX, float offsety, float radius);
+                          float offsetX, float offsety);
 
             //input is picture read into matrix in grayscale
             //set`s
