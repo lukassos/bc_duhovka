@@ -16,7 +16,7 @@ public:
     ImageManip(QImage *image);
     ~ImageManip();
     //treba spravit vypis *Mat do okna huigui
-    //treba spravit obdobu tejto funkcie pre kazdy operato vracat bude *Mat
+    //treba spravit obdobu tejto funkcie pre kazdy operator vracat bude *Mat
     void onTrackbar(int, void*);
     void showImgThoughOpenCV(QString pathToImage);
     Mat* bindIplImage2Mat(const IplImage *iplImage);

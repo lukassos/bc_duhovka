@@ -1,5 +1,5 @@
-#ifndef EXTERNALENERGYFIELD_H
-#define EXTERNALENERGYFIELD_H
+#ifndef ENERGYEXTERNALFIELD_H
+#define ENERGYEXTERNALFIELD_H
 
 #include <QMainWindow>
 #include <QtGUI>
@@ -8,13 +8,13 @@
 #include <opencv2/core/core.hpp>
 #include <qmath.h>
 
-class ExternalEnergyField
+class EnergyExternalField
 {
 protected:
     CvMat vectorField;
 public:
-    ExternalEnergyField();
+    EnergyExternalField();
 
 };
 
-#endif // EXTERNALENERGYFIELD_H
+#endif // ENERGYEXTERNALFIELD_H

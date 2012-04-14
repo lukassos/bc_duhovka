@@ -33,7 +33,7 @@ public:
 };
 
 
-class snake
+class Snake
 {//controller of all snake parts and fuctions
 
 
@@ -43,21 +43,23 @@ protected:
     energyExternalField vectorField;
     float total_E_ext;
     float total_E_int;
+    EnergyInternalTemplate::ContourType type;
 
 public:
-    snake();
+    Snake();
 
             // set`s linked list of snakePoints and sets contour this.template
-    void initSnakeContour(snake snakeToInit, int numberOfPoints, energyInternalTemplate::ContourType decision);
+    void initSnakeContour(Snake snakeToInit, int numberOfPoints, EnergyInternalTemplate::ContourType decision);
 
             //set`s coordinates to snakePoints and sets radius circle/polygon created by those points
-    void initSnakeContour(snake snakeToInit, int numberOfPoints, energyInternalTemplate::ContourType decision,
+    void initSnakeContour(Snake snakeToInit, int numberOfPoints, EnergyInternalTemplate::ContourType decision,
                           float offsetX, float offsety, float radius);
 
             //input is picture read into matrix in grayscale
             //set`s
     void initSnakeExtField(CvMat *pictureMatrix);
 
+    CvMat showMatrix(CvMat image, Snake snake);
 
 };
 
