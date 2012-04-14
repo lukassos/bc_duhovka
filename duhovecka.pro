@@ -14,12 +14,16 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     imagemanip.cpp \
     snake.cpp \
-    findFiles.cpp
+    findFiles.cpp \
+    energyinternaltemplate.cpp \
+    energyexternalfield.cpp
 
 HEADERS  += mainwindow.h \
     imagemanip.h \
     snake.h \
-    findFiles.h
+    findFiles.h \
+    energyinternaltemplate.h \
+    energyexternalfield.h
 
 FORMS    += mainwindow.ui
 
@@ -28,6 +32,14 @@ win32: LIBS += -LC:\opencv22mingw\bin
 LIBS += -lopencv_core220 \
         -lopencv_highgui220 \
         -lopencv_imgproc220
+
+
+
+
+
+
+
+
 
 
 

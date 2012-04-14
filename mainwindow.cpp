@@ -401,31 +401,53 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
     {
     case ImageManip::Blur_flag:
         algTime= ImageManip::doBlur(workImg, intBuffer.at(0));
-        namedWindow("Blur");
-        openedCVWindowNames.append("Blur");
-        imshow("Blur",workImg);
-        if(!massRun)
+        if(!massRun){
+            namedWindow("Blur");
+            openedCVWindowNames.append("Blur");
+            imshow("Blur",workImg);
+
             ui->textEdit_setup->append(QString::number(algTime)+"ms : Blur { "+QString::number(intBuffer.at(0))+"; }");
+        }
         intBuffer.pop_front();
         break;
 
     case ImageManip::MedianBlur_flag:
         algTime = ImageManip::doMedianBlur(workImg, intBuffer.at(0));
-        namedWindow("MedianBlur");
-        openedCVWindowNames.append("MedianBlur");
-        imshow("MedianBlur",workImg);
-        if(!massRun)
+        if(!massRun){
+            namedWindow("MedianBlur");
+            openedCVWindowNames.append("MedianBlur");
+            imshow("MedianBlur",workImg);
             ui->textEdit_setup->append(QString::number(algTime)+"ms : Median Blur { "+QString::number(intBuffer.at(0))+"; }");
+
+        }
         intBuffer.pop_front();
         break;
 
     case ImageManip::GausianBlur_flag:
         algTime = ImageManip::doGausianBlur(workImg, intBuffer.at(0), doubleBuffer.at(0), doubleBuffer.at(1));
-        namedWindow("GausianBlur");
-        openedCVWindowNames.append("GausianBlur");
-        imshow("GausianBlur",workImg);
-        if(!massRun)
+        if(!massRun){
+            namedWindow("GausianBlur");
+            openedCVWindowNames.append("GausianBlur");
+            imshow("GausianBlur",workImg);
+
             ui->textEdit_setup->append(QString::number(algTime)+"ms : Gausian Blur { "+QString::number(intBuffer.at(0))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
+
+        }
+        intBuffer.pop_front();
+        doubleBuffer.pop_front();
+        doubleBuffer.pop_front();
+        break;
+
+    case ImageManip::BilateralSmoothing_flag:
+        algTime = ImageManip::doBilateralFiltering(workImg, intBuffer.at(0), doubleBuffer.at(0), doubleBuffer.at(1));
+        if(!massRun){
+            namedWindow("BilateralFiltering");
+            openedCVWindowNames.append("BilateralFiltering");
+            imshow("BilateralFiltering",workImg);
+
+            ui->textEdit_setup->append(QString::number(algTime)+"ms : Bilateral Filtering { "+QString::number(intBuffer.at(0))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
+
+        }
         intBuffer.pop_front();
         doubleBuffer.pop_front();
         doubleBuffer.pop_front();
@@ -433,36 +455,42 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 
     case ImageManip::ThresholdUnder_flag:
         algTime = ImageManip::doThresholdUnder(workImg, intBuffer.at(0));
-        namedWindow("ThresholdUnder");
-        openedCVWindowNames.append("ThresholdUnder");
-        imshow("ThresholdUnder",workImg);
-        if(!massRun)
+        if(!massRun){
+            namedWindow("ThresholdUnder");
+            openedCVWindowNames.append("ThresholdUnder");
+            imshow("ThresholdUnder",workImg);
+
             ui->textEdit_setup->append(QString::number(algTime)+"ms : Threshold Under { "+QString::number(intBuffer.at(0))+"; }");
+
+        }
         intBuffer.pop_front();
         break;
 
     case ImageManip::ThresholdAbove_flag:
         algTime = ImageManip::doThresholdAbove(workImg,  intBuffer.at(0));
-        namedWindow("ThresholdAbove");
-        openedCVWindowNames.append("ThresholdAbove");
-        imshow("ThresholdAbove",workImg);
-        if(!massRun)
+        if(!massRun){
+            namedWindow("ThresholdAbove");
+            openedCVWindowNames.append("ThresholdAbove");
+            imshow("ThresholdAbove",workImg);
+
             ui->textEdit_setup->append(QString::number(algTime)+"ms : Threshold Above { "+QString::number(intBuffer.at(0))+"; }");
-        intBuffer.pop_front();
+
+        }intBuffer.pop_front();
         break;
 
     case ImageManip::Canny_flag:
         algTime = ImageManip::doCanny(workImg,  intBuffer.at(0), intBuffer.at(1),intBuffer.at(2) ,boolBuffer.at(0));
-        namedWindow("Canny");
-        openedCVWindowNames.append("Canny");
-        imshow("Canny",workImg);
         if(!massRun){
-            if(boolBuffer.at(0))
-            {
-                ui->textEdit_setup->append(QString::number(algTime)+"ms : Canny edge dettection {"+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(intBuffer.at(2))+"; "+"true"+"; }");
-            }else{
-                ui->textEdit_setup->append(QString::number(algTime)+"ms : Canny edge dettection {"+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(intBuffer.at(2))+"; "+"false"+"; }");
-            }
+            namedWindow("Canny");
+            openedCVWindowNames.append("Canny");
+            imshow("Canny",workImg);
+                if(boolBuffer.at(0))
+                {
+                    ui->textEdit_setup->append(QString::number(algTime)+"ms : Canny edge dettection {"+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(intBuffer.at(2))+"; "+"true"+"; }");
+                }else{
+                    ui->textEdit_setup->append(QString::number(algTime)+"ms : Canny edge dettection {"+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(intBuffer.at(2))+"; "+"false"+"; }");
+                }
+
         }
         intBuffer.pop_front();
         intBuffer.pop_front();
@@ -472,23 +500,28 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 
     case ImageManip::Laplacian_flag:
         algTime = ImageManip::doLaplacian(workImg, intBuffer.at(0), doubleBuffer.at(0), doubleBuffer.at(1));
+    if(!massRun){
         namedWindow("Laplacian");
         openedCVWindowNames.append("Laplacian");
         imshow("Laplacian",workImg);
-        if(!massRun)
-            ui->textEdit_setup->append(QString::number(algTime)+"ms : Laplacian { "+QString::number(intBuffer.at(0))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
-        intBuffer.pop_front();
+
+        ui->textEdit_setup->append(QString::number(algTime)+"ms : Laplacian { "+QString::number(intBuffer.at(0))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
+
+    }
+    intBuffer.pop_front();
         doubleBuffer.pop_front();
         doubleBuffer.pop_front();
         break;
 
     case ImageManip::Scharr_flag:
         algTime = ImageManip::doScharr(workImg, intBuffer.at(0), intBuffer.at(1), doubleBuffer.at(0), doubleBuffer.at(1));
+    if(!massRun){
         namedWindow("Scharr");
         openedCVWindowNames.append("Scharr");
         imshow("Scharr",workImg);
-        if(!massRun)
-            ui->textEdit_setup->append(QString::number(algTime)+"ms : Scharr { "+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
+        ui->textEdit_setup->append(QString::number(algTime)+"ms : Scharr { "+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
+
+    }
         intBuffer.pop_front();
         intBuffer.pop_front();
         doubleBuffer.pop_front();
@@ -497,11 +530,13 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 
     case ImageManip::Sobel_flag:
         algTime = ImageManip::doSobel(workImg, intBuffer.at(0), intBuffer.at(1), intBuffer.at(2), doubleBuffer.at(0), doubleBuffer.at(1));
-        namedWindow("Sobel");
+        if(!massRun){
+            namedWindow("Sobel");
         openedCVWindowNames.append("Sobel");
         imshow("Sobel",workImg);
-        if(!massRun)
-            ui->textEdit_setup->append(QString::number(algTime)+"ms : Sobel { "+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(intBuffer.at(2))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
+
+        ui->textEdit_setup->append(QString::number(algTime)+"ms : Sobel { "+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; "+QString::number(intBuffer.at(2))+"; "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; }");
+        }
         intBuffer.pop_front();
         intBuffer.pop_front();
         intBuffer.pop_front();
@@ -511,11 +546,14 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 
     case ImageManip::CornerHarris_flag:
         algTime = ImageManip::doCornerHarris(workImg, intBuffer.at(0), intBuffer.at(1), doubleBuffer.at(0));
+    if(!massRun){
         namedWindow("Harris");
         openedCVWindowNames.append("Harris");
         imshow("Harris",workImg);
-        if(!massRun)
-            ui->textEdit_setup->append(QString::number(algTime)+"ms : Harris { "+ui->spinBox_harris_blockSize->text()+"; "+ui->comboBox_harris_appertureSize->currentText()+"; "+ui->doubleSpinBox_harris_kFreeParam->text()+"; }");
+
+        ui->textEdit_setup->append(QString::number(algTime)+"ms : Harris { "+ui->spinBox_harris_blockSize->text()+"; "+ui->comboBox_harris_appertureSize->currentText()+"; "+ui->doubleSpinBox_harris_kFreeParam->text()+"; }");
+
+    }
         intBuffer.pop_front();
         intBuffer.pop_front();
         doubleBuffer.pop_front();
@@ -523,18 +561,20 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 
     case ImageManip::PreCornerDetect_flag:
         algTime = ImageManip::doPreCornerDetect(workImg, intBuffer.at(0));
-//        namedWindow("Pre-corner Detection");
-//        openedCVWindowNames.append("Pre-corner Detection");
-//        imshow("Pre-corner Detection",workImg);
-        if(!massRun)
+        if(!massRun){
+            namedWindow("Pre-corner Detection");
+        openedCVWindowNames.append("Pre-corner Detection");
+        imshow("Pre-corner Detection",workImg);
             ui->textEdit_setup->append(QString::number(algTime)+"ms : Pre-corner Detection { "+ui->comboBox_preCornerDetect_appertureSize->currentText()+"; }");
-        intBuffer.pop_front();
+        }
+            intBuffer.pop_front();
         break;
 
     case ImageManip::HoughCircles_flag:
 
         algTime = ImageManip::doHoughCircles(workImg, circles, doubleBuffer.at(0), doubleBuffer.at(1), doubleBuffer.at(2), doubleBuffer.at(3), intBuffer.at(0), intBuffer.at(1));
-        namedWindow("Hough Transform");
+        if(!massRun){
+            namedWindow("Hough Transform");
         openedCVWindowNames.append("Hough Transform");
         imshow("Hough Transform",workImg);
 //        origImg = imread(imagePath.toStdString(),1);
@@ -542,8 +582,7 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 //        namedWindow("Hough Transform2");
 //        openedCVWindowNames.append("Hough Transform2");
 //        imshow("Hough Transform2",origImg);
-        if(!massRun)
-        {
+
             ui->textEdit_setup->append(QString::number(algTime)+"ms : Hough Transform { "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; "+QString::number(doubleBuffer.at(2))+"; "+QString::number(doubleBuffer.at(3))+"; "+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; }\nFound Circles: ");
             for(uint i=0; i<circles.size(); i++){
                 ui->textEdit_setup->append("("+QString::number(circles[i][0])+","+QString::number(circles[i][1])+","+QString::number(circles[i][2])+")");
@@ -559,31 +598,35 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 
     case ImageManip::Inverse_flag:
         algTime = ImageManip::doInvert(workImg);
-        namedWindow("Inverse intensity");
-        openedCVWindowNames.append("Inverse intensity");
-        imshow("Inverse intensity",workImg);
-        if(!massRun)
+        if(!massRun){
+            namedWindow("Inverse intensity");
+            openedCVWindowNames.append("Inverse intensity");
+            imshow("Inverse intensity",workImg);
             ui->textEdit_setup->append(QString::number(algTime)+"ms : Inverse intensity { ; }");
+        }
         break;
 
     case ImageManip::PlusIntensity_flag:
         algTime = ImageManip::doPlusIntensity(workImg, intBuffer.at(0));
-        namedWindow("Intensity addition");
-        openedCVWindowNames.append("Intensity addition");
-        imshow("Intensity addition",workImg);
-        if(!massRun)
+        if(!massRun){
+            namedWindow("Intensity addition");
+            openedCVWindowNames.append("Intensity addition");
+            imshow("Intensity addition",workImg);
+
             ui->textEdit_setup->append(QString::number(algTime)+"ms : Intensity addition { "+QString::number(intBuffer.at(0))+"; }");
+        }
         intBuffer.pop_front();
         break;
 
     case ImageManip::PseudoContrast_flag:
         algTime = ImageManip::doPseudoContrast(workImg, intBuffer.at(0));
-        namedWindow("Pseudo-Contrast");
+        if(!massRun){
+            namedWindow("Pseudo-Contrast");
         openedCVWindowNames.append("Pseudo-Contrast");
         imshow("Pseudo-Contrast",workImg);
-        if(!massRun)
             ui->textEdit_setup->append(QString::number(algTime)+"ms : Pseudo-Contrast { "+QString::number(intBuffer.at(0))+"; }");
-        intBuffer.pop_front();
+        }
+            intBuffer.pop_front();
         break;
 
     default:;
@@ -669,7 +712,8 @@ void MainWindow::on_pushButton_massRun_clicked()
         on_pushButton_setFilesList_clicked();
     }
     //QStringList temp = listOfFiles;
-    messageOutStringList("listOFiles",listOfFiles);
+    if(listOfFiles.size()<50)
+        messageOutStringList("listOFiles",listOfFiles);
     //messageOutStringList("activeSetup",QStringList(activeSetup));
     //init setup
     if(!activeSetup.isEmpty()){
@@ -678,55 +722,56 @@ void MainWindow::on_pushButton_massRun_clicked()
         lastDoubleBuffer = doubleBuffer;
         lastBoolBuffer = boolBuffer;
     }
+    int processedFiles = 0;
     if(activeSetup.size()>0){
-    if(imageSaveDir.isEmpty()){
-       while(!on_actionSet_Mass_Save_Directory_triggered());
-    }else{
-        QMessageBox msg;
-        msg.setText("Actual save directory is:");
-        msg.setInformativeText(imageSaveDir);
-        QPushButton *okButton = msg.addButton(QMessageBox::Ok);
-        QPushButton *changeButton = msg.addButton(tr("Change"),QMessageBox::ActionRole);
-        msg.exec();
-        if (msg.clickedButton() == changeButton)
-        {
-            // change the directory
+        if(imageSaveDir.isEmpty()){
             while(!on_actionSet_Mass_Save_Directory_triggered());
-        } else if (msg.clickedButton() == okButton){
-            // it`s ok nothing done
-        }
-    }
-    int proc_number = 0;
-    QString subdir_name = "processed_images_run_0000";
-    QDir dir;
-    dir.setCurrent(imageSaveDir);
-    while(!dir.mkdir(subdir_name))
-    {
-        proc_number++;
-        if(proc_number<10){
-            subdir_name = "processed_images_run_000"+QString().number(proc_number);
-        }else if(proc_number<100){
-            subdir_name = "processed_images_run_00"+QString().number(proc_number);
-        }else if(proc_number<1000){
-            subdir_name = "processed_images_run_0"+QString().number(proc_number);
         }else{
-            subdir_name = "processed_images_run_"+QString().number(proc_number);
+            QMessageBox msg;
+            msg.setText("Actual save directory is:");
+            msg.setInformativeText(imageSaveDir);
+            QPushButton *okButton = msg.addButton(QMessageBox::Ok);
+            QPushButton *changeButton = msg.addButton(tr("Change"),QMessageBox::ActionRole);
+            msg.exec();
+            if (msg.clickedButton() == changeButton)
+            {
+                // change the directory
+                while(!on_actionSet_Mass_Save_Directory_triggered());
+            } else if (msg.clickedButton() == okButton){
+                // it`s ok nothing done
+            }
         }
-    }
+        int proc_number = 0;
+        QString subdir_name = "processed_images_run_0000";
+        QDir dir;
+        dir.setCurrent(imageSaveDir);
+        while(!dir.mkdir(subdir_name))
+        {
+            proc_number++;
+            if(proc_number<10){
+                subdir_name = "processed_images_run_000"+QString().number(proc_number);
+            }else if(proc_number<100){
+                subdir_name = "processed_images_run_00"+QString().number(proc_number);
+            }else if(proc_number<1000){
+                subdir_name = "processed_images_run_0"+QString().number(proc_number);
+            }else{
+                subdir_name = "processed_images_run_"+QString().number(proc_number);
+            }
+        }
 
-//debugWindow("directory created");
-    //QList <ImageManip::SetupFlags> temp_setup = activeSetup;
-    QString actual_file_prefix = imageSaveDir+"\\"+subdir_name+"\\processedImg_";
+        //debugWindow("directory created");
+        //QList <ImageManip::SetupFlags> temp_setup = activeSetup;
+        QString actual_file_prefix = imageSaveDir+"\\"+subdir_name+"\\processedImg_";
 
-    //for all is time counted together
-    ui->actualTime->setText("0");
-    QProgressDialog progressDialog(this);
-    progressDialog.setWindowModality(Qt::WindowModal);
-    progressDialog.setCancelButtonText(tr("&Cancel"));
-    progressDialog.setRange(0, listOfFiles.size());
-    progressDialog.setWindowTitle(tr("Mass Run"));
+        //for all is time counted together
+        ui->actualTime->setText("0");
+        QProgressDialog progressDialog(this);
+        progressDialog.setWindowModality(Qt::WindowModal);
+        progressDialog.setCancelButtonText(tr("&Cancel"));
+        progressDialog.setRange(0, listOfFiles.size());
+        progressDialog.setWindowTitle(tr("Mass Run"));
 
-//debugWindow("starting for cycle");
+        //debugWindow("starting for cycle");
         for(int files=0; files< listOfFiles.size(); files++){
             progressDialog.setValue(files);
             progressDialog.setLabelText(tr("Processing file number %1 of %2...").arg(files).arg(listOfFiles.size()));
@@ -736,18 +781,18 @@ void MainWindow::on_pushButton_massRun_clicked()
             if (progressDialog.wasCanceled())
                 break;
 
-            ui->textEdit_setup->append("Processed: "+listOfFiles.at(files)+"\n------------");
+
             //begin - processing of image from list
-//debugWindow("work image will be : "+QString().fromStdString(listOfFiles.at(files).toStdString()));
+            //debugWindow("work image will be : "+QString().fromStdString(listOfFiles.at(files).toStdString()));
             //tempPath = listOfFilePaths.at(files);
             workImg = imread(listOfFilePaths.at(files).toStdString(),0);
             origImg = workImg;
-//debugWindow("starting OpenCV functions");
+            //debugWindow("starting OpenCV functions");
             intBuffer = lastIntBuffer;
             doubleBuffer = lastDoubleBuffer;
             boolBuffer = lastBoolBuffer;
             for(int i=0; i<activeSetup.size(); i++){
-//messageOutBuffersLists(QString().number(i)+" run "+QString().number(activeSetup.at(i)), intBuffer, doubleBuffer, boolBuffer);
+                //messageOutBuffersLists(QString().number(i)+" run "+QString().number(activeSetup.at(i)), intBuffer, doubleBuffer, boolBuffer);
 
                 if (progressDialog.wasCanceled())
                     break;
@@ -761,14 +806,22 @@ void MainWindow::on_pushButton_massRun_clicked()
 
             imwrite(actual_file.toStdString(),workImg);
             //show the resulting image processed
-            namedWindow(actual_w);
-            openedCVWindowNames.append(actual_window);
-//debugWindow("starting creation of window");
-            imshow(actual_w,workImg);
+            if(listOfFiles.size()<50){
+                ui->textEdit_setup->append("Processed: "+listOfFiles.at(files)+"\n------------");
+                //debugWindow("starting creation of window");
+                namedWindow(actual_w);
+                openedCVWindowNames.append(actual_window);
+                imshow(actual_w,workImg);
+            }else{
+                processedFiles++;
+            }
             //end - processing of image from list end
         }
     }else{
         ui->textEdit_setup->append("Processed nothing as no setup found\n------------");
+    }
+    if(listOfFiles.size()>50){
+        ui->textEdit_setup->append("Processed "+QString().number(processedFiles)+"number of files.\n------------");
     }
     ui->textEdit_setup->append("\n-------------------------------\nSetup File\n-------------------------------");
     updateGraphics_active();
@@ -1007,6 +1060,15 @@ void MainWindow::on_pushButton_pseudoContrast_clicked()
     intBuffer.append(ui->spinBox_pseudoContrast->value());
 }
 
+void MainWindow::on_pushButton_bilateralSmoothing_clicked()
+{
+    activeSetup.append(ImageManip::BilateralSmoothing_flag);
+    ui->textEdit_setup->append("Bilateral Filtering { "+ui->comboBox_bilateralFilter_ksize->currentText()+"; "+ui->doubleSpinBox_bilateralFilterSigmaColor->text()+"; "+ui->doubleSpinBox_bilateralFilterSigmaSpace->text()+"; }");
+    intBuffer.append(ui->comboBox_bilateralFilter_ksize->currentText().toInt());
+    doubleBuffer.append(ui->doubleSpinBox_bilateralFilterSigmaColor->value());
+    doubleBuffer.append(ui->doubleSpinBox_bilateralFilterSigmaSpace->value());
+}
+
 void MainWindow::on_pushButton_pupilFilterSetup_clicked()
 {
     int setup[5]={60, 190, 3, 150, 160};
@@ -1088,6 +1150,11 @@ void MainWindow::on_actionHough_Transformation_triggered()
 void MainWindow::on_actionPupil_Filter_Setup_triggered()
 {
     on_pushButton_pupilFilterSetup_clicked();
+}
+
+void MainWindow::on_actionBilateral_Filtering_triggered()
+{
+    on_pushButton_bilateralSmoothing_clicked();
 }
 
  //////////////////////////
@@ -1210,3 +1277,4 @@ void MainWindow::on_actionLast_Setup_triggered()
         boolBuffer = lastBoolBuffer;
     }
 }
+

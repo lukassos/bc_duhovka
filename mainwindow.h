@@ -8,6 +8,7 @@
 #include <opencv2/core/core.hpp>
 #include "imagemanip.h"
 #include "findFiles.h"
+#include "snake.h"
 
 
 namespace Ui {
@@ -160,6 +161,10 @@ private slots:
     void on_pushButton_pupilFilterSetup_clicked();
 
     void on_actionPupil_Filter_Setup_triggered();
+
+    void on_pushButton_bilateralSmoothing_clicked();
+
+    void on_actionBilateral_Filtering_triggered();
 
 private:
     Ui::MainWindow *ui;

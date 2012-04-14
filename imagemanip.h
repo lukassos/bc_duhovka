@@ -32,6 +32,7 @@ public:
     static int doGausianBlur(Mat processedImage, int size);
     static int doGausianBlur(Mat processedImage, int size, double sigma1, double sigma2);
     static int doMedianBlur(Mat processedImage, int size);
+    static int doBilateralFiltering(Mat processedImage, double kernel, double sigmaColor, double sigmaSpace );
 
     static int doLaplacian(Mat processedImage, int ksize, double scale, double delta);
     static int doSobel(Mat processedImage, int dx, int dy, int ksize, double scale, double delta );
@@ -71,6 +72,7 @@ public:
             Laplacian_flag,
             Sobel_flag,
             Scharr_flag,
+            BilateralSmoothing_flag,
         //cv::Miscellaneous Image Transformations
             //Thresholds
             ThresholdUnder_flag,

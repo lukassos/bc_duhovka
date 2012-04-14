@@ -372,9 +372,21 @@ Mat ImageManip::doHistogram(Mat processedImage){
             rectangle( histImg, Point(h*scale, s*scale), Point( (h+1)*scale - 1, (s+1)*scale - 1), Scalar::all(intensity), CV_FILLED );
         }
 
-    namedWindow( "H-S Histograms", 1 );
-    imshow( "H-S Histograms", histImg );
+    //namedWindow( "H-S Histograms", 1 );
+    //imshow( "H-S Histograms", histImg );
     return histImg;
+}
+
+int ImageManip::doBilateralFiltering(Mat processedImage, double kernel, double sigmaColor, double sigmaSpace )
+{
+    QElapsedTimer algTime;
+    algTime.start();
+    Mat showka;
+    //namedWindow("showka2");
+    bilateralFilter(processedImage, showka, kernel, sigmaColor,  sigmaSpace, BORDER_DEFAULT);
+    //imshow("showka2",showka);
+    processedImage = showka;
+    return algTime.elapsed();
 }
 
 //int downsize(){

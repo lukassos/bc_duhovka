@@ -48,11 +48,7 @@ FindFiles::FindFiles(QWidget *parent)
 {
     browseButton = createButton(tr("&Browse..."), SLOT(browse()));
     findButton = createButton(tr("&Find"), SLOT(find()));
-    //confirmButton = createButton(tr("&Confirm"), SLOT(accept()));
-    //cancelButton = createButton(tr("&Cancel"), SLOT(reject()));
-
-    fileComboBox = createComboBox(tr("*.jpg"));
-    textComboBox = createComboBox();
+    regexpComboBox = createComboBox(tr(".*.jpg"));
     directoryComboBox = createComboBox(QDir::currentPath());
 
     fileLabel = new QLabel(tr("Named:"));
@@ -60,33 +56,23 @@ FindFiles::FindFiles(QWidget *parent)
     directoryLabel = new QLabel(tr("In directory:"));
     filesFoundLabel = new QLabel;
     createFilesTable();
-//! [0]
 
-//! [1]
+
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->setSizeConstraint(QLayout::SetNoConstraint);
     mainLayout->addWidget(fileLabel, 0, 0);
-    mainLayout->addWidget(fileComboBox, 0, 1, 1, 2);
+    mainLayout->addWidget(regexpComboBox, 0, 1, 1, 2);
     mainLayout->addWidget(textLabel, 1, 0);
-    mainLayout->addWidget(textComboBox, 1, 1, 1, 2);
     mainLayout->addWidget(directoryLabel, 2, 0);
     mainLayout->addWidget(directoryComboBox, 2, 1);
     mainLayout->addWidget(browseButton, 2, 2);
     mainLayout->addWidget(filesTable, 3, 0, 1, 3);
     mainLayout->addWidget(filesFoundLabel, 4, 0, 1, 2);
     mainLayout->addWidget(findButton, 2, 3);
-   // mainLayout->addWidget(confirmButton, 4, 1);
-   // mainLayout->addWidget(cancelButton, 4, 2);
     setLayout(mainLayout);
-
     setWindowTitle(tr("Find Files"));
-#if !defined(Q_OS_SYMBIAN) && !defined(Q_WS_MAEMO_5) && !defined(Q_WS_SIMULATOR)
-    resize(700, 300);
-#endif
-}
-//! [1]
 
-//! [2]
+}
 void FindFiles::browse()
 {
     QString directory = QFileDialog::getExistingDirectory(this,
@@ -98,7 +84,7 @@ void FindFiles::browse()
         directoryComboBox->setCurrentIndex(directoryComboBox->findText(directory));
     }
 }
-//! [2]
+
 
 static void updateComboBox(QComboBox *comboBox)
 {
@@ -106,150 +92,79 @@ static void updateComboBox(QComboBox *comboBox)
         comboBox->addItem(comboBox->currentText());
 }
 
-//! [3]
 void FindFiles::find()
 {
     filesTable->setRowCount(0);
 
-    QString fileName = fileComboBox->currentText();
-    QString text = textComboBox->currentText();
+    QString fileName = regexpComboBox->currentText();
     QString path = directoryComboBox->currentText();
-//! [3]
 
-    updateComboBox(fileComboBox);
-    updateComboBox(textComboBox);
+    updateComboBox(regexpComboBox);
     updateComboBox(directoryComboBox);
 
-//! [4]
     currentDir = QDir(path);
-    //QStringList files;
     if (fileName.isEmpty())
-        fileName = "*";
-    //QFileInfoList filesInfo = currentDir.entryInfoList(QStringList(fileName),
-    //                                                   QDir::Files | QDir::Readable | QDir::NoSymLinks);
-    QStringList files = currentDir.entryList(QStringList(fileName),
-                                 QDir::Files | QDir::NoSymLinks);
-    QStringList filePaths = files;
-    //files = filesInfo
-//    QMessageBox msg;
-////    msg.setText("filesInfo.at(0).absoluteFilePath():");
-////    msg.setInformativeText(filesInfo.at(0).absoluteFilePath());
-////    msg.exec();
-//    msg.setText("file.at(0):");
-//    msg.setInformativeText(files.at(0));
-//    msg.exec();
-//    msg.setText("currentDir.absoluteFilePath(files[i]):");
-//    msg.setInformativeText(currentDir.absoluteFilePath(files[0]));
-//    msg.exec();
-    for(int i=0; i< files.size(); i++){
-        filePaths[i] = currentDir.absoluteFilePath(files[i]);
+        fileName = ".*";
+    QStringList files;
+    QStringList filePaths;
+
+    QDirIterator subdirectory_finder(currentDir.path(), QDir::Dirs | QDir::NoSymLinks, QDirIterator::Subdirectories);
+
+    int numberOfDirs = 0;
+    while(subdirectory_finder.hasNext())
+    {
+        subdirectory_finder.next();
+        numberOfDirs++;
     }
-//    msg.setText("file.at(0):");
-//    msg.setInformativeText(files.at(0));
-//    msg.exec();
 
-    if (!text.isEmpty())
-        files = findFilesList(files, text);
-    emit signalFiles(files,filePaths);
-    showFiles(files);
-  //return files;
-}
-//! [4]
+    QDirIterator directory_walker(currentDir.path(), QDir::Files | QDir::NoSymLinks, QDirIterator::Subdirectories);
 
-QStringList FindFiles::findFilesList(const QFileInfoList &filesInfo, const QString &text)
-{
     QProgressDialog progressDialog(this);
     progressDialog.setCancelButtonText(tr("&Cancel"));
-    progressDialog.setRange(0, filesInfo.size());
+    progressDialog.setRange(0, numberOfDirs);
     progressDialog.setWindowTitle(tr("Find Files"));
-
-//! [5] //! [6]
-    QStringList foundFiles;
-//    QMessageBox msg;
-//    msg.setText(">inside filesInfo.at(0).absoluteFilePath():");
-//    msg.setInformativeText(filesInfo.at(0).absoluteFilePath());
-//    msg.exec();
-    for (int i = 0; i < filesInfo.size(); ++i) {
+    int i=0;
+    while(directory_walker.hasNext())
+    {
         progressDialog.setValue(i);
-        progressDialog.setLabelText(tr("Searching file number %1 of %2...")
-                                    .arg(i).arg(filesInfo.size()));
+        progressDialog.setLabelText(tr("Searching file number %1 in %2 directory").arg(i++).arg(numberOfDirs));
         qApp->processEvents();
-//! [6]
-
         if (progressDialog.wasCanceled())
             break;
-
-//! [7]
-        QFile file(filesInfo.at(i).absoluteFilePath());
-//        QMessageBox msg;
-//        msg.setText("filesInfo.at(i).absoluteFilePath():");
-//        msg.setInformativeText(filesInfo.at(i).absoluteFilePath());
-//        msg.exec();
-        if (file.open(QIODevice::ReadOnly)) {
-            QString line;
-            QTextStream in(&file);
-            while (!in.atEnd()) {
-                if (progressDialog.wasCanceled())
-                    break;
-                line = in.readLine();
-                if (line.contains(text)) {
-                    //foundFiles << QString(currentDir.absolutePath()+currentDir.absoluteFilePath(files[i]));
-                    foundFiles << filesInfo.at(i).absoluteFilePath();
-                    break;
-                }
-            }
+        QString actualFileName = directory_walker.fileInfo().completeBaseName()+"."+directory_walker.fileInfo().completeSuffix();
+        QString regularFileName = "";
+        QRegExp regularExp("("+fileName+")");
+        int pos = regularExp.indexIn(actualFileName);
+        if (pos > -1){
+            regularFileName = regularExp.cap(0);
         }
+
+        if(regularFileName == actualFileName){
+            filePaths.append(directory_walker.fileInfo().absoluteFilePath());
+            files.append(directory_walker.fileName());
+
+        }
+        directory_walker.next();
+
     }
-    return foundFiles;
+
+    emit signalFiles(files,filePaths);
+    showFiles(files);
 }
 
-//! [5]
-QStringList FindFiles::findFilesList(const QStringList &files, const QString &text)
+void FindFiles::showFiles(const QStringList &files)
 {
     QProgressDialog progressDialog(this);
     progressDialog.setCancelButtonText(tr("&Cancel"));
     progressDialog.setRange(0, files.size());
-    progressDialog.setWindowTitle(tr("Find Files"));
-
-//! [5] //! [6]
-    QStringList foundFiles;
+    progressDialog.setWindowTitle(tr("Show Table"));
 
     for (int i = 0; i < files.size(); ++i) {
         progressDialog.setValue(i);
-        progressDialog.setLabelText(tr("Searching file number %1 of %2...")
-                                    .arg(i).arg(files.size()));
+        progressDialog.setLabelText(tr("Setting table row %1 of %2...\nYou can skip this and whole list of files will be exported").arg(i).arg(files.size()));
         qApp->processEvents();
-//! [6]
-
         if (progressDialog.wasCanceled())
             break;
-
-//! [7]
-        QFile file(currentDir.absoluteFilePath(files[i]));
-
-        if (file.open(QIODevice::ReadOnly)) {
-            QString line;
-            QTextStream in(&file);
-            while (!in.atEnd()) {
-                if (progressDialog.wasCanceled())
-                    break;
-                line = in.readLine();
-                if (line.contains(text)) {
-                    //foundFiles << QString(currentDir.absolutePath()+currentDir.absoluteFilePath(files[i]));
-                    foundFiles << files[i];
-                    break;
-                }
-            }
-        }
-    }
-    return foundFiles;
-}
-//! [7]
-
-//! [8]
-void FindFiles::showFiles(const QStringList &files)
-{
-    for (int i = 0; i < files.size(); ++i) {
         QFile file(currentDir.absoluteFilePath(files[i]));
         qint64 size = QFileInfo(file).size();
 
@@ -276,9 +191,7 @@ void FindFiles::showFiles(const QStringList &files)
 
     filesFoundLabel->setWordWrap(true);
 }
-//! [8]
 
-//! [9]
 QPushButton *FindFiles::createButton(const QString &text, const char *member)
 {
     QPushButton *button = new QPushButton(text);
@@ -286,29 +199,16 @@ QPushButton *FindFiles::createButton(const QString &text, const char *member)
     return button;
 }
 
-QPushButton *FindFiles::createButton(const QString &text)
-{
-    QPushButton *button = new QPushButton(text);
-    //connect(button, SIGNAL(clicked()), this, member);
-    return button;
-}
-//! [9]
-
-//! [10]
 QComboBox *FindFiles::createComboBox(const QString &text)
 {
     QComboBox *comboBox = new QComboBox;
     comboBox->setEditable(true);
     comboBox->addItem(text);
     comboBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-#if defined(Q_OS_SYMBIAN) || defined(Q_WS_MAEMO_5) || defined(Q_WS_SIMULATOR)
-    comboBox->setMinimumContentsLength(3);
-#endif
+
     return comboBox;
 }
-//! [10]
 
-//! [11]
 void FindFiles::createFilesTable()
 {
     filesTable = new QTableWidget(0, 3);
@@ -325,9 +225,6 @@ void FindFiles::createFilesTable()
     connect(filesTable, SIGNAL(cellActivated(int,int)),
             this, SLOT(openFileOfItem(int,int)));
 }
-//! [11]
-
-//! [12]
 
 void FindFiles::openFileOfItem(int row, int /* column */)
 {
@@ -335,7 +232,5 @@ void FindFiles::openFileOfItem(int row, int /* column */)
 
     QDesktopServices::openUrl(QUrl::fromLocalFile(currentDir.absoluteFilePath(item->text())));
 }
-
-//! [12]
 
 
