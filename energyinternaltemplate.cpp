@@ -15,5 +15,26 @@ void EnergyInternalTemplate::setCirclePositions(QList <SnakePoint> points, float
 }
 
 void EnergyInternalTemplate::fastCenterLocalizationAlgorithm(CvMat image, cv::Point fastCenter, float radius){
-    CvMat
+
+    float borders[4] = {0,0,0,0}; //top,bottom,left,right
+    QSystemLocale time;
+
+    qsrand(131*QSystemLocale.TimeFormatShort);
+    float xMax = image.cols*0.3;
+    float yMax = image.rows*0.3;
+    float xOffset = image.cols*0.35;
+    float yOffset = image.rows*0.35;
+
+    for(int i=0; i<maxSize; i++){
+        int randomN = qrand();
+        //intensity of random pixel in 30% * 30% rectangle in the middle of image
+        //(image.data.ptr + ((yOffset + randomN)%yMax)*image.step + ((xOffset+randomN) % xMax))
+        if((image.data.ptr + ((yOffset + randomN)%yMax)*image.step + ((xOffset+randomN) % xMax)) == 0){
+            if(borders[0]>
+
+
+        }
+    }
+
+
 }

@@ -15,50 +15,50 @@ class ImageManip : public QObject
 public:
     ImageManip(QImage *image);
     ~ImageManip();
-    //treba spravit vypis *CvMat do okna huigui
-    //treba spravit obdobu tejto funkcie pre kazdy operator vracat bude *CvMat
+    //treba spravit vypis *Mat do okna huigui
+    //treba spravit obdobu tejto funkcie pre kazdy operato vracat bude *Mat
     void onTrackbar(int, void*);
     void showImgThoughOpenCV(QString pathToImage);
-    CvMat* bindIplImage2Mat(const IplImage *iplImage);
-    IplImage Mat2IplImage(const CvMat *CvMat);
+    Mat* bindIplImage2Mat(const IplImage *iplImage);
+    IplImage Mat2IplImage(const Mat *mat);
     IplImage* qImage2IplImage(const QImage& qImage);
     QImage IplImage2QImage(const IplImage *iplImage);
 
-    //CvMat manipulation functions
-    static int toGrayscale(CvMat processedImage);
+    //Mat manipulation functions
+    static int toGrayscale(Mat processedImage);
 
-    static void doOneClickProcessing(CvMat processedImage);
-    static int doBlur(CvMat processedImage, int size);
-    static int doGausianBlur(CvMat processedImage, int size);
-    static int doGausianBlur(CvMat processedImage, int size, double sigma1, double sigma2);
-    static int doMedianBlur(CvMat processedImage, int size);
-    static int doBilateralFiltering(CvMat processedImage, double kernel, double sigmaColor, double sigmaSpace );
+    static void doOneClickProcessing(Mat processedImage);
+    static int doBlur(Mat processedImage, int size);
+    static int doGausianBlur(Mat processedImage, int size);
+    static int doGausianBlur(Mat processedImage, int size, double sigma1, double sigma2);
+    static int doMedianBlur(Mat processedImage, int size);
+    static int doBilateralFiltering(Mat processedImage, double kernel, double sigmaColor, double sigmaSpace );
 
-    static int doLaplacian(CvMat processedImage, int ksize, double scale, double delta);
-    static int doSobel(CvMat processedImage, int dx, int dy, int ksize, double scale, double delta );
-    static int doScharr(CvMat processedImage, int dx, int dy, double scale, double delta );
+    static int doLaplacian(Mat processedImage, int ksize, double scale, double delta);
+    static int doSobel(Mat processedImage, int dx, int dy, int ksize, double scale, double delta );
+    static int doScharr(Mat processedImage, int dx, int dy, double scale, double delta );
 
-    static int doThresholdUnder(CvMat processedImage, int threshVal);
-    static int doThresholdAbove(CvMat processedImage, int threshVal);
-    static int doImageMap(CvMat processedImage, int threshVal);
-    static int doAdaptiveThreshold(CvMat processedImage);
+    static int doThresholdUnder(Mat processedImage, int threshVal);
+    static int doThresholdAbove(Mat processedImage, int threshVal);
+    static int doImageMap(Mat processedImage, int threshVal);
+    static int doAdaptiveThreshold(Mat processedImage);
 
-    static int doGrabCut(CvMat processedImage);
-    static int doIntegral(CvMat processedImage);
+    static int doGrabCut(Mat processedImage);
+    static int doIntegral(Mat processedImage);
 
-    static int doCanny(CvMat processedImage, int thresh1, int thresh2, int size, bool l2grad);
-    static int doCornerHarris(CvMat processedImage, int blockSize, int apertureSize, double k);
-    static int doHoughCircles(CvMat processedImage, vector<Vec3f> circles, double dp_invAcum, double minDist, double param1, double param2, int minRadius, int maxRadius);
+    static int doCanny(Mat processedImage, int thresh1, int thresh2, int size, bool l2grad);
+    static int doCornerHarris(Mat processedImage, int blockSize, int apertureSize, double k);
+    static int doHoughCircles(Mat processedImage, vector<Vec3f> circles, double dp_invAcum, double minDist, double param1, double param2, int minRadius, int maxRadius);
 
-    static int doPreCornerDetect(CvMat processedImage, int apertureSize);
-    static int doGoodFeatureToTrack(CvMat processedImage, int maxCorners, double qualityLevel, double minDistance, int blockSize, bool useHarris, double k);
+    static int doPreCornerDetect(Mat processedImage, int apertureSize);
+    static int doGoodFeatureToTrack(Mat processedImage, int maxCorners, double qualityLevel, double minDistance, int blockSize, bool useHarris, double k);
 
-    static int doInvert(CvMat processedImage);
-    static int doPlusIntensity(CvMat processedImage, int amount);
-    static int doPseudoContrast(CvMat processedImage, int amount);
+    static int doInvert(Mat processedImage);
+    static int doPlusIntensity(Mat processedImage, int amount);
+    static int doPseudoContrast(Mat processedImage, int amount);
 
-    static void drawCircles(CvMat processedImage, vector<Vec3f> circles);
-    static CvMat doHistogram(CvMat processedImage);
+    static void drawCircles(Mat processedImage, vector<Vec3f> circles);
+    static Mat doHistogram(Mat processedImage);
 
     enum SetupFlags{
         //cv::Image Preprocessing
@@ -95,8 +95,8 @@ private:
 
 
     bool flags[20];
-    CvMat *matTemp;
-    CvMat tempMat, edgeMat;
+    Mat *matTemp;
+    cv::Mat tempMat, edgeMat;
     int tempInt;
 };
 

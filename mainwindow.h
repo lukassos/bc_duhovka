@@ -26,8 +26,8 @@ public:
     QString tempPath;
     QString imageSaveDir;
     QStringList openedCVWindowNames;
-    CvMat origImg, workImg;
-    CvMat histImg;
+    Mat origImg, workImg;
+    Mat histImg;
     vector<Vec3f> circles;
 
     explicit MainWindow(QWidget *parent = 0);
