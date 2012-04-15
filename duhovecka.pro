@@ -23,7 +23,8 @@ HEADERS  += mainwindow.h \
     snake.h \
     findFiles.h \
     energyinternaltemplate.h \
-    energyexternalfield.h
+    energyexternalfield.h \
+    crossInclude.h
 
 FORMS    += mainwindow.ui
 
@@ -32,6 +33,7 @@ win32: LIBS += -LC:\opencv22mingw\bin
 LIBS += -lopencv_core220 \
         -lopencv_highgui220 \
         -lopencv_imgproc220
+
 
 
 

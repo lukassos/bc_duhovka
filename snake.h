@@ -7,11 +7,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
 #include <qmath.h>
-#include "energyexternalfield.h"
-#ifndef ENERGYINTERNALTEMPLATE_H
-    #include "energyinternaltemplate.h"
-#endif
 
+#include "crossInclude.h"
 using namespace std;
 using namespace cv;
 

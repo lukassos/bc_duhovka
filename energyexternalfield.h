@@ -8,6 +8,8 @@
 #include <opencv2/core/core.hpp>
 #include <qmath.h>
 
+#include "crossInclude.h"
+
 class EnergyExternalField
 {
 protected:
