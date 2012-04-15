@@ -7,9 +7,9 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
 #include <qmath.h>
-class SnakePoint;
-class Snake;
-
+#ifndef SNAKEPOINT_H
+    #include "snake.h"
+#endif
 
 using namespace cv;
 
@@ -23,7 +23,7 @@ public:
     EnergyInternalTemplate();
 
     void setCirclePositions(QList <SnakePoint> points, float centerX, float ceterY, float radius);
-    void fastCenterLocalizationAlgorithm(CvMat image, cv::Point fastCenter, float radius);
+    void fastCenterLocalizationAlgorithm(Mat image, cv::Point fastCenter, float radius);
     float countPotentialPositionX(int pointNumber, Snake snake);
     float countPotentialPositionY(int pointNumber, Snake snake);
 

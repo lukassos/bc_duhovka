@@ -8,7 +8,9 @@
 #include <opencv2/core/core.hpp>
 #include <qmath.h>
 #include "energyexternalfield.h"
-#include "energyinternaltemplate.h"
+#ifndef ENERGYINTERNALTEMPLATE_H
+    #include "energyinternaltemplate.h"
+#endif
 
 using namespace std;
 using namespace cv;
@@ -23,14 +25,20 @@ namespace snakeNames{
 #define SNAKEPOINT_H
 class SnakePoint
 {//one control point of entire contour
-protected:
+protected:/*until getre and setre created commented
     float x, y; // coordnates
-    float alpha, beta;
-    float E_int, E_ext, E_snake;
+    float alpha, beta, step;
+    float E_int, E_ext, E_snake;*/
 
 public:
     SnakePoint();
+    float getAlpha(){return this->alpha;}
+    float getBeta(){return this->beta;}
+    float getStep(){return this->step;}
 
+    float x, y; // coordnates
+    float alpha, beta, step;
+    float E_int, E_ext, E_snake;
 };
 #endif
 
@@ -45,10 +53,14 @@ protected:
     float total_E_ext;
     float total_E_int;
     int typeOfContour;
+    Mat originalImage;
+    Mat matrixOfPoints;
+
 
 public:
     Snake();
-
+    Mat getImageOriginal(){return this->originalImage;}
+    Mat getMatrixOfPoints(){return this->matrixOfPoints;}
             // set`s linked list of snakePoints and sets contour this.template
     void initSnakeContour(Snake snakeToInit, int numberOfPoints, EnergyInternalTemplate::ContourType decision);
 
@@ -58,9 +70,11 @@ public:
 
             //input is picture read into matrix in grayscale
             //set`s
-    void initSnakeExtField(CvMat *pictureMatrix);
+    void initSnakeExtField(Mat pictureMatrix);
 
-    CvMat showMatrix(CvMat image, Snake snake);
+    void showMatrix(Mat image, Snake snake, QString windowName);
+
+
 
 };
 

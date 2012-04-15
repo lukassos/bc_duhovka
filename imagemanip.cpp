@@ -11,8 +11,8 @@ ImageManip::~ImageManip()
 {
 
 }
-    //treba spravit vypis *CvMat do okna huigui
-    //treba spravit obdobu tejto funkcie pre kazdy operato vracat bude *CvMat
+    //treba spravit vypis *Mat do okna huigui
+    //treba spravit obdobu tejto funkcie pre kazdy operato vracat bude *Mat
 //void ImageManip::showImgThoughOpenCV(QString pathToImage)
 //{
 //    //destroyAllCVWindows();
@@ -20,8 +20,8 @@ ImageManip::~ImageManip()
 //        pathToImage = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::currentPath());
 //        imagePath = pathToImage;
 //    }
-//    CvMat image = imread(pathToImage.toStdString(),1);
-//    CvMat image_greyscaled = imread(pathToImage.toStdString(),0);
+//    Mat image = imread(pathToImage.toStdString(),1);
+//    Mat image_greyscaled = imread(pathToImage.toStdString(),0);
 //    //    namedWindow("My Image");
 //    createCVWindow("My Image");
 //    createCVWindow("My Grey Image");
@@ -32,7 +32,7 @@ ImageManip::~ImageManip()
 //    //tempMat = image_greyscaled;
 //    imshow("Blur + Canny edge detection", image_greyscaled);
 //    blur(image_greyscaled, tempMat, Size(3,3));
-//    CvMat blured = tempMat;
+//    Mat blured = tempMat;
 //    createCVWindow("Blur");
 //    imshow("Blur", blured);
 //    //createTrackbar("Canny threshold", "Blur + Canny edge detection", &tempInt, 100, NULL);
@@ -43,9 +43,9 @@ ImageManip::~ImageManip()
 //    waitKey(-1);
 //}
 
-CvMat* ImageManip::bindIplImage2Mat(const IplImage *iplImage)
+Mat* ImageManip::bindIplImage2Mat(const IplImage *iplImage)
 {
-    CvMat *newMat = new CvMat;
+    Mat *newMat = new Mat;
     *newMat = cvarrToMat(iplImage);
     //    ak sa data nekopiruju zdielaju sa z povodnym obrazkom a tym sa da vyhnut konverzii spat
     //    *newMat = cvarrToMat(iplImage).clone();
@@ -53,10 +53,10 @@ CvMat* ImageManip::bindIplImage2Mat(const IplImage *iplImage)
 }
 
 //tato konverzia je zbytocne zlozita na vykonavanie real time
-//IplImage* MainWindow:: Mat2IplImage(const CvMat *CvMat)
+//IplImage* MainWindow:: Mat2IplImage(const Mat *Mat)
 //{
 //    IplImage *newIplImage = new IplImage;
-//    *CvMat->
+//    *Mat->
 //    *newIplImage =
 //    return newIplImage;
 //}
@@ -125,13 +125,13 @@ void ImageManip::onTrackbar(int, void*) {
     blur(tempMat, tempMat, Size(3,3));
     // Run the edge detector on grayscale
     Canny(tempMat, tempMat, tempInt, tempInt*3, 3);
-    //    CvMat edge = Scalar::all(0);
-    CvMat edge;
-    CvMat().copyTo(edge, tempMat);
+    //    Mat edge = Scalar::all(0);
+    Mat edge;
+    Mat().copyTo(edge, tempMat);
     imshow("Blur + Canny edge detection", edge);
 }
 
-int ImageManip::toGrayscale(CvMat processedImage)
+int ImageManip::toGrayscale(Mat processedImage)
 {
     QElapsedTimer algTime;
     algTime.start();
@@ -139,11 +139,11 @@ int ImageManip::toGrayscale(CvMat processedImage)
     return algTime.elapsed();
 }
 
-int ImageManip::doBlur(CvMat processedImage, int size)
+int ImageManip::doBlur(Mat processedImage, int size)
 {
     QElapsedTimer algTime;
     algTime.start();
-    //CvMat temp1, temp2;
+    //Mat temp1, temp2;
     //temp1 = processedImage;
 
     blur(processedImage, processedImage, Size(size,size));
@@ -151,7 +151,7 @@ int ImageManip::doBlur(CvMat processedImage, int size)
     return algTime.elapsed();
 }
 
-int ImageManip::doMedianBlur(CvMat processedImage, int size)
+int ImageManip::doMedianBlur(Mat processedImage, int size)
 {
     QElapsedTimer algTime;
     algTime.start();
@@ -159,7 +159,7 @@ int ImageManip::doMedianBlur(CvMat processedImage, int size)
     return algTime.elapsed();
 }
 
-int ImageManip::doGausianBlur(CvMat processedImage, int size, double sigma1, double sigma2)
+int ImageManip::doGausianBlur(Mat processedImage, int size, double sigma1, double sigma2)
 {
     QElapsedTimer algTime;
     algTime.start();
@@ -167,7 +167,7 @@ int ImageManip::doGausianBlur(CvMat processedImage, int size, double sigma1, dou
     return algTime.elapsed();
 }
 
-int ImageManip::doGausianBlur(CvMat processedImage, int size)
+int ImageManip::doGausianBlur(Mat processedImage, int size)
 {
     QElapsedTimer algTime;
     algTime.start();
@@ -175,7 +175,7 @@ int ImageManip::doGausianBlur(CvMat processedImage, int size)
     return algTime.elapsed();
 }
 
-int ImageManip::doLaplacian(CvMat processedImage, int ksize, double scale, double delta)
+int ImageManip::doLaplacian(Mat processedImage, int ksize, double scale, double delta)
 {
     QElapsedTimer algTime;
     algTime.start();
@@ -183,7 +183,7 @@ int ImageManip::doLaplacian(CvMat processedImage, int ksize, double scale, doubl
     return algTime.elapsed();
 }
 
-int ImageManip::doSobel(CvMat processedImage, int dx, int dy, int ksize, double scale, double delta )
+int ImageManip::doSobel(Mat processedImage, int dx, int dy, int ksize, double scale, double delta )
 {
     QElapsedTimer algTime;
     algTime.start();
@@ -191,7 +191,7 @@ int ImageManip::doSobel(CvMat processedImage, int dx, int dy, int ksize, double 
     return algTime.elapsed();
 }
 
-int ImageManip::doScharr(CvMat processedImage, int dx, int dy, double scale, double delta )
+int ImageManip::doScharr(Mat processedImage, int dx, int dy, double scale, double delta )
 {
     QElapsedTimer algTime;
     algTime.start();
@@ -199,7 +199,7 @@ int ImageManip::doScharr(CvMat processedImage, int dx, int dy, double scale, dou
     return algTime.elapsed();
 }
 
-int ImageManip::doThresholdUnder(CvMat processedImage, int threshVal)
+int ImageManip::doThresholdUnder(Mat processedImage, int threshVal)
 {
     QElapsedTimer algTime;
     algTime.start();
@@ -207,7 +207,7 @@ int ImageManip::doThresholdUnder(CvMat processedImage, int threshVal)
     return algTime.elapsed();
 }
 
-int ImageManip::doThresholdAbove(CvMat processedImage, int threshVal)
+int ImageManip::doThresholdAbove(Mat processedImage, int threshVal)
 {
     QElapsedTimer algTime;
     algTime.start();
@@ -215,7 +215,7 @@ int ImageManip::doThresholdAbove(CvMat processedImage, int threshVal)
     return algTime.elapsed();
 }
 
-int ImageManip::doCanny(CvMat processedImage, int threshLower, int threshUpper, int size, bool l2grad)
+int ImageManip::doCanny(Mat processedImage, int threshLower, int threshUpper, int size, bool l2grad)
 {
     QElapsedTimer algTime;
     algTime.start();
@@ -223,18 +223,18 @@ int ImageManip::doCanny(CvMat processedImage, int threshLower, int threshUpper, 
     return algTime.elapsed();
 }
 
-int ImageManip::doCornerHarris(CvMat processedImage, int blockSize, int apertureSize, double k )
+int ImageManip::doCornerHarris(Mat processedImage, int blockSize, int apertureSize, double k )
 {
     QElapsedTimer algTime;
     algTime.start();
-    CvMat showka;
+    Mat showka;
     namedWindow("showka2");
     cornerHarris( processedImage, showka, blockSize, apertureSize, k, BORDER_DEFAULT);
     imshow("showka2",showka);
     return algTime.elapsed();
 }
 
-int ImageManip::doHoughCircles(CvMat processedImage, vector<Vec3f> circles, double dp_invAcum, double minDist, double param1, double param2, int minRadius, int maxRadius)
+int ImageManip::doHoughCircles(Mat processedImage, vector<Vec3f> circles, double dp_invAcum, double minDist, double param1, double param2, int minRadius, int maxRadius)
 {
    QElapsedTimer algTime;
    algTime.start();
@@ -244,7 +244,7 @@ int ImageManip::doHoughCircles(CvMat processedImage, vector<Vec3f> circles, doub
    return algTime.elapsed();
 }
 
-void ImageManip::drawCircles(CvMat processedImage, vector<Vec3f> circles)
+void ImageManip::drawCircles(Mat processedImage, vector<Vec3f> circles)
 {
 for( size_t i = 0; i < circles.size(); i++ )
    {
@@ -258,31 +258,31 @@ for( size_t i = 0; i < circles.size(); i++ )
    }
 }
 
-int ImageManip::doGoodFeatureToTrack(CvMat processedImage, int maxCorners, double qualityLevel, double minDistance, int blockSize, bool useHarris, double k)
+int ImageManip::doGoodFeatureToTrack(Mat processedImage, int maxCorners, double qualityLevel, double minDistance, int blockSize, bool useHarris, double k)
 {
     QElapsedTimer algTime;
     algTime.start();
     vector<Point2f> corners;
-    //goodFeaturesToTrack( processedImage, vector<Point2f>& corners, maxCorners, qualityLevel, minDistance, const CvMat& roiMask=CvMat(), blockSize=3, useHarris, k=0.44);
+    //goodFeaturesToTrack( processedImage, vector<Point2f>& corners, maxCorners, qualityLevel, minDistance, const Mat& roiMask=Mat(), blockSize=3, useHarris, k=0.44);
     return algTime.elapsed();
 }
 
-int ImageManip::doPreCornerDetect(CvMat processedImage, int apertureSize){
+int ImageManip::doPreCornerDetect(Mat processedImage, int apertureSize){
     QElapsedTimer algTime;
     algTime.start();
-    CvMat showka;
+    Mat showka;
     namedWindow("showka");
     preCornerDetect( processedImage, showka, apertureSize, BORDER_DEFAULT );
     imshow("showka",showka);
      return algTime.elapsed();
-//CvMat corners, dilated_corners;
+//Mat corners, dilated_corners;
 //preCornerDetect(image, corners, 3);
 //// dilation with 3x3 rectangular structuring element
-//dilate(corners, dilated_corners, CvMat(), 1);
-//CvMat corner_mask = corners == dilated_corners;
+//dilate(corners, dilated_corners, Mat(), 1);
+//Mat corner_mask = corners == dilated_corners;
 }
 
-int fastCenterAlgorithm(CvMat processedImage)
+int fastCenterAlgorithm(Mat processedImage)
 {
     QElapsedTimer algTime;
     algTime.start();
@@ -311,7 +311,7 @@ int fastCenterAlgorithm(CvMat processedImage)
     return algTime.elapsed();
 }
 
-int ImageManip::doPseudoContrast(CvMat processedImage, int amount)
+int ImageManip::doPseudoContrast(Mat processedImage, int amount)
 {
     QElapsedTimer algTime;
     algTime.start();
@@ -327,7 +327,7 @@ int ImageManip::doPseudoContrast(CvMat processedImage, int amount)
         return algTime.elapsed();
 }
 
-int ImageManip::doPlusIntensity(CvMat processedImage, int amount)
+int ImageManip::doPlusIntensity(Mat processedImage, int amount)
 {
     QElapsedTimer algTime;
     algTime.start();
@@ -335,7 +335,7 @@ int ImageManip::doPlusIntensity(CvMat processedImage, int amount)
     return algTime.elapsed();
 }
 
-int ImageManip::doInvert(CvMat processedImage)
+int ImageManip::doInvert(Mat processedImage)
 {
     QElapsedTimer algTime;
     algTime.start();
@@ -343,8 +343,8 @@ int ImageManip::doInvert(CvMat processedImage)
     return algTime.elapsed();
 }
 
-CvMat ImageManip::doHistogram(CvMat processedImage){
-    CvMat hsv;
+Mat ImageManip::doHistogram(Mat processedImage){
+    Mat hsv;
     cvtColor(processedImage, hsv, CV_GRAY2BGR);
     cvtColor(hsv, hsv, CV_BGR2HSV);//here is bad conv
     // let’s quantize the hue to 30 levels and the saturation to 32 levels
@@ -358,12 +358,12 @@ CvMat ImageManip::doHistogram(CvMat processedImage){
     MatND hist;
     // we compute the histogram from the 0-th and 1-st channels
     int channels[] = {0};//0,1
-    calcHist(&hsv, 1, channels, CvMat(), /* do not use mask*/ hist, 1, histSize, ranges, true, /* the histogram is uniform*/ false );
-//    calcHist(&hsv, 1, channels, CvMat(), /* do not use mask*/ hist, 2, histSize, ranges, true, /* the histogram is uniform*/ false );
+    calcHist(&hsv, 1, channels, Mat(), /* do not use mask*/ hist, 1, histSize, ranges, true, /* the histogram is uniform*/ false );
+//    calcHist(&hsv, 1, channels, Mat(), /* do not use mask*/ hist, 2, histSize, ranges, true, /* the histogram is uniform*/ false );
     double maxVal=255;
     minMaxLoc(hist, 0, &maxVal, 0, 0);
     int scale = 10;
-    CvMat histImg = CvMat::zeros(sbins*scale, hbins*10, CV_8U);
+    Mat histImg = Mat::zeros(sbins*scale, hbins*10, CV_8U);
     for( int h = 0; h < hbins; h++ )
         for( int s = 0; s < sbins; s++ )
         {
@@ -377,11 +377,11 @@ CvMat ImageManip::doHistogram(CvMat processedImage){
     return histImg;
 }
 
-int ImageManip::doBilateralFiltering(CvMat processedImage, double kernel, double sigmaColor, double sigmaSpace )
+int ImageManip::doBilateralFiltering(Mat processedImage, double kernel, double sigmaColor, double sigmaSpace )
 {
     QElapsedTimer algTime;
     algTime.start();
-    CvMat showka;
+    Mat showka;
     //namedWindow("showka2");
     bilateralFilter(processedImage, showka, kernel, sigmaColor,  sigmaSpace, BORDER_DEFAULT);
     //imshow("showka2",showka);
