@@ -9,6 +9,7 @@
 #include <qmath.h>
 
 #include "crossInclude.h"
+
 using namespace std;
 using namespace cv;
 
@@ -32,6 +33,22 @@ public:
     float getAlpha(){return this->alpha;}
     float getBeta(){return this->beta;}
     float getStep(){return this->step;}
+    float getX(){return this->x;}
+    float getY(){return this->y;}
+    float getE_int(){return this->E_int;}
+    float getE_ext(){return this->E_ext;}
+    float getE_snake(){return this->E_snake;}
+
+
+    void setAlpha(float value){this->alpha = value;}
+    void setBeta(float value){this->beta = value;}
+    void setStep(float value){this->step = value;}
+    void setX(float value){this->x = value;}
+    void setY(float value){this->y = value;}
+    void setE_int(float value){this->E_int = value;}
+    void setE_ext(float value){this->E_ext = value;}
+    void setE_snake(float value){this->E_snake = value;}
+
 
     float x, y; // coordnates
     float alpha, beta, step;
@@ -45,7 +62,7 @@ class Snake
 
 protected:
     QList<SnakePoint> contour;
-    EnergyInternalTemplate contourTemplate;
+    EnergyInternalTemplate *contourTemplate;
     EnergyExternalField vectorField;
     float total_E_ext;
     float total_E_int;

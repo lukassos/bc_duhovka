@@ -28,15 +28,19 @@ void EnergyInternalTemplate::fastCenterLocalizationAlgorithm(Mat image, cv::Poin
     float borders[4] = {0,0,0,0}; //top,bottom,left,right
 
     //seed of random number depends on system time
-    QSystemLocale time;
-    qsrand(131*time.query(time.TimeFormatShort));
+    QTime time;
+    qsrand(131*time.currentTime().msec);
 
     //30% * 30% rectangle in the middle of image
-    float xMax = image.cols*0.3; borders[3] = xOffset+(xMax/2);
-    float yMax = image.rows*0.3; borders[1] = yOffset+(yMax/2);
-    float xOffset = image.cols*0.35;  borders[2] = xOffset+(xMax/2);
-    float yOffset = image.rows*0.35;  borders[0] = yOffset+(yMax/2);
-
+    float xMax = image.cols*0.3;
+    float yMax = image.rows*0.3;
+    float maxSize = (xMax*(yMax*0,1));
+    float xOffset = image.cols*0.35;
+    float yOffset = image.rows*0.35;
+    borders[3] = xOffset+(xMax/2);
+    borders[2] = xOffset+(xMax/2);
+    borders[1] = yOffset+(yMax/2);
+    borders[0] = yOffset+(yMax/2);
     for(int i=0; i<maxSize; i++){
         int randomN = qrand();
         //intensity of random pixel in 30% * 30% rectangle in the middle of image

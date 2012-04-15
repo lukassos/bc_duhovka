@@ -12,9 +12,9 @@ void Snake::initSnakeContour(Snake snake, int numberOfPoints, EnergyInternalTemp
     snake.typeOfContour = decision;
     for(int i=0; i<numberOfPoints; i++){
         SnakePoint temp;
-        temp.alpha=0,2;
-        temp.beta=0;
-        temp.step=1;
+        temp.setAlpha(0.2);
+        temp.setBeta(0);
+        temp.setStep(1);
         snake.contour.append(temp);
     }
 
@@ -35,9 +35,9 @@ void Snake::initSnakeContour(Snake snake, int numberOfPoints, EnergyInternalTemp
     if(snake.contour.isEmpty() || numberOfPoints!=snake.contour.size())
         for(int i=0; i<numberOfPoints; i++){
             SnakePoint temp;
-            temp.alpha=0,2;
-            temp.beta=0;
-            temp.step=1;
+            temp.setAlpha(0.2);
+            temp.setBeta(0);
+            temp.setStep(1);
             snake.contour.append(temp);
         }
     cv::Point fastCenter;

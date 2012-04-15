@@ -10,6 +10,8 @@
 
 #include "crossInclude.h"
 
+class SnakePoint;
+class Snake;
 
 using namespace cv;
 
