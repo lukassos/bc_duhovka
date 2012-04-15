@@ -1,3 +1,5 @@
+#define sqr(a) ((a)*(a))
+
 #include "energyinternaltemplate.h"
 
 EnergyInternalTemplate::EnergyInternalTemplate()
@@ -5,61 +7,34 @@ EnergyInternalTemplate::EnergyInternalTemplate()
 
 }
 
-void EnergyInternalTemplate::setCirclePositions(QList <SnakePoint> points, float centerX, float centerY, float radius){
-    int count = points.size();
-    float angle = (2*M_PI)/count;
-    for(int i=0; i<count ;i++){
-        points.at(i).x = centerX+(radius*cos(angle));
-        points.at(i).y = centerY+(radius*sin(angle));
-    }
-}
-
-void EnergyInternalTemplate::fastCenterLocalizationAlgorithm(Mat image, cv::Point fastCenter, float radius){
-    //pre
-    threshold(image, image, 60, 0, THRESH_TOZERO);
-    threshold(image, image, 190, 0, THRESH_TOZERO_INV);
-    medianBlur(image, image, 3);
-    image+=150;
-    threshold(image, image, 160, 0, THRESH_TOZERO);
-
-
-
-    //rectangle of boundaries for circle found in the middle of image
-    float borders[4] = {0,0,0,0}; //top,bottom,left,right
-
-    //seed of random number depends on system time
-    QTime time;
-    qsrand(131*time.currentTime().msec);
-
-    //30% * 30% rectangle in the middle of image
-    float xMax = image.cols*0.3;
-    float yMax = image.rows*0.3;
-    float maxSize = (xMax*(yMax*0,1));
-    float xOffset = image.cols*0.35;
-    float yOffset = image.rows*0.35;
-    borders[3] = xOffset+(xMax/2);
-    borders[2] = xOffset+(xMax/2);
-    borders[1] = yOffset+(yMax/2);
-    borders[0] = yOffset+(yMax/2);
-    for(int i=0; i<maxSize; i++){
-        int randomN = qrand();
-        //intensity of random pixel in 30% * 30% rectangle in the middle of image
-        //(image.data.ptr + ((yOffset + randomN)%yMax)*image.step + ((xOffset+randomN) % xMax))
-        float actX = (yOffset + randomN) % yMax;
-        float actY = (xOffset + randomN) % xMax;
-        if((image.data.ptr + actY*image.step + actX) == 0){
-            if(borders[0] > actY)
-                borders[0] = actY;
-            if(borders[1] < actY)
-                borders[1] = actY;
-            if(borders[2] > actX)
-                borders[2] = actX;
-            if(borders[3] < actX)
-                borders[3] = actX;
+void EnergyInternalTemplate::count
+void EnergyInternalTemplate::countTotalEnergyInt(Snake snake){
+    float totalEnergy = 0;
+    float localEnergy = 0;
+    //indexes of deformable contour, has to be moduled to n
+    //s_i_p1 = s with index (i + 1) // s_i = s with index i // s_i_m1 = s with index (i - 1)
+    int s_i_p1_x, s_i_x, s_i_m1_x, s_i_p1_y, s_i_y, s_i_m1_y;
+    int n = snake.contour.size();
+    switch (snake.typeOfContour){
+    case EnergyInternalTemplate::ClosedContour_Circle:
+        for(int i=0; i<n; i++){
+            //alpha*
+            s_i_p1_x = snake.contour.at((i+1)%n)->x;
+            s_i_x = snake.contour.at(i)->x;
+            s_i_m1_x = snake.contour.at((i-1)%n)->x;
+            s_i_p1_y = snake.contour.at((i+1)%n)->y;
+            s_i_y = snake.contour.at(i)->y;
+            s_i_m1_y = snake.contour.at((i-1)%n)->y;
+            localEnergy = (snake.contour.at(i)->alpha*(sqr( abs((int)( s_i_x - s_i_m1_x )))
+                                                      +sqr( abs((int)( s_i_y - s_i_m1_y )))
+                           +
+                           snake.contour.at(i)->beta*(sqr( abs((int)( s_i_m1_x - ( 2*s_i_x ) + s_i_p1_x )))
+                                                     + sqr( abs((int)( s_i_m1_y - ( 2*s_i_y ) + s_i_p1_y ))))));
+            snake.contour.at(i)->setE_int(localEnergy);
+            totalEnergy += localEnergy;
         }
-
+        break;
+    default:;
     }
-    fastCenter.x = borders[3]-borders[2];
-    fastCenter.y = borders[1]-borders[0];
-    radius = qMin((borders[3]-borders[2])/2,(borders[1]-borders[0])/2);
+    snake.total_E_int = totalEnergy;
 }

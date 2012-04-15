@@ -9,61 +9,23 @@
 #include <qmath.h>
 
 #include "crossInclude.h"
+#include "snakepoint.h"
 
 using namespace std;
 using namespace cv;
 
 namespace snakeNames{
     class Snake;
-    class SnakePoint;
 }
 
-
-#ifndef SNAKEPOINT_H
-#define SNAKEPOINT_H
-class SnakePoint
-{//one control point of entire contour
-protected:/*until getre and setre created commented
-    float x, y; // coordnates
-    float alpha, beta, step;
-    float E_int, E_ext, E_snake;*/
-
-public:
-    SnakePoint();
-    float getAlpha(){return this->alpha;}
-    float getBeta(){return this->beta;}
-    float getStep(){return this->step;}
-    float getX(){return this->x;}
-    float getY(){return this->y;}
-    float getE_int(){return this->E_int;}
-    float getE_ext(){return this->E_ext;}
-    float getE_snake(){return this->E_snake;}
-
-
-    void setAlpha(float value){this->alpha = value;}
-    void setBeta(float value){this->beta = value;}
-    void setStep(float value){this->step = value;}
-    void setX(float value){this->x = value;}
-    void setY(float value){this->y = value;}
-    void setE_int(float value){this->E_int = value;}
-    void setE_ext(float value){this->E_ext = value;}
-    void setE_snake(float value){this->E_snake = value;}
-
-
-    float x, y; // coordnates
-    float alpha, beta, step;
-    float E_int, E_ext, E_snake;
-};
-#endif
 
 class Snake
 {//controller of all snake parts and fuctions
 
-
-protected:
-    QList<SnakePoint> contour;
-    EnergyInternalTemplate *contourTemplate;
-    EnergyExternalField vectorField;
+public:
+    QList<SnakePoint*> contour;
+//    EnergyInternalTemplate contourTemplate;
+//    EnergyExternalField vectorField;
     float total_E_ext;
     float total_E_int;
     int typeOfContour;
@@ -71,25 +33,34 @@ protected:
     Mat matrixOfPoints;
 
 
-public:
+
+    //constructors
     Snake();
-    Mat getImageOriginal(){return this->originalImage;}
-    Mat getMatrixOfPoints(){return this->matrixOfPoints;}
-            // set`s linked list of snakePoints and sets contour this.template
-    void initSnakeContour(Snake snakeToInit, int numberOfPoints, EnergyInternalTemplate::ContourType decision);
+    Snake(Mat image);
+    Snake(Mat image, QList<SnakePoint*> points);
 
-            //set`s coordinates to snakePoints and sets radius circle/polygon created by those points
-    void initSnakeContour(Snake snakeToInit, int numberOfPoints, EnergyInternalTemplate::ContourType decision,
-                          float offsetX, float offsety);
+    // INTERNAL ENERGY
 
-            //input is picture read into matrix in grayscale
-            //set`s
+    //set`s coordinates to snakePoints and sets radius circle/polygon created by those points
+    void initSnakeContour(Snake* snakeToInit, int numberOfPoints, int decision,
+                  float offsetX=0, float offsetY=0, float baseAlpha = 0.2, float baseBeta = 0.5, int baseStep = 1);
+
+    //functions called during initialization
+    void fastCenterLocalizationAlgorithm(Mat image, cv::Point fastCenter, float radius);
+    void setCirclePositions(QList <SnakePoint*> points, float centerX, float ceterY, float radius);
+
+    // EXTERNAL ENERGY
+
+    //input is picture read into matrix in grayscale
+    //set`s
     void initSnakeExtField(Mat pictureMatrix);
 
     void showMatrix(Mat image, Snake snake, QString windowName);
 
 
 
+    Mat getImageOriginal(){return this->originalImage;}
+    Mat getMatrixOfPoints(){return this->matrixOfPoints;}
 };
 
 

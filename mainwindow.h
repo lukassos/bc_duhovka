@@ -8,7 +8,7 @@
 #include <opencv2/core/core.hpp>
 #include "imagemanip.h"
 #include "findFiles.h"
-#include "snake.h"
+#include "crossInclude.h"
 
 
 namespace Ui {
@@ -165,6 +165,8 @@ private slots:
     void on_pushButton_bilateralSmoothing_clicked();
 
     void on_actionBilateral_Filtering_triggered();
+
+    void on_pushButton_snakePromo_clicked();
 
 private:
     Ui::MainWindow *ui;
