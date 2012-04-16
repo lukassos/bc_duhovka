@@ -20,16 +20,17 @@ protected:
 public:
 
     EnergyExternalField();
-    EnergyExternalField(Mat *inputImage, int energy_ext_type, float deviation);
+    EnergyExternalField(Mat inputImage, int energy_ext_type, float deviation);
 
     void countVectorField(int type);
 
     //copy image into new instance
-    void setVectorField(Mat *inputImage){
+    void setVectorField(Mat inputImage){
         //inputImage->copyTo(this->vectorField)
         //inputImage = new Mat(inputImage->rows, inputImage->cols, inputImage->type(), inputImage->data);
-        this->vectorField =  Mat(*inputImage);
-        ;}
+        //this->vectorField =  Mat(*inputImage);
+        this->vectorField = inputImage.clone();
+        }
 
     //vector field can manipulate the input field
     void cloneVectorField(Mat inputField){this->vectorField=inputField.clone();}

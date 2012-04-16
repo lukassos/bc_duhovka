@@ -34,19 +34,19 @@ float EnergyInternalTemplate::countLocalEnergyInt(Snake snake, int pointOfSnake,
     return newLocalEnergy;
 }
 
-void EnergyInternalTemplate::countTotalEnergyInt(Snake snake){
+void EnergyInternalTemplate::countTotalEnergyInt(Snake *snake){
     //this function counts total energy for snake contour at actual coordinates of points
     float totalEnergy = 0;
 
-    switch (snake.typeOfContour){
+    switch (snake->typeOfContour){
     case EnergyInternalTemplate::ClosedContour_Circle:
-        for(int i=0; i<snake.contour.size(); i++){
-            snake.contour.at(i)->E_int = countLocalEnergyInt(snake, i, snake.contour.at(i)->x, snake.contour.at(i)->y);
-            totalEnergy += snake.contour.at(i)->E_int;
+        for(int i=0; i<snake->contour.size(); i++){
+            snake->contour.at(i)->E_int = countLocalEnergyInt(*snake, i, snake->contour.at(i)->x, snake->contour.at(i)->y);
+            totalEnergy += snake->contour.at(i)->E_int;
         }
-        snake.total_E_int = totalEnergy;
+        snake->total_E_int = totalEnergy;
         break;
     default:;
     }
-    snake.total_E_int = totalEnergy;
+    snake->total_E_int = totalEnergy;
 }

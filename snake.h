@@ -30,6 +30,7 @@ public:
     float total_E_int;
     int typeOfContour;
     Mat originalImage;
+    Mat showImage;
     Mat matrixOfPoints;
 
 
@@ -53,13 +54,13 @@ public:
 
     //input is picture read into matrix in grayscale
     //set`s
-    void initSnakeExtField(Mat *pictureMatrix, Snake *snake, int type, float deviation);
+    void initSnakeExtField(Snake *snake, int type, float deviation);
 
     // ITERATIONS OF SNAKE
-    void moveSnakeContour(Snake snake);
+    void moveSnakeContour(Snake *snake);
 
     // demo
-    void showMatrix(Mat image, Snake snake);
+    void showMatrix(Snake *snake);
 
     Mat getImageOriginal(){return this->originalImage;}
     Mat* getImageOriginalPointer(){return &this->originalImage;}

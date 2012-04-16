@@ -1293,7 +1293,17 @@ void MainWindow::on_pushButton_snakePromo_clicked()
     activeContour->initSnakeContour(activeContour, 300,
                                     EnergyInternalTemplate::ClosedContour_Circle,
                                     EnergyExternalField::GradientMagnitudes);
-    namedWindow("Snake");
-    openedCVWindowNames.append("Snake");
-    imshow("Snake",activeContour->matrixOfPoints);
+    namedWindow("Snake Orig Matrix");
+    openedCVWindowNames.append("Snake Orig Matrix");
+    imshow("Snake Orig Matrix",activeContour->originalImage);
+
+    namedWindow("VectorField");
+    openedCVWindowNames.append("VectorField");
+    imshow("VectorField",activeContour->vectorField->getVectorField());
+    namedWindow("Snake Point Matrix");
+    openedCVWindowNames.append("Snake Point Matrix");
+    imshow("Snake Point Matrix",activeContour->matrixOfPoints);
+    namedWindow("Snake Show Matrix");
+    openedCVWindowNames.append("Snake Show Matrix");
+    imshow("Snake Show Matrix",activeContour->showImage);
 }

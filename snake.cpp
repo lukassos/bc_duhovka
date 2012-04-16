@@ -68,14 +68,14 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
         centerX = fastCenter->x + offsetX;
         centerY = fastCenter->y + offsetY;
         snake->setCirclePositions(snake->contour,  centerX, centerY, 100, snake->getImageOriginal().rows, snake->getImageOriginal().cols);
-        EnergyInternalTemplate().countTotalEnergyInt(*snake);
+        EnergyInternalTemplate().countTotalEnergyInt(snake);
         break;
 
     default:;
     }
     //cretion of external energy and control class
-    initSnakeExtField(snake->getImageOriginalPointer(), snake, energy_ext_type, deviation);
-    snake->showMatrix(snake->getImageOriginal(), *snake);
+    initSnakeExtField(snake, energy_ext_type, deviation);
+    snake->showMatrix(snake);
 }
 
 void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float centerY, float radius, int maxX, int maxY){
@@ -105,11 +105,11 @@ void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float 
         outputFile.close();
 }
 
-void Snake::initSnakeExtField(Mat *pictureMatrix, Snake *snake, int energy_ext_type, float deviation){
+void Snake::initSnakeExtField(Snake *snake, int energy_ext_type, float deviation){
 
     switch(energy_ext_type){
     case EnergyExternalField::GradientMagnitudes:
-        snake->vectorField = new EnergyExternalField(pictureMatrix, energy_ext_type, deviation);
+        snake->vectorField = new EnergyExternalField(snake->getImageOriginal(), energy_ext_type, deviation);
         snake->vectorField->countVectorField(EnergyExternalField::GradientMagnitudes);
         for (int i=0; i<snake->contour.size(); i++){
             snake->contour.at(i)->E_ext=snake->vectorField->getValueFromVectorField(snake->contour.at(i)->x,snake->contour.at(i)->y);
@@ -125,29 +125,32 @@ void Snake::initSnakeExtField(Mat *pictureMatrix, Snake *snake, int energy_ext_t
 }
 
 
-void Snake::moveSnakeContour(Snake snake)
+void Snake::moveSnakeContour(Snake *snake)
 {
     int best_x, best_y;
     float actual_local_ext_E, actual_local_int_E, best_local_ext_E, best_local_int_E;
-    int border_x = snake.originalImage.rows;
-    int border_y = snake.originalImage.cols;
-    switch(snake.vectorField->getTypeOfVectorField()){
+    int border_x = snake->originalImage.rows;
+    int border_y = snake->originalImage.cols;
+    switch(snake->vectorField->getTypeOfVectorField()){
     case EnergyExternalField::GradientMagnitudes:
+
+        //while(energy total not equal lowest energy){
         //for all points count locally external and internal energy and look if is in neighborhood point witl lower energy
-        for (int i=0; i<snake.contour.size(); i++){
-            best_x = snake.contour.at(i)->x;
-            best_y = snake.contour.at(i)->y;
-            actual_local_ext_E = snake.contour.at(i)->E_ext;
-            actual_local_int_E = snake.contour.at(i)->E_int;
+
+        for (int i=0; i<snake->contour.size(); i++){
+            best_x = snake->contour.at(i)->x;
+            best_y = snake->contour.at(i)->y;
+            actual_local_ext_E = snake->contour.at(i)->E_ext;
+            actual_local_int_E = snake->contour.at(i)->E_int;
             best_local_ext_E = actual_local_ext_E;
             best_local_int_E = actual_local_int_E;
-            //for steps*steps points around snake.contour.at(i)
-            for (int actual_x = snake.contour.at(i)->x - ((-1) * (snake.contour.at(i)->step)); actual_x <= (snake.contour.at(i)->x + snake.contour.at(i)->step); actual_x++){
-                for (int actual_y = snake.contour.at(i)->y - ((-1) * (snake.contour.at(i)->step)); actual_y <= (snake.contour.at(i)->y + snake.contour.at(i)->step); actual_y++){
+            //for steps*steps points around snake->contour.at(i)
+            for (int actual_x = snake->contour.at(i)->x - ((-1) * (snake->contour.at(i)->step)); actual_x <= (snake->contour.at(i)->x + snake->contour.at(i)->step); actual_x++){
+                for (int actual_y = snake->contour.at(i)->y - ((-1) * (snake->contour.at(i)->step)); actual_y <= (snake->contour.at(i)->y + snake->contour.at(i)->step); actual_y++){
                     if( (0 <= actual_x) && (actual_x < border_x) && (0 <= actual_y) && (actual_y < border_y) )
                     {
-                        actual_local_ext_E = snake.vectorField->getValueFromVectorField(actual_x, actual_y);
-                        actual_local_int_E = EnergyInternalTemplate().countLocalEnergyInt(snake, i, actual_x, actual_y);
+                        actual_local_ext_E = snake->vectorField->getValueFromVectorField(actual_x, actual_y);
+                        actual_local_int_E = EnergyInternalTemplate().countLocalEnergyInt(*snake, i, actual_x, actual_y);
 
                         if((best_local_ext_E + best_local_int_E) > (actual_local_ext_E + actual_local_int_E)){
                             best_x = actual_x;
@@ -159,6 +162,9 @@ void Snake::moveSnakeContour(Snake snake)
                 }
             }
         }
+        EnergyInternalTemplate().countTotalEnergyInt(snake);
+        //}
+
         break;
 
     default:;
@@ -166,19 +172,27 @@ void Snake::moveSnakeContour(Snake snake)
 }
 
 
-void Snake::showMatrix(Mat image, Snake snake){
-    snake.matrixOfPoints = Mat(image.rows,image.cols, CV_32FC3, 0);
-    cvtColor(image, snake.matrixOfPoints, CV_GRAY2RGBA);
+void Snake::showMatrix(Snake *snake){
+    Mat zeromat = Mat().zeros(snake->originalImage.rows,snake->originalImage.cols, CV_8U);
+    snake->matrixOfPoints = Mat(snake->originalImage.rows,snake->originalImage.cols, CV_32FC3, 0);
+    cvtColor(zeromat, snake->matrixOfPoints, CV_GRAY2RGBA);
+
+    snake->showImage = Mat(snake->originalImage.rows,snake->originalImage.cols, CV_32FC3, 0);
+    cvtColor(snake->originalImage, snake->showImage, CV_GRAY2RGBA);
+
 //    for(int i = 0; i < imageToShow.rows; i++)
 //        for(int j = 0; j < imageToShow.cols; j++)
 //            imageToShow.at<Vec3b>(i,j)[2]=155;
 
-    for(int i=0; i<snake.contour.size(); i++){
-//        const float* ptr = (const float*)(image.data.ptr + snake.contour.at(i).y*image.step + snake.contour.at(i).y);
+    for(int i=0; i<snake->contour.size(); i++){
+//        const float* ptr = (const float*)(image.data.ptr + snake->contour.at(i).y*image.step + snake->contour.at(i).y);
 //        ptr* =
-        snake.matrixOfPoints.at<Vec3b>(snake.contour.at(i)->y, snake.contour.at(i)->x)[0] = 155;//255 - imageToShow.at<float>(snake.contour.at(i)->y, snake.contour.at(i)->x);
-        snake.matrixOfPoints.at<Vec3b>(snake.contour.at(i)->y, snake.contour.at(i)->x)[1] = 200;
-        snake.matrixOfPoints.at<Vec3b>(snake.contour.at(i)->y, snake.contour.at(i)->x)[2] = 155;
+        snake->matrixOfPoints.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[0] = 0;//255 - imageToShow.at<float>(snake->contour.at(i)->y, snake->contour.at(i)->x);
+        snake->matrixOfPoints.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[1] = 255;
+        snake->matrixOfPoints.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[2] = 255;
+        snake->showImage.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[0] = 0;//255 - imageToShow.at<float>(snake->contour.at(i)->y, snake->contour.at(i)->x);
+        snake->showImage.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[1] = 0;
+        snake->showImage.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[2] = 255;
 
     }
 }

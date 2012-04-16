@@ -5,9 +5,10 @@ EnergyExternalField::EnergyExternalField()
 }
 
 
-EnergyExternalField::EnergyExternalField(Mat *inputImage, int energy_ext_type, float deviation)
+EnergyExternalField::EnergyExternalField(Mat inputImage, int energy_ext_type, float deviation)
 {
     this->setVectorField(inputImage);
+
     this->gausianDeviation = deviation;
     this->typeOfVectorField = energy_ext_type;
 }
