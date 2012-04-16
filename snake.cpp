@@ -57,7 +57,7 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
             snake->contour.append(temp);
         }
     }
-    cv::Point fastCenter;
+    cv::Point *fastCenter = new cv::Point();
     float centerX ;
     float centerY ;
     float radius;
@@ -65,10 +65,9 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     case EnergyInternalTemplate::ClosedContour_Circle:
         //snake.contourTemplate.type = EnergyInternalTemplate::ClosedContour_Circle;
         snake->fastCenterLocalizationAlgorithm(snake->getImageOriginal(), fastCenter, radius);
-        centerX = fastCenter.x + offsetX;
-        centerY = fastCenter.y + offsetY;
+        centerX = fastCenter->x + offsetX;
+        centerY = fastCenter->y + offsetY;
         snake->setCirclePositions(snake->contour,  centerX, centerY, 100);
-        snake->showMatrix(snake->getImageOriginal(), *snake);
         EnergyInternalTemplate().countTotalEnergyInt(*snake);
         break;
 
@@ -76,6 +75,7 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     }
     //cretion of external energy and control class
     initSnakeExtField(snake->getImageOriginal(), snake, energy_ext_type, deviation);
+    snake->showMatrix(snake->getImageOriginal(), *snake);
 }
 
 void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float centerY, float radius){
@@ -86,7 +86,11 @@ void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float 
     QTextStream outText(&outputFile);
     for(int i=0; i<count ;i++){
         points.at(i)->x = (centerX+(radius*cos(i*angle)));
+        if(points.at(i)->x < 0)
+            points.at(i)->x = 0;
         points.at(i)->y = (centerY+(radius*sin(i*angle)));
+        if(points.at(i)->y < 0)
+            points.at(i)->y = 0;
         outText << "x\t" << QString().number(points.at(i)->x) << "\ty\t" << QString().number(points.at(i)->y) << "\n";
     }
 
@@ -173,7 +177,7 @@ void Snake::showMatrix(Mat image, Snake snake){
 
 
 
-void Snake::fastCenterLocalizationAlgorithm(Mat image, cv::Point fastCenter, float radius){
+void Snake::fastCenterLocalizationAlgorithm(Mat image, cv::Point *fastCenter, float radius){
     //pre
     threshold(image, image, 60, 0, THRESH_TOZERO);
     threshold(image, image, 190, 0, THRESH_TOZERO_INV);
@@ -243,12 +247,12 @@ void Snake::fastCenterLocalizationAlgorithm(Mat image, cv::Point fastCenter, flo
         }
     }
 
-    fastCenter.x = borders[3]-borders[2];
-    fastCenter.y = borders[1]-borders[0];
+    fastCenter->x = borders[3]-borders[2]+xOffset;
+    fastCenter->y = borders[1]-borders[0]+yOffset;
     radius = 0;
     radius = min((borders[3]-borders[2])/2,(borders[1]-borders[0])/2);
-    test.append("fastCenterY:\t"+QString().number(fastCenter.x)+
-                "\tfastCenterY:\t"+QString().number(fastCenter.y)+
+    test.append("fastCenterY:\t"+QString().number(fastCenter->x)+
+                "\tfastCenterY:\t"+QString().number(fastCenter->y)+
                 "\tradius:\t"+QString().number(radius)
                 );
     QFile outputFile("c:\\Temp\\testovacisubor.xls");
