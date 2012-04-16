@@ -270,10 +270,12 @@ int ImageManip::doGoodFeatureToTrack(Mat processedImage, int maxCorners, double 
 int ImageManip::doPreCornerDetect(Mat processedImage, int apertureSize){
     QElapsedTimer algTime;
     algTime.start();
-    Mat showka;
-    namedWindow("showka");
-    preCornerDetect( processedImage, showka, apertureSize, BORDER_DEFAULT );
-    imshow("showka",showka);
+//    Mat showka;
+//    namedWindow("showka");
+    Mat temp = processedImage.clone();
+    preCornerDetect( processedImage, temp, apertureSize, BORDER_DEFAULT );
+//    imshow("showka",showka);
+    processedImage = temp.clone();
      return algTime.elapsed();
 //Mat corners, dilated_corners;
 //preCornerDetect(image, corners, 3);

@@ -249,7 +249,7 @@ p, li { white-space: pre-wrap; }
      </sizepolicy>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>5</number>
     </property>
     <widget class="QWidget" name="page_proc">
      <property name="geometry">
@@ -1488,8 +1488,8 @@ p, li { white-space: pre-wrap; }
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>98</width>
-       <height>28</height>
+       <width>150</width>
+       <height>399</height>
       </rect>
      </property>
      <attribute name="label">
@@ -1867,8 +1867,8 @@ p, li { white-space: pre-wrap; }
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>98</width>
-       <height>28</height>
+       <width>150</width>
+       <height>399</height>
       </rect>
      </property>
      <attribute name="label">
@@ -2134,8 +2134,8 @@ Threshold</string>
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>98</width>
-       <height>28</height>
+       <width>150</width>
+       <height>399</height>
       </rect>
      </property>
      <attribute name="label">
@@ -2217,8 +2217,8 @@ Threshold</string>
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>98</width>
-       <height>28</height>
+       <width>150</width>
+       <height>399</height>
       </rect>
      </property>
      <attribute name="label">
@@ -2235,6 +2235,19 @@ Threshold</string>
       </property>
       <property name="text">
        <string>Pupil Filter</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_snakePromo">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>40</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Snake Promo</string>
       </property>
      </widget>
     </widget>

@@ -196,10 +196,10 @@ void MainWindow::initGraphicsImages(QString filePath)
     //*tempPixmap_gray = QPixmap::fromImage(image,Qt::ColorOnly);
     imageRasters.append(tempPixmap_gray);
     pxi_gray->setPixmap(*imageRasters.at(1));
-    histImg=ImageManip::doHistogram(workImg);
-    openedCVWindowNames.append("H-S Histogram");
-    namedWindow( "H-S Histogram", 1 );
-    imshow( "H-S Histogram", histImg );
+//    histImg=ImageManip::doHistogram(workImg);
+//    openedCVWindowNames.append("H-S Histogram");
+//    namedWindow( "H-S Histogram", 1 );
+//    imshow( "H-S Histogram", histImg );
     QPixmap *tempPixmap_hist = tempPixmap_orig;
     imageRasters.append(tempPixmap_hist);
     pxi_hist->setPixmap(*imageRasters.at(2));
@@ -1278,3 +1278,22 @@ void MainWindow::on_actionLast_Setup_triggered()
     }
 }
 
+
+void MainWindow::on_pushButton_snakePromo_clicked()
+{
+    //runs snake
+    if(imagePath.isEmpty()){
+       on_actionLoad_picture_triggered();
+    }else{
+       workImg = imread(imagePath.toStdString(),0);
+       origImg = workImg;
+    }
+    openedCVWindowNames.append("Snake After Init");
+    Snake *activeContour = new Snake(workImg);
+    activeContour->initSnakeContour(activeContour, 300,
+                                    EnergyInternalTemplate::ClosedContour_Circle,
+                                    EnergyExternalField::GradientMagnitudes);
+    namedWindow("Snake");
+    openedCVWindowNames.append("Snake");
+    imshow("Snake",activeContour->matrixOfPoints);
+}

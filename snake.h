@@ -25,7 +25,7 @@ class Snake
 public:
     QList<SnakePoint*> contour;
 //    EnergyInternalTemplate contourTemplate;
-//    EnergyExternalField vectorField;
+    EnergyExternalField *vectorField;
     float total_E_ext;
     float total_E_int;
     int typeOfContour;
@@ -42,8 +42,8 @@ public:
     // INTERNAL ENERGY
 
     //set`s coordinates to snakePoints and sets radius circle/polygon created by those points
-    void initSnakeContour(Snake* snakeToInit, int numberOfPoints, int decision,
-                  float offsetX=0, float offsetY=0, float baseAlpha = 0.2, float baseBeta = 0.5, int baseStep = 1);
+    void initSnakeContour(Snake* snakeToInit, int numberOfPoints, int energy_int_type, int energy_ext_type,
+                  float offsetX=0, float offsetY=0, float baseAlpha = 0.2, float baseBeta = 0.5, float deviation = 12, int baseStep = 1);
 
     //functions called during initialization
     void fastCenterLocalizationAlgorithm(Mat image, cv::Point fastCenter, float radius);
@@ -53,9 +53,13 @@ public:
 
     //input is picture read into matrix in grayscale
     //set`s
-    void initSnakeExtField(Mat pictureMatrix);
+    void initSnakeExtField(Mat pictureMatrix, Snake *snake, int type, float deviation);
 
-    void showMatrix(Mat image, Snake snake, QString windowName);
+    // ITERATIONS OF SNAKE
+    void moveSnakeContour(Snake snake);
+
+    // demo
+    void showMatrix(Mat image, Snake snake);
 
 
 

@@ -36,14 +36,16 @@ Snake::Snake(Mat image, QList<SnakePoint*> points)
 //    }
 //}
 
-void Snake::initSnakeContour(Snake* snake, int numberOfPoints, int decision,
+void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
+                             int energy_int_type, int energy_ext_type,
                              float offsetX, float offsetY,
-                             float baseAlpha, float baseBeta,
+                             float baseAlpha, float baseBeta,/*energy internal parameters*/
+                             float deviation,/*energy external parameters*/
                              int baseStep)
 {
 
    // snake.contourTemplate.type=decision;
-    snake->typeOfContour = decision;
+    snake->typeOfContour = energy_int_type;
 
     snake->contour.clear();
     if(snake->contour.isEmpty() || numberOfPoints!=snake->contour.size()){
@@ -59,25 +61,102 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints, int decision,
     float centerX ;
     float centerY ;
     float radius;
-    switch(decision){
+    switch(energy_int_type){
     case EnergyInternalTemplate::ClosedContour_Circle:
-
-
         //snake.contourTemplate.type = EnergyInternalTemplate::ClosedContour_Circle;
         snake->fastCenterLocalizationAlgorithm(snake->getImageOriginal(), fastCenter, radius);
         centerX = fastCenter.x + offsetX;
         centerY = fastCenter.y + offsetY;
         snake->setCirclePositions(snake->contour,  centerX, centerY, 100);
-        snake->showMatrix(snake->getImageOriginal(), *snake, "Snake After Init");
+        snake->showMatrix(snake->getImageOriginal(), *snake);
+        EnergyInternalTemplate().countTotalEnergyInt(*snake);
         break;
+
+    default:;
+    }
+    //cretion of external energy and control class
+    initSnakeExtField(snake->getImageOriginal(), snake, energy_ext_type, deviation);
+}
+
+void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float centerY, float radius){
+    int count = points.size();
+    float angle = (2*M_PI)/count;
+    QFile outputFile("c:\\Temp\\testovacibodykruhu.xls");
+    outputFile.open(QIODevice::WriteOnly | QFile::Text);
+    QTextStream outText(&outputFile);
+    for(int i=0; i<count ;i++){
+        points.at(i)->x = (centerX+(radius*cos(i*angle)));
+        points.at(i)->y = (centerY+(radius*sin(i*angle)));
+        outText << "x\t" << QString().number(points.at(i)->x) << "\ty\t" << QString().number(points.at(i)->y) << "\n";
+    }
+
+        outputFile.close();
+}
+
+void Snake::initSnakeExtField(Mat pictureMatrix, Snake *snake, int energy_ext_type, float deviation){
+
+    switch(energy_ext_type){
+    case EnergyExternalField::GradientMagnitudes:
+        snake->vectorField = new EnergyExternalField(pictureMatrix, energy_ext_type, deviation);
+        snake->vectorField->countVectorField(EnergyExternalField::GradientMagnitudes);
+        for (int i=0; i<snake->contour.size(); i++){
+            snake->contour.at(i)->E_ext=snake->vectorField->getValueFromVectorField(snake->contour.at(i)->x,snake->contour.at(i)->y);
+        }
+        break;
+
+    default:;
+    }
+
+    for(int i=0; i<snake->contour.size(); i++){
+        snake->contour.at(i)->E_ext = snake->vectorField->getValueFromVectorField(snake->contour.at(i)->x, snake->contour.at(i)->y);
+    }
+}
+
+
+void Snake::moveSnakeContour(Snake snake)
+{
+    int best_x, best_y;
+    float actual_local_ext_E, actual_local_int_E, best_local_ext_E, best_local_int_E;
+    int border_x = snake.originalImage.rows;
+    int border_y = snake.originalImage.cols;
+    switch(snake.vectorField->getTypeOfVectorField()){
+    case EnergyExternalField::GradientMagnitudes:
+        //for all points count locally external and internal energy and look if is in neighborhood point witl lower energy
+        for (int i=0; i<snake.contour.size(); i++){
+            best_x = snake.contour.at(i)->x;
+            best_y = snake.contour.at(i)->y;
+            actual_local_ext_E = snake.contour.at(i)->E_ext;
+            actual_local_int_E = snake.contour.at(i)->E_int;
+            best_local_ext_E = actual_local_ext_E;
+            best_local_int_E = actual_local_int_E;
+            //for steps*steps points around snake.contour.at(i)
+            for (int actual_x = snake.contour.at(i)->x - ((-1) * (snake.contour.at(i)->step)); actual_x <= (snake.contour.at(i)->x + snake.contour.at(i)->step); actual_x++){
+                for (int actual_y = snake.contour.at(i)->y - ((-1) * (snake.contour.at(i)->step)); actual_y <= (snake.contour.at(i)->y + snake.contour.at(i)->step); actual_y++){
+                    if( (0 <= actual_x) && (actual_x < border_x) && (0 <= actual_y) && (actual_y < border_y) )
+                    {
+                        actual_local_ext_E = snake.vectorField->getValueFromVectorField(actual_x, actual_y);
+                        actual_local_int_E = EnergyInternalTemplate().countLocalEnergyInt(snake, i, actual_x, actual_y);
+
+                        if((best_local_ext_E + best_local_int_E) > (actual_local_ext_E + actual_local_int_E)){
+                            best_x = actual_x;
+                            best_y = actual_y;
+                            best_local_ext_E = actual_local_ext_E;
+                            best_local_int_E = actual_local_int_E;
+                        }
+                    }
+                }
+            }
+        }
+        break;
+
     default:;
     }
 }
 
-void Snake::showMatrix(Mat image, Snake snake, QString windowName){
 
-    Mat imageToShow = Mat(image.rows,image.cols, CV_32FC3, 0);
-    cvtColor(image,imageToShow,CV_GRAY2RGBA);
+void Snake::showMatrix(Mat image, Snake snake){
+    snake.matrixOfPoints = Mat(image.rows,image.cols, CV_32FC3, 0);
+    cvtColor(image, snake.matrixOfPoints, CV_GRAY2RGBA);
 //    for(int i = 0; i < imageToShow.rows; i++)
 //        for(int j = 0; j < imageToShow.cols; j++)
 //            imageToShow.at<Vec3b>(i,j)[2]=155;
@@ -85,15 +164,11 @@ void Snake::showMatrix(Mat image, Snake snake, QString windowName){
     for(int i=0; i<snake.contour.size(); i++){
 //        const float* ptr = (const float*)(image.data.ptr + snake.contour.at(i).y*image.step + snake.contour.at(i).y);
 //        ptr* =
-        imageToShow.at<Vec3b>(snake.contour.at(i)->y, snake.contour.at(i)->x)[0] = 155;//255 - imageToShow.at<float>(snake.contour.at(i)->y, snake.contour.at(i)->x);
-        imageToShow.at<Vec3b>(snake.contour.at(i)->y, snake.contour.at(i)->x)[1] = 200;
-        imageToShow.at<Vec3b>(snake.contour.at(i)->y, snake.contour.at(i)->x)[2] = 155;
+        snake.matrixOfPoints.at<Vec3b>(snake.contour.at(i)->y, snake.contour.at(i)->x)[0] = 155;//255 - imageToShow.at<float>(snake.contour.at(i)->y, snake.contour.at(i)->x);
+        snake.matrixOfPoints.at<Vec3b>(snake.contour.at(i)->y, snake.contour.at(i)->x)[1] = 200;
+        snake.matrixOfPoints.at<Vec3b>(snake.contour.at(i)->y, snake.contour.at(i)->x)[2] = 155;
 
     }
-    namedWindow( windowName.toStdString().c_str(), CV_WINDOW_AUTOSIZE );
-    imshow( windowName.toStdString().c_str(), imageToShow );
-    waitKey(0);
-    destroyWindow( windowName.toStdString().c_str() );
 }
 
 
@@ -187,20 +262,4 @@ void Snake::fastCenterLocalizationAlgorithm(Mat image, cv::Point fastCenter, flo
     }
 }
 
-void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float centerY, float radius){
-    int count = points.size();
-    float angle = (2*M_PI)/count;
-    QFile outputFile("c:\\Temp\\testovacibodykruhu.xls");
-    outputFile.open(QIODevice::WriteOnly | QFile::Text);
-    QTextStream outText(&outputFile);
-    for(int i=0; i<count ;i++){
-        points.at(i)->x = (centerX+(radius*cos(i*angle)));
-        points.at(i)->y = (centerY+(radius*sin(i*angle)));
-        outText << "x\t" << QString().number(points.at(i)->x) << "\ty\t" << QString().number(points.at(i)->y) << "\n";
-    }
-
-        outputFile.close();
-
-
-}
 

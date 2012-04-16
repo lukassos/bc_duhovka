@@ -24,11 +24,10 @@ protected:
 public:
     EnergyInternalTemplate();
 
-
     float countPotentialPositionX(int pointNumber, Snake snake);
     float countPotentialPositionY(int pointNumber, Snake snake);
 
-    void countLocalEnergyInt(Snake snake, int point, int newX, int newY);
+    float countLocalEnergyInt(Snake snake, int point, int newX, int newY);
     void countTotalEnergyInt(Snake snake);
     enum ContourType{
         ClosedContour_Circle,
