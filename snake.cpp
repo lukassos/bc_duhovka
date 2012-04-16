@@ -67,7 +67,7 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
         snake->fastCenterLocalizationAlgorithm(snake->getImageOriginal(), fastCenter, radius);
         centerX = fastCenter->x + offsetX;
         centerY = fastCenter->y + offsetY;
-        snake->setCirclePositions(snake->contour,  centerX, centerY, 100);
+        snake->setCirclePositions(snake->contour,  centerX, centerY, 100, snake->getImageOriginal().rows, snake->getImageOriginal().cols);
         EnergyInternalTemplate().countTotalEnergyInt(*snake);
         break;
 
@@ -78,19 +78,27 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     snake->showMatrix(snake->getImageOriginal(), *snake);
 }
 
-void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float centerY, float radius){
+void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float centerY, float radius, int maxX, int maxY){
     int count = points.size();
     float angle = (2*M_PI)/count;
     QFile outputFile("c:\\Temp\\testovacibodykruhu.xls");
     outputFile.open(QIODevice::WriteOnly | QFile::Text);
     QTextStream outText(&outputFile);
     for(int i=0; i<count ;i++){
+        //count and set coordinate X
         points.at(i)->x = (centerX+(radius*cos(i*angle)));
-        if(points.at(i)->x < 0)
+        if(points.at(i)->x < 0){
             points.at(i)->x = 0;
+        }else if(points.at(i)->x > maxX){
+            points.at(i)->x = maxX;
+        }
+        //count and set coordinate Y
         points.at(i)->y = (centerY+(radius*sin(i*angle)));
-        if(points.at(i)->y < 0)
+        if(points.at(i)->y < 0){
             points.at(i)->y = 0;
+        }else if(points.at(i)->y > maxY){
+            points.at(i)->y = maxY;
+        }
         outText << "x\t" << QString().number(points.at(i)->x) << "\ty\t" << QString().number(points.at(i)->y) << "\n";
     }
 

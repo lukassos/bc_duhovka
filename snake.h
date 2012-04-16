@@ -47,7 +47,7 @@ public:
 
     //functions called during initialization
     void fastCenterLocalizationAlgorithm(Mat image, cv::Point *fastCenter, float radius);
-    void setCirclePositions(QList <SnakePoint*> points, float centerX, float ceterY, float radius);
+    void setCirclePositions(QList <SnakePoint*> points, float centerX, float ceterY, float radius, int maxX, int maxY);
 
     // EXTERNAL ENERGY
 

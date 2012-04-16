@@ -17,12 +17,14 @@ float EnergyInternalTemplate::countLocalEnergyInt(Snake snake, int pointOfSnake,
     //indexes of deformable contour, has to be moduled to n
     //s_i_p1 = s with index (i + 1) // s_i = s with index i at new possiblepoint// s_i_m1 = s with index (i - 1)
     int s_i_p1_x, s_i_x, s_i_m1_x, s_i_p1_y, s_i_y, s_i_m1_y;
+
     s_i_p1_x = snake.contour.at((pointOfSnake+1)%n)->x;
     s_i_x = newX;
-    s_i_m1_x = snake.contour.at((pointOfSnake-1)%n)->x;
+    s_i_m1_x = snake.contour.at((pointOfSnake==0) ? 299 : (pointOfSnake-1))->x;
     s_i_p1_y = snake.contour.at((pointOfSnake+1)%n)->y;
     s_i_y = newY;
-    s_i_m1_y = snake.contour.at((pointOfSnake-1)%n)->y;
+    s_i_m1_y = snake.contour.at((pointOfSnake==0) ? 299 : (pointOfSnake-1))->y;
+
     newLocalEnergy = (snake.contour.at(pointOfSnake)->alpha*(sqr( qAbs((int)( s_i_x - s_i_m1_x )))
                                                             +sqr( qAbs((int)( s_i_y - s_i_m1_y )))
                    +
