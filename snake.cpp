@@ -74,7 +74,7 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     default:;
     }
     //cretion of external energy and control class
-    initSnakeExtField(snake->getImageOriginal(), snake, energy_ext_type, deviation);
+    initSnakeExtField(snake->getImageOriginalPointer(), snake, energy_ext_type, deviation);
     snake->showMatrix(snake->getImageOriginal(), *snake);
 }
 
@@ -105,7 +105,7 @@ void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float 
         outputFile.close();
 }
 
-void Snake::initSnakeExtField(Mat pictureMatrix, Snake *snake, int energy_ext_type, float deviation){
+void Snake::initSnakeExtField(Mat *pictureMatrix, Snake *snake, int energy_ext_type, float deviation){
 
     switch(energy_ext_type){
     case EnergyExternalField::GradientMagnitudes:
