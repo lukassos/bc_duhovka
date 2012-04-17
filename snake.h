@@ -44,7 +44,7 @@ public:
 
     //set`s coordinates to snakePoints and sets radius circle/polygon created by those points
     void initSnakeContour(Snake* snakeToInit, int numberOfPoints, int energy_int_type, int energy_ext_type,
-                  float offsetX=0, float offsetY=0, float baseAlpha = 0.2, float baseBeta = 0.5, float deviation = 12, int baseStep = 1);
+                  float offsetX=0, float offsetY=0, float baseAlpha = 0.2, float baseBeta = 0.5, float deviation = 24, int baseStep = 1);
 
     //functions called during initialization
     void fastCenterLocalizationAlgorithm(Mat image, cv::Point *fastCenter, float radius);

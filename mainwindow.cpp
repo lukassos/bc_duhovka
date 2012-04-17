@@ -1303,7 +1303,9 @@ void MainWindow::on_pushButton_snakePromo_clicked()
     namedWindow("Snake Point Matrix");
     openedCVWindowNames.append("Snake Point Matrix");
     imshow("Snake Point Matrix",activeContour->matrixOfPoints);
+    activeContour->moveSnakeContour(activeContour);
     namedWindow("Snake Show Matrix");
     openedCVWindowNames.append("Snake Show Matrix");
     imshow("Snake Show Matrix",activeContour->showImage);
+
 }

@@ -73,7 +73,7 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
 
     default:;
     }
-    //cretion of external energy and control class
+    //creation of external energy and control class
     initSnakeExtField(snake, energy_ext_type, deviation);
     snake->showMatrix(snake);
 }
@@ -128,42 +128,61 @@ void Snake::initSnakeExtField(Snake *snake, int energy_ext_type, float deviation
 void Snake::moveSnakeContour(Snake *snake)
 {
     int best_x, best_y;
-    float actual_local_ext_E, actual_local_int_E, best_local_ext_E, best_local_int_E;
+    float actual_local_ext_E, actual_local_int_E,
+            best_local_ext_E, best_local_int_E;
+    float lastRun_tot_ext_E = 0;
+    float lastRun_tot_int_E = 0;
     int border_x = snake->originalImage.rows;
     int border_y = snake->originalImage.cols;
+    bool equilibrium = false;
+    int test_equilibrium = 10;
+    //int n = snake->contour.size();
     switch(snake->vectorField->getTypeOfVectorField()){
     case EnergyExternalField::GradientMagnitudes:
 
-        //while(energy total not equal lowest energy){
-        //for all points count locally external and internal energy and look if is in neighborhood point witl lower energy
+        while(!equilibrium){
+            //for all points count locally external and internal energy and look if is in neighborhood point witl lower energy
 
-        for (int i=0; i<snake->contour.size(); i++){
-            best_x = snake->contour.at(i)->x;
-            best_y = snake->contour.at(i)->y;
-            actual_local_ext_E = snake->contour.at(i)->E_ext;
-            actual_local_int_E = snake->contour.at(i)->E_int;
-            best_local_ext_E = actual_local_ext_E;
-            best_local_int_E = actual_local_int_E;
-            //for steps*steps points around snake->contour.at(i)
-            for (int actual_x = snake->contour.at(i)->x - ((-1) * (snake->contour.at(i)->step)); actual_x <= (snake->contour.at(i)->x + snake->contour.at(i)->step); actual_x++){
-                for (int actual_y = snake->contour.at(i)->y - ((-1) * (snake->contour.at(i)->step)); actual_y <= (snake->contour.at(i)->y + snake->contour.at(i)->step); actual_y++){
-                    if( (0 <= actual_x) && (actual_x < border_x) && (0 <= actual_y) && (actual_y < border_y) )
+            for (int i=0; i<snake->contour.size(); i++){
+                best_x = snake->contour.at(i)->x;
+                best_y = snake->contour.at(i)->y;
+                actual_local_ext_E = snake->contour.at(i)->E_ext;
+                actual_local_int_E = snake->contour.at(i)->E_int;
+                best_local_ext_E = actual_local_ext_E;
+                best_local_int_E = actual_local_int_E;
+                //for steps*steps points around snake->contour.at(i)
+                for (int actual_x = snake->contour.at(i)->x - ((-1) * (snake->contour.at(i)->step)); actual_x <= (snake->contour.at(i)->x + snake->contour.at(i)->step); actual_x++)
+                {
+                    for (int actual_y = snake->contour.at(i)->y - ((-1) * (snake->contour.at(i)->step)); actual_y <= (snake->contour.at(i)->y + snake->contour.at(i)->step); actual_y++)
                     {
-                        actual_local_ext_E = snake->vectorField->getValueFromVectorField(actual_x, actual_y);
-                        actual_local_int_E = EnergyInternalTemplate().countLocalEnergyInt(*snake, i, actual_x, actual_y);
+                        if( (0 <= actual_x) && (actual_x < border_x) && (0 <= actual_y) && (actual_y < border_y) )
+                        {
+                            actual_local_ext_E = snake->vectorField->getValueFromVectorField(actual_x, actual_y);
+                            actual_local_int_E = EnergyInternalTemplate().countLocalEnergyInt(*snake, i, actual_x, actual_y);
 
-                        if((best_local_ext_E + best_local_int_E) > (actual_local_ext_E + actual_local_int_E)){
-                            best_x = actual_x;
-                            best_y = actual_y;
-                            best_local_ext_E = actual_local_ext_E;
-                            best_local_int_E = actual_local_int_E;
+                            if((best_local_ext_E + best_local_int_E) > (actual_local_ext_E + actual_local_int_E)){
+                                best_x = actual_x;
+                                best_y = actual_y;
+                                best_local_ext_E = actual_local_ext_E;
+                                best_local_int_E = actual_local_int_E;
+                            }
                         }
                     }
                 }
+                snake->contour.at(i)->setX(best_x);
+                snake->contour.at(i)->setX(best_y);
+                snake->contour.at(i)->setE_ext(best_local_ext_E);
+                snake->contour.at(i)->setE_int(best_local_int_E);
+            }
+            EnergyInternalTemplate().countTotalEnergyInt(snake);
+            if((lastRun_tot_ext_E+lastRun_tot_int_E)==(snake->total_E_ext+snake->total_E_int)){
+                test_equilibrium--;
+                if(test_equilibrium < 0)
+                    equilibrium = true;
+            }else{
+                test_equilibrium = 10;
             }
         }
-        EnergyInternalTemplate().countTotalEnergyInt(snake);
-        //}
 
         break;
 
@@ -180,13 +199,13 @@ void Snake::showMatrix(Snake *snake){
     snake->showImage = Mat(snake->originalImage.rows,snake->originalImage.cols, CV_32FC3, 0);
     cvtColor(snake->originalImage, snake->showImage, CV_GRAY2RGBA);
 
-//    for(int i = 0; i < imageToShow.rows; i++)
-//        for(int j = 0; j < imageToShow.cols; j++)
-//            imageToShow.at<Vec3b>(i,j)[2]=155;
+    //    for(int i = 0; i < imageToShow.rows; i++)
+    //        for(int j = 0; j < imageToShow.cols; j++)
+    //            imageToShow.at<Vec3b>(i,j)[2]=155;
 
     for(int i=0; i<snake->contour.size(); i++){
-//        const float* ptr = (const float*)(image.data.ptr + snake->contour.at(i).y*image.step + snake->contour.at(i).y);
-//        ptr* =
+        //        const float* ptr = (const float*)(image.data.ptr + snake->contour.at(i).y*image.step + snake->contour.at(i).y);
+        //        ptr* =
         snake->matrixOfPoints.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[0] = 0;//255 - imageToShow.at<float>(snake->contour.at(i)->y, snake->contour.at(i)->x);
         snake->matrixOfPoints.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[1] = 255;
         snake->matrixOfPoints.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[2] = 255;
@@ -207,10 +226,10 @@ void Snake::fastCenterLocalizationAlgorithm(Mat image, cv::Point *fastCenter, fl
     image+=150;
     threshold(image, image, 160, 0, THRESH_TOZERO);
 
-//    namedWindow( "test", CV_WINDOW_AUTOSIZE );
-//    imshow( "test", image );
+    //    namedWindow( "test", CV_WINDOW_AUTOSIZE );
+    //    imshow( "test", image );
 
-//    destroyWindow( "test" );
+    //    destroyWindow( "test" );
 
     //rectangle of boundaries for circle found in the middle of image
     float borders[4] = {0,0,0,0}; //top,bottom,left,right
@@ -256,16 +275,16 @@ void Snake::fastCenterLocalizationAlgorithm(Mat image, cv::Point *fastCenter, fl
                 borders[3] = actX;
 
 
-        test.append("i:\t"+QString().number(i)+
-                    "\timage value:\t"+QString().number(image.at<float>(actX, actY))+
-                    "\tactx:\t"+QString().number(actX)+
-                    "acty:\t"+QString().number(actY)+
-                    "\ttop:\t"+QString().number(borders[0])+
-                    "\tbottom:\t"+QString().number(borders[1])+
-                    "\tleft:\t"+QString().number(borders[2])+
-                    "\tright:\t"+QString().number(borders[3])+
-                    "\n"
-                    );
+            test.append("i:\t"+QString().number(i)+
+                        "\timage value:\t"+QString().number(image.at<float>(actX, actY))+
+                        "\tactx:\t"+QString().number(actX)+
+                        "acty:\t"+QString().number(actY)+
+                        "\ttop:\t"+QString().number(borders[0])+
+                        "\tbottom:\t"+QString().number(borders[1])+
+                        "\tleft:\t"+QString().number(borders[2])+
+                        "\tright:\t"+QString().number(borders[3])+
+                        "\n"
+                        );
         }
     }
 
