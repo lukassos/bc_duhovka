@@ -1295,7 +1295,7 @@ void MainWindow::on_pushButton_snakePromo_clicked()
                                     EnergyExternalField::GradientMagnitudes,
                                     0, 0, 0.1, 0,
                                     20,
-                                    5 );
+                                    1 );
     namedWindow("Snake Orig Matrix");
     openedCVWindowNames.append("Snake Orig Matrix");
     imshow("Snake Orig Matrix",activeContour->originalImage);
