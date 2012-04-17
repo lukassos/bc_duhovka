@@ -18,8 +18,8 @@ void EnergyExternalField::countVectorField(int type){
 
     switch(type){
         case EnergyExternalField::GradientMagnitudes:
-
-            GaussianBlur(this->vectorField, this->vectorField, Size(3,3), this->gausianDeviation, this->gausianDeviation);
+        this->vectorField = Mat().zeros(this->vectorField.rows,this->vectorField.cols, CV_8U);
+            //GaussianBlur(this->vectorField, this->vectorField, Size(3,3), this->gausianDeviation, this->gausianDeviation);
 
 // here count gradient for x,y and together magnitude as cross product
 //            Mat vectorField_3layered =  Mat(this->vectorField.rows,this->vectorField.cols, CV_32FC3, 0);

@@ -1292,7 +1292,10 @@ void MainWindow::on_pushButton_snakePromo_clicked()
     Snake *activeContour = new Snake(workImg);
     activeContour->initSnakeContour(activeContour, 300,
                                     EnergyInternalTemplate::ClosedContour_Circle,
-                                    EnergyExternalField::GradientMagnitudes);
+                                    EnergyExternalField::GradientMagnitudes,
+                                    0, 0, 0.5, 0,
+                                    50,
+                                    5 );
     namedWindow("Snake Orig Matrix");
     openedCVWindowNames.append("Snake Orig Matrix");
     imshow("Snake Orig Matrix",activeContour->originalImage);

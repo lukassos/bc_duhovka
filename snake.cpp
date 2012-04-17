@@ -111,8 +111,10 @@ void Snake::initSnakeExtField(Snake *snake, int energy_ext_type, float deviation
     case EnergyExternalField::GradientMagnitudes:
         snake->vectorField = new EnergyExternalField(snake->getImageOriginal(), energy_ext_type, deviation);
         snake->vectorField->countVectorField(EnergyExternalField::GradientMagnitudes);
+         snake->total_E_ext = 0;
         for (int i=0; i<snake->contour.size(); i++){
             snake->contour.at(i)->E_ext=snake->vectorField->getValueFromVectorField(snake->contour.at(i)->x,snake->contour.at(i)->y);
+            snake->total_E_ext += snake->contour.at(i)->E_ext;
         }
         break;
 
@@ -140,7 +142,8 @@ void Snake::moveSnakeContour(Snake *snake)
     switch(snake->vectorField->getTypeOfVectorField()){
     case EnergyExternalField::GradientMagnitudes:
 
-        while(!equilibrium){
+        for (int cycles = 0; cycles < 200; cycles++){
+        //while(!equilibrium){
             //for all points count locally external and internal energy and look if is in neighborhood point witl lower energy
 
             for (int i=0; i<snake->contour.size(); i++){
@@ -151,15 +154,19 @@ void Snake::moveSnakeContour(Snake *snake)
                 best_local_ext_E = actual_local_ext_E;
                 best_local_int_E = actual_local_int_E;
                 //for steps*steps points around snake->contour.at(i)
-                for (int actual_x = snake->contour.at(i)->x - ((-1) * (snake->contour.at(i)->step)); actual_x <= (snake->contour.at(i)->x + snake->contour.at(i)->step); actual_x++)
+                int hint_x1 = snake->contour.at(i)->x - ((-1) * (snake->contour.at(i)->step));
+                int hint_x2 = snake->contour.at(i)->x + snake->contour.at(i)->step;
+                for (int actual_x = (snake->contour.at(i)->x - ((-1) * (snake->contour.at(i)->step))); actual_x <= (snake->contour.at(i)->x + snake->contour.at(i)->step); actual_x++)
                 {
-                    for (int actual_y = snake->contour.at(i)->y - ((-1) * (snake->contour.at(i)->step)); actual_y <= (snake->contour.at(i)->y + snake->contour.at(i)->step); actual_y++)
+                    for (int actual_y = (snake->contour.at(i)->y - ((-1) * (snake->contour.at(i)->step))); actual_y <= (snake->contour.at(i)->y + snake->contour.at(i)->step); actual_y++)
                     {
+                        actual_local_int_E =0;
                         if( (0 <= actual_x) && (actual_x < border_x) && (0 <= actual_y) && (actual_y < border_y) )
                         {
-                            actual_local_ext_E = snake->vectorField->getValueFromVectorField(actual_x, actual_y);
-                            actual_local_int_E = EnergyInternalTemplate().countLocalEnergyInt(*snake, i, actual_x, actual_y);
-
+                            if(actual_x != snake->contour.at(i)->x && actual_y != snake->contour.at(i)->y){
+                                actual_local_ext_E = snake->vectorField->getValueFromVectorField(actual_x, actual_y);
+                                actual_local_int_E = EnergyInternalTemplate().countLocalEnergyInt(*snake, i, actual_x, actual_y);
+                            }
                             if((best_local_ext_E + best_local_int_E) > (actual_local_ext_E + actual_local_int_E)){
                                 best_x = actual_x;
                                 best_y = actual_y;
