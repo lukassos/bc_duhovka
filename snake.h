@@ -56,6 +56,10 @@ public:
     //set`s
     void initSnakeExtField(Snake *snake, int type, float deviation);
 
+    //this function sets external energy to all snake control points and counts total external energy
+    //same functionality is included in moveSnakeContour
+    void countTotalEnergyExt(Snake *snake);
+
     // ITERATIONS OF SNAKE
     void moveSnakeContour(Snake *snake);
 

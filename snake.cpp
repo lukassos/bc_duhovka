@@ -111,18 +111,19 @@ void Snake::initSnakeExtField(Snake *snake, int energy_ext_type, float deviation
     case EnergyExternalField::GradientMagnitudes:
         snake->vectorField = new EnergyExternalField(snake->getImageOriginal(), energy_ext_type, deviation);
         snake->vectorField->countVectorField(EnergyExternalField::GradientMagnitudes);
-         snake->total_E_ext = 0;
-        for (int i=0; i<snake->contour.size(); i++){
-            snake->contour.at(i)->E_ext=snake->vectorField->getValueFromVectorField(snake->contour.at(i)->x,snake->contour.at(i)->y);
-            snake->total_E_ext += snake->contour.at(i)->E_ext;
-        }
+
         break;
 
     default:;
     }
+    countTotalEnergyExt(snake);
+}
 
-    for(int i=0; i<snake->contour.size(); i++){
-        snake->contour.at(i)->E_ext = snake->vectorField->getValueFromVectorField(snake->contour.at(i)->x, snake->contour.at(i)->y);
+void Snake::countTotalEnergyExt(Snake *snake){
+    snake->total_E_ext = 0;
+    for (int i=0; i<snake->contour.size(); i++){
+        snake->contour.at(i)->E_ext=snake->vectorField->getValueFromVectorField(snake->contour.at(i)->x,snake->contour.at(i)->y);
+        snake->total_E_ext += snake->contour.at(i)->E_ext;
     }
 }
 
@@ -153,14 +154,15 @@ void Snake::moveSnakeContour(Snake *snake)
                 actual_local_int_E = snake->contour.at(i)->E_int;
                 best_local_ext_E = actual_local_ext_E;
                 best_local_int_E = actual_local_int_E;
+                int neighbour = 0;
                 //for steps*steps points around snake->contour.at(i)
-                int hint_x1 = snake->contour.at(i)->x - ((-1) * (snake->contour.at(i)->step));
+                int hint_x1 = snake->contour.at(i)->x - snake->contour.at(i)->step;
                 int hint_x2 = snake->contour.at(i)->x + snake->contour.at(i)->step;
-                for (int actual_x = (snake->contour.at(i)->x - ((-1) * (snake->contour.at(i)->step))); actual_x <= (snake->contour.at(i)->x + snake->contour.at(i)->step); actual_x++)
+                for (int actual_x = (snake->contour.at(i)->x -  snake->contour.at(i)->step); actual_x <= (snake->contour.at(i)->x + snake->contour.at(i)->step); actual_x++)
                 {
-                    for (int actual_y = (snake->contour.at(i)->y - ((-1) * (snake->contour.at(i)->step))); actual_y <= (snake->contour.at(i)->y + snake->contour.at(i)->step); actual_y++)
+                    for (int actual_y = (snake->contour.at(i)->y - snake->contour.at(i)->step); actual_y <= (snake->contour.at(i)->y + snake->contour.at(i)->step); actual_y++)
                     {
-                        actual_local_int_E =0;
+                        neighbour++;
                         if( (0 <= actual_x) && (actual_x < border_x) && (0 <= actual_y) && (actual_y < border_y) )
                         {
                             if(actual_x != snake->contour.at(i)->x && actual_y != snake->contour.at(i)->y){
@@ -176,10 +178,13 @@ void Snake::moveSnakeContour(Snake *snake)
                         }
                     }
                 }
-                snake->contour.at(i)->setX(best_x);
-                snake->contour.at(i)->setX(best_y);
-                snake->contour.at(i)->setE_ext(best_local_ext_E);
-                snake->contour.at(i)->setE_int(best_local_int_E);
+                snake->total_E_int -= snake->contour.at(i)->E_ext;
+                snake->contour.at(i)->x = best_x;
+                snake->contour.at(i)->y = best_y;
+                snake->contour.at(i)->E_ext = best_local_ext_E;
+                snake->contour.at(i)->E_int = best_local_int_E;
+                snake->contour.at(i)->E_ext = snake->vectorField->getValueFromVectorField(best_x,best_y);
+                snake->total_E_int += best_local_ext_E;
             }
             EnergyInternalTemplate().countTotalEnergyInt(snake);
             if((lastRun_tot_ext_E+lastRun_tot_int_E)==(snake->total_E_ext+snake->total_E_int)){
@@ -188,6 +193,8 @@ void Snake::moveSnakeContour(Snake *snake)
                     equilibrium = true;
             }else{
                 test_equilibrium = 10;
+                lastRun_tot_ext_E=snake->total_E_ext;
+                lastRun_tot_int_E=snake->total_E_int;
             }
         }
 

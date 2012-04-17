@@ -45,6 +45,8 @@ public:
 
     //float getValueFromVectorField(int x, int y, int layer){return this->vectorField.at<Vec3b>[layer](y, x);}
 
+
+
     enum FieldType{
         GradientMagnitudes,
         GradientVectorFlow
