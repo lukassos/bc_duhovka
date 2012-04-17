@@ -25,8 +25,8 @@ float EnergyInternalTemplate::countLocalEnergyInt(Snake snake, int pointOfSnake,
     s_i_y = newY;
     s_i_m1_y = snake.contour.at((pointOfSnake==0) ? 299 : (pointOfSnake-1))->y;
 
-    newLocalEnergy = (snake.contour.at(pointOfSnake)->alpha*(sqr( qAbs((int)( s_i_p1_x - s_i_m1_x )))
-                                                            +sqr( qAbs((int)( s_i_p1_y - s_i_m1_y )))
+    newLocalEnergy = (snake.contour.at(pointOfSnake)->alpha*(sqr( qAbs((int)( s_i_x - s_i_m1_x )))
+                                                            +sqr( qAbs((int)( s_i_y - s_i_m1_y )))
                    +
                    snake.contour.at(pointOfSnake)->beta*(sqr( qAbs((int)( s_i_m1_x - ( 2*s_i_x ) + s_i_p1_x )))
                                                         +sqr( qAbs((int)( s_i_m1_y - ( 2*s_i_y ) + s_i_p1_y ))))));

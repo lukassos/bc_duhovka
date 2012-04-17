@@ -187,6 +187,7 @@ void Snake::moveSnakeContour(Snake *snake)
                 snake->total_E_int += best_local_ext_E;
             }
             EnergyInternalTemplate().countTotalEnergyInt(snake);
+
             if((lastRun_tot_ext_E+lastRun_tot_int_E)==(snake->total_E_ext+snake->total_E_int)){
                 test_equilibrium--;
                 if(test_equilibrium < 0)
@@ -277,8 +278,6 @@ void Snake::fastCenterLocalizationAlgorithm(Mat image, cv::Point *fastCenter, fl
 
         if( image.at<float>(actY, actX) == 0 )
         {
-
-            image.at<float>(actY, actX) = 150;
             if(borders[0] > actY)
                 borders[0] = actY;
             if(borders[1] < actY)
@@ -287,18 +286,6 @@ void Snake::fastCenterLocalizationAlgorithm(Mat image, cv::Point *fastCenter, fl
                 borders[2] = actX;
             if(borders[3] < actX)
                 borders[3] = actX;
-
-
-            test.append("i:\t"+QString().number(i)+
-                        "\timage value:\t"+QString().number(image.at<float>(actX, actY))+
-                        "\tactx:\t"+QString().number(actX)+
-                        "acty:\t"+QString().number(actY)+
-                        "\ttop:\t"+QString().number(borders[0])+
-                        "\tbottom:\t"+QString().number(borders[1])+
-                        "\tleft:\t"+QString().number(borders[2])+
-                        "\tright:\t"+QString().number(borders[3])+
-                        "\n"
-                        );
         }
     }
 
@@ -306,19 +293,7 @@ void Snake::fastCenterLocalizationAlgorithm(Mat image, cv::Point *fastCenter, fl
     fastCenter->y = borders[1]-borders[0]+yOffset;
     radius = 0;
     radius = min((borders[3]-borders[2])/2,(borders[1]-borders[0])/2);
-    test.append("fastCenterY:\t"+QString().number(fastCenter->x)+
-                "\tfastCenterY:\t"+QString().number(fastCenter->y)+
-                "\tradius:\t"+QString().number(radius)
-                );
-    QFile outputFile("c:\\Temp\\testovacisubor.xls");
-    if(outputFile.open(QIODevice::WriteOnly | QFile::Text)){
-        QTextStream outText(&outputFile);
-        for(int i=0; i<test.size(); i++){
-            outText << test.at(i);
-        }
-        outputFile.close();
 
-    }
 }
 
 

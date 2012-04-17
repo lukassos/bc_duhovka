@@ -49,6 +49,8 @@ public:
 
     int getCV_typeOfVectorField(){return this->vectorField.type();}
 
+    Mat getOneLayerFromVectorField(int layer);
+
     enum FieldType{
         GradientMagnitudes,
         GradientVectorFlow

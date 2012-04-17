@@ -168,6 +168,8 @@ private slots:
 
     void on_pushButton_snakePromo_clicked();
 
+    void on_pushButton_moveSnake_clicked();
+
 private:
     Ui::MainWindow *ui;
     QGraphicsScene *sc_orig;
@@ -190,6 +192,7 @@ private:
     QStringList listOfFiles;
     QStringList listOfFilePaths;
     bool massRun;
+    Snake *activeContour;
 };
 
 #endif // MAINWINDOW_H

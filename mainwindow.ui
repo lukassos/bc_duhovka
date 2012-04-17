@@ -2250,6 +2250,19 @@ Threshold</string>
        <string>Snake Promo</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="pushButton_moveSnake">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>70</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>move snake</string>
+      </property>
+     </widget>
     </widget>
    </widget>
    <widget class="QPushButton" name="pushButton_clear">

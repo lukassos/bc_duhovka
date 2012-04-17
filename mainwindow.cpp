@@ -1289,27 +1289,43 @@ void MainWindow::on_pushButton_snakePromo_clicked()
        origImg = workImg;
     }
     openedCVWindowNames.append("Snake After Init");
-    Snake *activeContour = new Snake(workImg);
+    activeContour = new Snake(workImg);
     activeContour->initSnakeContour(activeContour, 300,
                                     EnergyInternalTemplate::ClosedContour_Circle,
                                     EnergyExternalField::GradientMagnitudes,
                                     0, 0, 0.1, 0,
-                                    50,
+                                    20,
                                     5 );
     namedWindow("Snake Orig Matrix");
     openedCVWindowNames.append("Snake Orig Matrix");
     imshow("Snake Orig Matrix",activeContour->originalImage);
 
-    namedWindow("VectorField");
-    openedCVWindowNames.append("VectorField");
-    imshow("VectorField",activeContour->vectorField->getVectorField());
+    namedWindow("VectorField0");
+    openedCVWindowNames.append("VectorField0");
+    imshow("VectorField0",activeContour->vectorField->getOneLayerFromVectorField(0));
+    namedWindow("VectorField1");
+    openedCVWindowNames.append("VectorField1");
+    imshow("VectorField1",activeContour->vectorField->getOneLayerFromVectorField(1));
+    namedWindow("VectorField2");
+    openedCVWindowNames.append("VectorField2");
+    imshow("VectorField2",activeContour->vectorField->getOneLayerFromVectorField(2));
+
     namedWindow("Snake Point Matrix");
     openedCVWindowNames.append("Snake Point Matrix");
     imshow("Snake Point Matrix",activeContour->matrixOfPoints);
 
-    //activeContour->moveSnakeContour(activeContour);
+//    activeContour->moveSnakeContour(activeContour);
+
     namedWindow("Snake Show Matrix");
     openedCVWindowNames.append("Snake Show Matrix");
     imshow("Snake Show Matrix",activeContour->showImage);
 
+}
+
+void MainWindow::on_pushButton_moveSnake_clicked()
+{
+    activeContour->moveSnakeContour(activeContour);
+    namedWindow("Snake Show Matrix");
+    openedCVWindowNames.append("Snake Show Matrix");
+    imshow("Snake Show Matrix",activeContour->showImage);
 }
