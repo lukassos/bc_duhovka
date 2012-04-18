@@ -135,13 +135,14 @@ void Snake::moveSnakeContour(Snake *snake)
             best_local_ext_E, best_local_int_E;
     float lastRun_tot_ext_E = 0;
     float lastRun_tot_int_E = 0;
-    int border_x = snake->originalImage.rows;
-    int border_y = snake->originalImage.cols;
+    int border_x = snake->originalImage.cols;
+    int border_y = snake->originalImage.rows;
     bool equilibrium = false;
     int test_equilibrium = 10;
     bool foundBetter = false;
     int movedCount = 0;
     //int n = snake->contour.size();
+    saveSnakeToTextFile(snake);
     switch(snake->vectorField->getTypeOfVectorField()){
     case EnergyExternalField::GradientMagnitudes:
 
@@ -159,22 +160,36 @@ void Snake::moveSnakeContour(Snake *snake)
                 //for steps*steps points around snake->contour.at(i)
                 int hint_x1 = snake->contour.at(i)->x - snake->contour.at(i)->step;
                 int hint_x2 = snake->contour.at(i)->x + snake->contour.at(i)->step;
+                foundBetter = false;
                 for (int actual_x = (snake->contour.at(i)->x -  snake->contour.at(i)->step); actual_x <= (snake->contour.at(i)->x + snake->contour.at(i)->step); actual_x++)
                 {
                     for (int actual_y = (snake->contour.at(i)->y - snake->contour.at(i)->step); actual_y <= (snake->contour.at(i)->y + snake->contour.at(i)->step); actual_y++)
                     {
+
                         if( (0 <= actual_x) && (actual_x < border_x) && (0 <= actual_y) && (actual_y < border_y) )
                         {
                             if(actual_x != snake->contour.at(i)->x && actual_y != snake->contour.at(i)->y){
-                                actual_local_ext_E = snake->vectorField->getValueFromVectorField(actual_x, actual_y);
+                                actual_local_ext_E = snake->vectorField->getValueFromVectorField(actual_x, actual_y, 2);
                                 actual_local_int_E = EnergyInternalTemplate().countLocalEnergyInt(*snake, i, actual_x, actual_y);
                             }
-                            if((best_local_int_E - best_local_ext_E) > (actual_local_int_E - actual_local_ext_E)){
-                                best_x = actual_x;
-                                best_y = actual_y;
-                                best_local_ext_E = actual_local_ext_E;
-                                best_local_int_E = actual_local_int_E;
-                                foundBetter = true;
+                            //if not found better point before and can move to another point with same energy
+                            if(!foundBetter){
+                                if(abs(best_local_int_E - best_local_ext_E) >= abs(actual_local_int_E - actual_local_ext_E)){
+                                    best_x = actual_x;
+                                    best_y = actual_y;
+                                    best_local_ext_E = actual_local_ext_E;
+                                    best_local_int_E = actual_local_int_E;
+                                    foundBetter = true;
+                                }
+                            //if found better point before then can move to another point only with lower energy
+                            }else{
+                                if(abs(best_local_int_E - best_local_ext_E) > abs(actual_local_int_E - actual_local_ext_E)){
+                                    best_x = actual_x;
+                                    best_y = actual_y;
+                                    best_local_ext_E = actual_local_ext_E;
+                                    best_local_int_E = actual_local_int_E;
+                                    foundBetter = true;
+                                }
                             }
                         }
                     }
@@ -207,14 +222,18 @@ void Snake::moveSnakeContour(Snake *snake)
 
     default:;
     }
+    saveSnakeToTextFile(snake);
 }
 
 
 void Snake::showMatrix(Snake *snake){
+    saveSnakeToTextFile(this);
+    saveSnakeToTextFile(snake);
     Mat zeromat = Mat().zeros(snake->originalImage.rows,snake->originalImage.cols, CV_8U);
+    snake->matrixOfPoints.release();
     snake->matrixOfPoints = Mat(snake->originalImage.rows,snake->originalImage.cols, CV_32FC3, 0);
     cvtColor(zeromat, snake->matrixOfPoints, CV_GRAY2RGBA);
-
+    snake->showImage.release();
     snake->showImage = Mat(snake->originalImage.rows,snake->originalImage.cols, CV_32FC3, 0);
     cvtColor(snake->originalImage, snake->showImage, CV_GRAY2RGBA);
 
@@ -235,6 +254,59 @@ void Snake::showMatrix(Snake *snake){
     }
 }
 
+bool Snake::saveSnakeToTextFile(Snake *snake)
+{
+    QString path;
+    QWidget *dialog = new QWidget();
+    //while(path.isEmpty()){
+    path = QFileDialog::getSaveFileName(dialog,  "Save Snake header and SnakePoints to text file" , QDir::currentPath(), "Text files(*.txt)");
+    //}
+    QFile outputFile(path);
+    if(outputFile.open(QIODevice::WriteOnly | QFile::Text)){
+        QTextStream outText(&outputFile);
+        outText << "Header of Snake - \t"<< path << endl
+                << "Total Energy External =\t" << snake->total_E_ext << endl
+                << "Total Energy Internal =\t" << snake->total_E_int << endl
+                << "Type of Contour =\t" << snake->typeOfContour << endl
+                << "Type of Vector Field =\t" << snake->vectorField->getTypeOfVectorField() << endl
+                << "Type of Vector Field (OpenCV) =\t" << snake->vectorField->getCV_typeOfVectorField() << endl
+                << "Type of Gausian Deviation =\t" << snake->vectorField->getGausianDeviation() << endl
+                << "Type of Vector Field =\t" << snake->vectorField->getTypeOfVectorField() << endl
+                << "Number of SnakePoints =\t" << snake->contour.size() << endl;
+        for(int i=0; i<snake->contour.size(); i++){
+            outText << "---" << endl
+                    << "Point Number =\t" << i+1 << endl
+                    << "\tX =\t" << snake->contour.at(i)->x << endl
+                    << "\tY =\t" << snake->contour.at(i)->y << endl
+                    << "\tEnergy External =\t" << snake->contour.at(i)->E_ext << endl
+                    << "\tEnergy Internal =\t" << snake->contour.at(i)->E_int << endl
+                    << "\tEnergy Snake =\t" << snake->contour.at(i)->E_snake << endl
+                    << "\tAlpha =\t" << snake->contour.at(i)->alpha << endl
+                    << "\tBeta =\t" << snake->contour.at(i)->beta << endl
+                    << "\tStep =\t" << snake->contour.at(i)->step << endl
+                    << "---"<< endl;
+        }
+        outText << "Show Matrix" <<  endl
+                << "---"<< endl
+                << snake->matrixOfPoints.data << snake->matrixOfPoints.datastart << snake->matrixOfPoints.dataend << endl
+                << "---"<< endl ;
+//            for(int i = 0; i < snake->matrixOfPoints.rows; i++)
+//                for(int j = 0; j < snake->matrixOfPoints.cols; j++){
+//                    outText << snake->matrixOfPoints.at<Vec3b>(i,j)[0] <<  endl
+//                            << snake->matrixOfPoints.at<Vec3b>(i,j)[1] <<  endl
+//                            << snake->matrixOfPoints.at<Vec3b>(i,j)[2] <<  endl;
+
+//                }
+
+        outputFile.close();
+        return true;
+    }else{
+        QMessageBox mess;
+        mess.setText("Could not save file");
+        mess.exec();
+    }
+    return false;
+}
 
 
 void Snake::fastCenterLocalizationAlgorithm(Mat image, cv::Point *fastCenter, float radius){
@@ -272,7 +344,7 @@ void Snake::fastCenterLocalizationAlgorithm(Mat image, cv::Point *fastCenter, fl
     QStringList test;
     test.append("maxsize:\t "+QString().number(maxSize));
     for(int i=0; i<maxSize; i++){
-        int randomN = qrand();
+        int randomN = qrand()+time.msec();
         //intensity of random pixel in 30% * 30% rectangle in the middle of image
         //(image.data.ptr + ((yOffset + randomN)%yMax)*image.step + ((xOffset+randomN) % xMax))
         //(image.data.ptr + actY*image.step + actX)

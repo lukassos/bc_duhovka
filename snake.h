@@ -65,10 +65,12 @@ public:
 
     // demo
     void showMatrix(Snake *snake);
+    bool saveSnakeToTextFile(Snake *snake);
 
     Mat getImageOriginal(){return this->originalImage;}
     Mat* getImageOriginalPointer(){return &this->originalImage;}
     Mat getMatrixOfPoints(){return this->matrixOfPoints;}
+
 };
 
 
