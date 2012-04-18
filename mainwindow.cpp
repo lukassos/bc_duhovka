@@ -1324,7 +1324,7 @@ void MainWindow::on_pushButton_snakePromo_clicked()
 
 void MainWindow::on_pushButton_moveSnake_clicked()
 {
-    activeContour->saveSnakeToTextFile(activeContour);
+    //activeContour->saveSnakeToTextFile(activeContour);
     activeContour->moveSnakeContour(activeContour);
     namedWindow("Snake Show Matrix");
     openedCVWindowNames.append("Snake Show Matrix");

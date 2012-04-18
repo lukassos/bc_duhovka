@@ -81,7 +81,7 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
 void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float centerY, float radius, int maxX, int maxY){
     int count = points.size();
     float angle = (2*M_PI)/count;
-    QFile outputFile("c:\\Temp\\testovacibodykruhu.xls");
+    QFile outputFile("c:\\Temp\\testovaciebodykruhu.xls");
     outputFile.open(QIODevice::WriteOnly | QFile::Text);
     QTextStream outText(&outputFile);
     for(int i=0; i<count ;i++){
@@ -142,7 +142,7 @@ void Snake::moveSnakeContour(Snake *snake)
     bool foundBetter = false;
     int movedCount = 0;
     //int n = snake->contour.size();
-    saveSnakeToTextFile(snake);
+    //saveSnakeToTextFile(snake);
     switch(snake->vectorField->getTypeOfVectorField()){
     case EnergyExternalField::GradientMagnitudes:
 
@@ -169,7 +169,7 @@ void Snake::moveSnakeContour(Snake *snake)
                         if( (0 <= actual_x) && (actual_x < border_x) && (0 <= actual_y) && (actual_y < border_y) )
                         {
                             if(actual_x != snake->contour.at(i)->x && actual_y != snake->contour.at(i)->y){
-                                actual_local_ext_E = snake->vectorField->getValueFromVectorField(actual_x, actual_y, 2);
+                                actual_local_ext_E = snake->vectorField->getValueFromVectorField(actual_x, actual_y, 2)/255;
                                 actual_local_int_E = EnergyInternalTemplate().countLocalEnergyInt(*snake, i, actual_x, actual_y);
                             }
                             //if not found better point before and can move to another point with same energy
@@ -222,13 +222,12 @@ void Snake::moveSnakeContour(Snake *snake)
 
     default:;
     }
-    saveSnakeToTextFile(snake);
+    showMatrix(snake);
+    //saveSnakeToTextFile(snake);
 }
 
 
 void Snake::showMatrix(Snake *snake){
-    saveSnakeToTextFile(this);
-    saveSnakeToTextFile(snake);
     Mat zeromat = Mat().zeros(snake->originalImage.rows,snake->originalImage.cols, CV_8U);
     snake->matrixOfPoints.release();
     snake->matrixOfPoints = Mat(snake->originalImage.rows,snake->originalImage.cols, CV_32FC3, 0);
@@ -240,16 +239,13 @@ void Snake::showMatrix(Snake *snake){
     //    for(int i = 0; i < imageToShow.rows; i++)
     //        for(int j = 0; j < imageToShow.cols; j++)
     //            imageToShow.at<Vec3b>(i,j)[2]=155;
-
-    for(int i=0; i<snake->contour.size(); i++){
-        //        const float* ptr = (const float*)(image.data.ptr + snake->contour.at(i).y*image.step + snake->contour.at(i).y);
-        //        ptr* =
-        snake->matrixOfPoints.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[0] = 0;//255 - imageToShow.at<float>(snake->contour.at(i)->y, snake->contour.at(i)->x);
-        snake->matrixOfPoints.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[1] = 255;
-        snake->matrixOfPoints.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[2] = 255;
-        snake->showImage.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[0] = 0;//255 - imageToShow.at<float>(snake->contour.at(i)->y, snake->contour.at(i)->x);
-        snake->showImage.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[1] = 0;
-        snake->showImage.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[2] = 255;
+        for(int i=0; i<snake->contour.size(); i++){
+            snake->matrixOfPoints.at<Vec3b>((int)(snake->contour.at(i)->y), (int)(snake->contour.at(i)->x))[0] = 0;//255 - imageToShow.at<float>(snake->contour.at(i)->y, snake->contour.at(i)->x);
+            snake->matrixOfPoints.at<Vec3b>((int)(snake->contour.at(i)->y), (int)(snake->contour.at(i)->x))[1] = 255;
+            snake->matrixOfPoints.at<Vec3b>((int)(snake->contour.at(i)->y), (int)(snake->contour.at(i)->x))[2] = 255;
+            snake->showImage.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[0] = 0;//255 - imageToShow.at<float>(snake->contour.at(i)->y, snake->contour.at(i)->x);
+            snake->showImage.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[1] = 0;
+            snake->showImage.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[2] = 255;
 
     }
 }
