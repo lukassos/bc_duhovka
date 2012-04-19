@@ -60,11 +60,12 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     cv::Point *fastCenter = new cv::Point();
     float centerX ;
     float centerY ;
-    float radius;
+    float radius = 70;
+    snake->showImage = snake->originalImage.clone();
     switch(energy_int_type){
     case EnergyInternalTemplate::ClosedContour_Circle:
         //snake.contourTemplate.type = EnergyInternalTemplate::ClosedContour_Circle;
-        snake->fastCenterLocalizationAlgorithm(snake->getImageOriginal(), fastCenter, radius);
+        snake->fastCenterLocalizationAlgorithm(snake->showImage, fastCenter, radius);
         centerX = fastCenter->x + offsetX;
         centerY = fastCenter->y + offsetY;
         snake->setCirclePositions(snake->contour,  centerX, centerY, 100, snake->getImageOriginal().rows, snake->getImageOriginal().cols);
@@ -172,17 +173,17 @@ void Snake::moveSnakeContour(Snake *snake)
                                 actual_local_ext_E = snake->vectorField->getValueFromVectorField(actual_x, actual_y, 2)/255;
                                 actual_local_int_E = EnergyInternalTemplate().countLocalEnergyInt(*snake, i, actual_x, actual_y);
                             }
-                            //if not found better point before and can move to another point with same energy
-                            if(!foundBetter){
-                                if(abs(best_local_int_E - best_local_ext_E) >= abs(actual_local_int_E - actual_local_ext_E)){
-                                    best_x = actual_x;
-                                    best_y = actual_y;
-                                    best_local_ext_E = actual_local_ext_E;
-                                    best_local_int_E = actual_local_int_E;
-                                    foundBetter = true;
-                                }
-                            //if found better point before then can move to another point only with lower energy
-                            }else{
+//                            //if not found better point before and can move to another point with same energy
+//                            if(!foundBetter){
+//                                if(abs(best_local_int_E - best_local_ext_E) >= abs(actual_local_int_E - actual_local_ext_E)){
+//                                    best_x = actual_x;
+//                                    best_y = actual_y;
+//                                    best_local_ext_E = actual_local_ext_E;
+//                                    best_local_int_E = actual_local_int_E;
+//                                    foundBetter = true;
+//                                }
+//                            //if found better point before then can move to another point only with lower energy
+//                            }else{
                                 if(abs(best_local_int_E - best_local_ext_E) > abs(actual_local_int_E - actual_local_ext_E)){
                                     best_x = actual_x;
                                     best_y = actual_y;
@@ -190,7 +191,7 @@ void Snake::moveSnakeContour(Snake *snake)
                                     best_local_int_E = actual_local_int_E;
                                     foundBetter = true;
                                 }
-                            }
+//                            }
                         }
                     }
                 }
@@ -305,61 +306,98 @@ bool Snake::saveSnakeToTextFile(Snake *snake)
 }
 
 
-void Snake::fastCenterLocalizationAlgorithm(Mat image, cv::Point *fastCenter, float radius){
+void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastCenter, float radius){
     //pre
-    threshold(image, image, 60, 0, THRESH_TOZERO);
-    threshold(image, image, 190, 0, THRESH_TOZERO_INV);
-    medianBlur(image, image, 3);
-    image+=150;
-    threshold(image, image, 160, 0, THRESH_TOZERO);
+//    Mat processedImage = image.clone();
+    threshold(processedImage, processedImage, 60, 0, THRESH_TOZERO);
+    threshold(processedImage, processedImage, 190, 0, THRESH_TOZERO_INV);
+    //medianBlur(processedImage, processedImage, 3);
+    processedImage+=150;
+    threshold(processedImage, processedImage, 160, 0, THRESH_TOZERO);
 
     //    namedWindow( "test", CV_WINDOW_AUTOSIZE );
-    //    imshow( "test", image );
+    //    imshow( "test", processedImage );
 
     //    destroyWindow( "test" );
 
-    //rectangle of boundaries for circle found in the middle of image
+    //rectangle of boundaries for circle found in the middle of processedImage
     float borders[4] = {0,0,0,0}; //top,bottom,left,right
 
-    //seed of random number depends on system time
-    QTime time = QTime().currentTime();
-    qsrand(131*time.msec());
 
-    //30% * 30% rectangle in the middle of image
-    int xMax = floor(image.cols*0.3);
-    int yMax = floor(image.rows*0.3);
+
+    //30% * 30% rectangle in the middle of processedImage
+    int xMax = floor(processedImage.cols*0.3);
+    int yMax = floor(processedImage.rows*0.3);
     int maxSize = floor(xMax*(yMax*0.1));
-    int xOffset = floor(image.cols*0.35);
-    int yOffset = floor(image.rows*0.35);
+    int xOffset = floor(processedImage.cols*0.35);
+    int yOffset = floor(processedImage.rows*0.35);
     borders[3] = floor(xOffset+(xMax/2));
     borders[2] = floor(xOffset+(xMax/2));
     borders[1] = floor(yOffset+(yMax/2));
     borders[0] = floor(yOffset+(yMax/2));
-    int actX = 0;
-    int actY = 0;
-    QStringList test;
-    test.append("maxsize:\t "+QString().number(maxSize));
-    for(int i=0; i<maxSize; i++){
-        int randomN = qrand()+time.msec();
-        //intensity of random pixel in 30% * 30% rectangle in the middle of image
-        //(image.data.ptr + ((yOffset + randomN)%yMax)*image.step + ((xOffset+randomN) % xMax))
-        //(image.data.ptr + actY*image.step + actX)
 
-        actX = (yOffset + (randomN % yMax));
-        actY = (xOffset + (randomN % xMax));
 
-        if( image.at<float>(actY, actX) == 0 )
-        {
-            if(borders[0] > actY)
-                borders[0] = actY;
-            if(borders[1] < actY)
-                borders[1] = actY;
-            if(borders[2] > actX)
-                borders[2] = actX;
-            if(borders[3] < actX)
-                borders[3] = actX;
+
+//    //as this function was not generating strong pseudorandom numbers have to use another aproach
+//    //seed of random number depends on system time
+//    QTime time = QTime().currentTime();
+//    qsrand(131*time.msec());
+//    int actX = 0;
+//    int actY = 0;
+//    for(int i=0; i<maxSize; i++){
+//        int randomN = qrand()+time.msec();
+//        //intensity of random pixel in 30% * 30% rectangle in the middle of processedImage
+//        //(processedImage.data.ptr + ((yOffset + randomN)%yMax)*processedImage.step + ((xOffset+randomN) % xMax))
+//        //(processedImage.data.ptr + actY*processedImage.step + actX)
+
+//        actX = (yOffset + (randomN % yMax));
+//        actY = (xOffset + (randomN % xMax));
+
+//        if( processedImage.at<float>(actY, actX) == 0 )
+//        {
+//            if(borders[0] > actY)
+//                borders[0] = actY;
+//            if(borders[1] < actY)
+//                borders[1] = actY;
+//            if(borders[2] > actX)
+//                borders[2] = actX;
+//            if(borders[3] < actX)
+//                borders[3] = actX;
+//        }
+//    }
+
+
+    //new aproach of finding center of pupil
+    //as we know that picture is preprocessed and has mostly black or white areas this locates those whitch black
+    //as we also know pupil center or part of pupil near its center is located inaprox 30% middle rectangle of original matrix
+    //there we apply kernel of sum for aroung points to get divergence free areas highest or lowest magnitude
+
+    //setting of kernel
+    int k = 17;
+    Mat kernel = Mat().ones(k, k, CV_8U);
+    for(int i = 0; i < k; i++){
+        for(int j = 0; j < k; j++){
+            if(j<4){
+                if(i<=(((k-1)/2)-j)){
+                    kernel.at<float>(j, i)=0;
+                }else if(i>=(k-((k-1)/2)+j)){
+                    kernel.at<float>(j, i)=0;
+                }
+            }else if(j>k-((k-1)/2)-1){
+                if(i<=(k-1-j)){
+                    kernel.at<float>(j, i)=0;
+                }else if(k-1+k-((k-1)/2)-j){
+                    kernel.at<float>(j, i)=0;
+                }
+            }
+
         }
     }
+
+    //then apply filter2d for konvolution by this kernel
+    Mat sum;
+    filter2D(processedImage, sum, CV_32FC1, kernel);
+
 
     fastCenter->x = borders[3]-borders[2]+xOffset;
     fastCenter->y = borders[1]-borders[0]+yOffset;
