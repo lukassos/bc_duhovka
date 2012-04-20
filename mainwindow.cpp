@@ -1293,7 +1293,7 @@ void MainWindow::on_pushButton_snakePromo_clicked()
     activeContour->initSnakeContour(activeContour, 300,
                                     EnergyInternalTemplate::ClosedContour_Circle,
                                     EnergyExternalField::GradientMagnitudes,
-                                    0, 0, 0.5, 0.6,
+                                    0, 0, 0.5, 0.2,
                                     10,
                                     1 );
     namedWindow("Snake Orig Matrix");

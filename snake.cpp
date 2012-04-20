@@ -65,10 +65,10 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     switch(energy_int_type){
     case EnergyInternalTemplate::ClosedContour_Circle:
         //snake.contourTemplate.type = EnergyInternalTemplate::ClosedContour_Circle;
-        snake->fastCenterLocalizationAlgorithm(snake->showImage, fastCenter, radius);
+        snake->fastCenterLocalizationAlgorithm(snake->originalImage, fastCenter, radius);
         centerX = fastCenter->x + offsetX;
         centerY = fastCenter->y + offsetY;
-        snake->setCirclePositions(snake->contour,  centerX, centerY, 100, snake->getImageOriginal().rows, snake->getImageOriginal().cols);
+        snake->setCirclePositions(snake->contour,  centerX, centerY, 100, snake->getImageOriginal().cols, snake->getImageOriginal().rows);
         EnergyInternalTemplate().countTotalEnergyInt(snake);
         break;
 
@@ -82,9 +82,9 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
 void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float centerY, float radius, int maxX, int maxY){
     int count = points.size();
     float angle = (2*M_PI)/count;
-    QFile outputFile("c:\\Temp\\testovaciebodykruhu.xls");
-    outputFile.open(QIODevice::WriteOnly | QFile::Text);
-    QTextStream outText(&outputFile);
+//    QFile outputFile("c:\\Temp\\testovaciebodykruhu.xls");
+//    outputFile.open(QIODevice::WriteOnly | QFile::Text);
+//    QTextStream outText(&outputFile);
     for(int i=0; i<count ;i++){
         //count and set coordinate X
         points.at(i)->x = (centerX+(radius*cos(i*angle)));
@@ -100,10 +100,10 @@ void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float 
         }else if(points.at(i)->y > maxY){
             points.at(i)->y = maxY;
         }
-        outText << "x\t" << QString().number(points.at(i)->x) << "\ty\t" << QString().number(points.at(i)->y) << "\n";
+//        outText << "x\t" << QString().number(points.at(i)->x) << "\ty\t" << QString().number(points.at(i)->y) << "\n";
     }
 
-        outputFile.close();
+//        outputFile.close();
 }
 
 void Snake::initSnakeExtField(Snake *snake, int energy_ext_type, float deviation){
@@ -309,28 +309,31 @@ bool Snake::saveSnakeToTextFile(Snake *snake)
 void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastCenter, float radius){
     //pre
 //    Mat processedImage = image.clone();
-    threshold(processedImage, processedImage, 60, 0, THRESH_TOZERO);
-    threshold(processedImage, processedImage, 190, 0, THRESH_TOZERO_INV);
-    //medianBlur(processedImage, processedImage, 3);
-    processedImage+=150;
-    threshold(processedImage, processedImage, 160, 0, THRESH_TOZERO);
+    Mat sum = Mat(processedImage.rows,processedImage.cols, CV_32FC1);;
+    cv::convertScaleAbs(processedImage, sum);
+
+    threshold(sum, sum, 60, 0, THRESH_TOZERO);
+    threshold(sum, sum, 190, 0, THRESH_TOZERO_INV);
+    medianBlur(sum, sum, 3);
+    sum+=150;
+    threshold(sum, sum, 160, 0, THRESH_TOZERO);
 
     //    namedWindow( "test", CV_WINDOW_AUTOSIZE );
-    //    imshow( "test", processedImage );
+    //    imshow( "test", sum );
 
     //    destroyWindow( "test" );
 
-    //rectangle of boundaries for circle found in the middle of processedImage
+    //rectangle of boundaries for circle found in the middle of sum
     float borders[4] = {0,0,0,0}; //top,bottom,left,right
 
 
 
-    //30% * 30% rectangle in the middle of processedImage
-    int xMax = floor(processedImage.cols*0.3);
-    int yMax = floor(processedImage.rows*0.3);
+    //30% * 30% rectangle in the middle of sum
+    int xMax = floor(sum.cols*0.3);
+    int yMax = floor(sum.rows*0.3);
     int maxSize = floor(xMax*(yMax*0.1));
-    int xOffset = floor(processedImage.cols*0.35);
-    int yOffset = floor(processedImage.rows*0.35);
+    int xOffset = floor(sum.cols*0.35);
+    int yOffset = floor(sum.rows*0.35);
     borders[3] = floor(xOffset+(xMax/2));
     borders[2] = floor(xOffset+(xMax/2));
     borders[1] = floor(yOffset+(yMax/2));
@@ -346,14 +349,14 @@ void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastC
 //    int actY = 0;
 //    for(int i=0; i<maxSize; i++){
 //        int randomN = qrand()+time.msec();
-//        //intensity of random pixel in 30% * 30% rectangle in the middle of processedImage
-//        //(processedImage.data.ptr + ((yOffset + randomN)%yMax)*processedImage.step + ((xOffset+randomN) % xMax))
-//        //(processedImage.data.ptr + actY*processedImage.step + actX)
+//        //intensity of random pixel in 30% * 30% rectangle in the middle of sum
+//        //(sum.data.ptr + ((yOffset + randomN)%yMax)*sum.step + ((xOffset+randomN) % xMax))
+//        //(sum.data.ptr + actY*sum.step + actX)
 
 //        actX = (yOffset + (randomN % yMax));
 //        actY = (xOffset + (randomN % xMax));
 
-//        if( processedImage.at<float>(actY, actX) == 0 )
+//        if( sum.at<float>(actY, actX) == 0 )
 //        {
 //            if(borders[0] > actY)
 //                borders[0] = actY;
@@ -374,7 +377,7 @@ void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastC
 
     //setting of kernel
     int k = 17;
-    Mat kernel = Mat().ones(k, k, CV_8U);
+    Mat kernel = Mat().ones(k, k, CV_32F);
     for(int i = 0; i < k; i++){
         for(int j = 0; j < k; j++){
             if(j<4){
@@ -390,14 +393,33 @@ void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastC
                     kernel.at<float>(j, i)=0;
                 }
             }
-
         }
     }
+    kernel.at<float>((((k-1)/2)+1), (((k-1)/2)+1))=0;
 
     //then apply filter2d for konvolution by this kernel
-    Mat sum;
-    filter2D(processedImage, sum, CV_32FC1, kernel);
+    //Mat sum = Mat(sum.rows,sum.cols, CV_32FC1);;
+    //sum=255-sum;
+    filter2D(sum, sum, CV_32F, kernel);
+//    kernel = Mat().ones(k, k, CV_32F);
+//    filter2D(sum, sum, sum.depth(), kernel);
+    //sum = sum;
+    //sum = sum;
 
+    for(int i = xOffset; i < xOffset+xMax; i++){
+        for(int j = yOffset; j < yOffset+yMax; j++){
+            if(sum.at<float>(j,i)==0){
+                if(borders[0] > j)
+                    borders[0] = j;
+                if(borders[1] < j)
+                    borders[1] = j;
+                if(borders[2] > i)
+                    borders[2] = i;
+                if(borders[3] < i)
+                    borders[3] = i;
+            }
+        }
+    }
 
     fastCenter->x = borders[3]-borders[2]+xOffset;
     fastCenter->y = borders[1]-borders[0]+yOffset;

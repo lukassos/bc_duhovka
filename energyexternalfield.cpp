@@ -30,16 +30,27 @@ void EnergyExternalField::countVectorField(int type){
         Sobel(gaus, dy, CV_32F, 0, 1, 3);
 
         //gradient magnitude = sqrt(power_2(derivation by x) + power_2(derivation by y))
-        for(int i = 0; i < this->vectorField.rows; i++)
-            for(int j = 0; j < this->vectorField.cols; j++){
-                this->vectorField.at<Vec3b>(i,j)[0] = dx.at<float>(i,j);
-                this->vectorField.at<Vec3b>(i,j)[1] = dy.at<float>(i,j);
-                this->vectorField.at<Vec3b>(i,j)[2] = sqrt(sqr(dx.at<float>(i,j)) + sqr(dy.at<float>(i,j))) ;
-            }
+//        for(int i = 0; i < this->vectorField.rows; i++)
+//            for(int j = 0; j < this->vectorField.cols; j++){
+//                this->vectorField.at<Vec3b>(i,j)[0] = dx.at<float>(i,j);
+//                this->vectorField.at<Vec3b>(i,j)[1] = dy.at<float>(i,j);
+//                this->vectorField.at<Vec3b>(i,j)[2] = dx.at<float>(i,j) + dy.at<float>(i,j);
+//                this->vectorField.at<Vec3b>(i,j)[2] = sqrt(sqr(dx.at<float>(i,j)) + sqr(dy.at<float>(i,j))) ;
+//            }
 
-        //        cv::pow(this->vectorField.at[0], 2, this->vectorField.at[0]);
-        //        cv::pow(this->vectorField.at[1], 2, this->vectorField.at[1]);
-        //        cv::sqrt(this->vectorField.at[2], this->vectorField.at[2])
+
+                cv::pow(dx, 2, dx);
+                cv::pow(dy, 2, dy);
+                gaus = dx+dy;
+                cv::sqrt(gaus, gaus);
+
+                for(int i = 0; i < this->vectorField.rows; i++)
+                    for(int j = 0; j < this->vectorField.cols; j++){
+                        this->vectorField.at<Vec3b>(i,j)[0] = dx.at<float>(i,j);
+                        this->vectorField.at<Vec3b>(i,j)[1] = dy.at<float>(i,j);
+                        this->vectorField.at<Vec3b>(i,j)[2] = gaus.at<float>(i,j);
+                    }
+
         //        || equals ||
         //        cv::magnitude(this->vectorField[0],this->vectorField[1],this->vectorField.channels()[3])
 
