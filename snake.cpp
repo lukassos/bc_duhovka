@@ -41,7 +41,8 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
                              float offsetX, float offsetY,
                              float baseAlpha, float baseBeta,/*energy internal parameters*/
                              float deviation,/*energy external parameters*/
-                             int baseStep)
+                             int baseStep,
+                             int fastInitKernel)
 {
 
    // snake.contourTemplate.type=decision;
@@ -65,7 +66,7 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     switch(energy_int_type){
     case EnergyInternalTemplate::ClosedContour_Circle:
         //snake.contourTemplate.type = EnergyInternalTemplate::ClosedContour_Circle;
-        snake->fastCenterLocalizationAlgorithm(snake->originalImage, fastCenter, radius);
+        snake->fastCenterLocalizationAlgorithm(snake->originalImage, fastCenter, radius, fastInitKernel);
         centerX = fastCenter->x + offsetX;
         centerY = fastCenter->y + offsetY;
         snake->setCirclePositions(snake->contour,  centerX, centerY, 100, snake->getImageOriginal().cols, snake->getImageOriginal().rows);
@@ -306,17 +307,25 @@ bool Snake::saveSnakeToTextFile(Snake *snake)
 }
 
 
-void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastCenter, float radius){
+void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastCenter, float radius, int k){
     //pre
 //    Mat processedImage = image.clone();
-    Mat sum = Mat(processedImage.rows,processedImage.cols, CV_32FC1);;
-    cv::convertScaleAbs(processedImage, sum);
-
+    Mat sum = processedImage.clone();
+//    Mat sum = Mat(processedImage.rows,processedImage.cols, CV_32FC1);;
+//    cv::convertScaleAbs(processedImage, sum);
+    namedWindow("Sum Matrix");
+    imshow("Sum Matrix", sum);
     threshold(sum, sum, 60, 0, THRESH_TOZERO);
     threshold(sum, sum, 190, 0, THRESH_TOZERO_INV);
     medianBlur(sum, sum, 3);
     sum+=150;
     threshold(sum, sum, 160, 0, THRESH_TOZERO);
+
+    QMessageBox msg;
+    msg.setText("filtered by Pupil filter");
+    msg.exec();
+
+    imshow("Sum Matrix", sum);
 
     //    namedWindow( "test", CV_WINDOW_AUTOSIZE );
     //    imshow( "test", sum );
@@ -376,7 +385,7 @@ void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastC
     //there we apply kernel of sum for aroung points to get divergence free areas highest or lowest magnitude
 
     //setting of kernel
-    int k = 17;
+    //int k = 17;
     Mat kernel = Mat().ones(k, k, CV_32F);
     for(int i = 0; i < k; i++){
         for(int j = 0; j < k; j++){
@@ -400,32 +409,102 @@ void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastC
     //then apply filter2d for konvolution by this kernel
     //Mat sum = Mat(sum.rows,sum.cols, CV_32FC1);;
     //sum=255-sum;
-    filter2D(sum, sum, CV_32F, kernel);
+//*    filter2D(sum, sum, CV_32F, kernel);
 //    kernel = Mat().ones(k, k, CV_32F);
 //    filter2D(sum, sum, sum.depth(), kernel);
     //sum = sum;
     //sum = sum;
 
-    for(int i = xOffset; i < xOffset+xMax; i++){
+//    //boarder finder try
+//    for(int i = xOffset; i < xOffset+xMax; i++){
+//        for(int j = yOffset; j < yOffset+yMax; j++){
+//            if(sum.at<float>(j,i)==0){
+//                if(borders[0] > j)
+//                    borders[0] = j;
+//                if(borders[1] < j)
+//                    borders[1] = j;
+//                if(borders[2] > i)
+//                    borders[2] = i;
+//                if(borders[3] < i)
+//                    borders[3] = i;
+//            }
+//        }
+//    }
+
+    //2d list finder try
+
+    QList<int> x,y;
+    for(int kernelSize = k; kernelSize < k+2; kernelSize++){
+        //set new kernel
+        kernel = Mat().ones(kernelSize, kernelSize, sum.type());
+        for(int i = 0; i < kernelSize; i++){
+            for(int j = 0; j < kernelSize; j++){
+                if(j<4){
+                    if(i<=(((kernelSize-1)/2)-j)){
+                        kernel.at<unsigned char>(j, i)=0;
+                    }else if(i>=(kernelSize-((kernelSize-1)/2)+j)){
+                        kernel.at<unsigned char>(j, i)=0;
+                    }
+                }else if(j>kernelSize-((kernelSize-1)/2)-1){
+                    if(i<=(kernelSize-1-j)){
+                        kernel.at<unsigned char>(j, i)=0;
+                    }else if(kernelSize-1+kernelSize-((kernelSize-1)/2)-j){
+                        kernel.at<unsigned char>(j, i)=0;
+                    }
+                }
+            }
+        }
+        kernel.at<float>((((kernelSize-1)/2)+1), (((kernelSize-1)/2)+1))=5;
+        //apply new kernel
+        filter2D(sum, sum, sum.type(), kernel);
         for(int j = yOffset; j < yOffset+yMax; j++){
-            if(sum.at<float>(j,i)==0){
-                if(borders[0] > j)
-                    borders[0] = j;
-                if(borders[1] < j)
-                    borders[1] = j;
-                if(borders[2] > i)
-                    borders[2] = i;
-                if(borders[3] < i)
-                    borders[3] = i;
+            unsigned char* ptr = (unsigned char*) (sum.ptr() + j*sum.step);
+            for(int i = xOffset; i < xOffset+xMax; i++){
+                *ptr = 120;
+                ptr++;
+                //sum.at<unsigned char>(j,i)=120;
+                if(sum.at<unsigned char>(j,i)==0){
+                    x.append(i);
+                    y.append(j);
+                }
             }
         }
     }
+    qSort(x.begin(), x.end());
+    QString a;
+    int maxCount = 0;
+    int probableX[2]={0,0};
+    for(int i= 0; i<x.size(); i++){
+        int countOfAtI = 0;
+        qCount(x.begin(), x.end(), x.at(i), countOfAtI);
+        if(maxCount < countOfAtI)
+            maxCount = countOfAtI;
+        if(probableX[1]<countOfAtI){
+            probableX[0] = x.at(i);
+            probableX[1] = countOfAtI;
+        }
+        i+=countOfAtI-1;
+    }
+    msg.setText("probx: "+QString().number(probableX[0])+", "+QString().number(probableX[1]));
+    msg.setInformativeText("maxCount: "+QString().number(maxCount));
+    for(int i= 0; i<x.size(); i++){
+        int countOfAtI = 0;
+        qCount(x.begin(), x.end(), x.at(i), countOfAtI);
+
+        a.append(QString().number(x.at(i))+", "+QString().number(y.at(i))+", "+QString().number(countOfAtI)+"\n");
+
+    }
+
+    msg.setDetailedText(a);
+    msg.exec();
+
 
     fastCenter->x = borders[3]-borders[2]+xOffset;
     fastCenter->y = borders[1]-borders[0]+yOffset;
     radius = 0;
     radius = min((borders[3]-borders[2])/2,(borders[1]-borders[0])/2);
 
+    imshow("Sum Matrix", sum);
 }
 
 
