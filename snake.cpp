@@ -615,8 +615,56 @@ float Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fast
 //    msg.setDetailedText(a);
 //    msg.exec();
 
+//    correction of y and setting radius
     float radius = 0;
-    radius =(((probableXY[2] - probableXY[1]) < ((correctionOfX[1]-correctionOfX[0])/2)) ? ((probableXY[2] - probableXY[1])/2) : ((correctionOfX[1]-correctionOfX[0])/2));
+    float radiusXY[2] = {((correctionOfX[1]-correctionOfX[0])/2),(probableXY[2] - probableXY[1])};
+    if(radiusXY[0] < radiusXY[1]){
+        //if there is big difference between radiuses then need to correct x, y coordinates
+        while((radiusXY[1] - radiusXY[0])>2){
+            if(radiusXY[0] < radiusXY[1]){
+                radiusXY[1]= radiusXY[0];
+                probableXY[1]=probableXY[2]-radiusXY[0];
+                correctionOfX[0] = probableXY[0];
+                correctionOfX[1] = probableXY[0];
+                //int correctionOfX[2] = {probableXY[0],probableXY[0]}; //{old x/ most left x, old x/most right x}
+                notFound = true;
+                while(notFound){
+                    if(sum.at<unsigned char>(probableXY[1],correctionOfX[1]) == sum.at<unsigned char>(probableXY[1],correctionOfX[1]+1)){
+                        correctionOfX[1]++;
+                    }else{
+                        notFound = false; //did not found black point at right of actual => edge of pupil
+                    }
+                }
+                notFound = true;
+                while(notFound){
+                    if(sum.at<unsigned char>(probableXY[1],correctionOfX[0]) == sum.at<unsigned char>(probableXY[1],correctionOfX[0]-1)){
+                        correctionOfX[0]--;
+                    }else{
+                        notFound = false; //did not found black point at left of actual => edge of pupil
+                    }
+                }
+                //if old x not equal new x then set new x as x
+                probableXY[0] = ((((correctionOfX[1]-correctionOfX[0])/2)+correctionOfX[0])!=probableXY[0] ? (((correctionOfX[1]-correctionOfX[0])/2)+correctionOfX[0]) : probableXY[0]);
+
+                msg.setText("probXY: "+QString().number(probableXY[0])+", "+QString().number(probableXY[1])+", "+QString().number(probableXY[2])+", "+QString().number(probableXY[3]));
+                msg.setInformativeText("correctionX[0,1]: "+QString().number(correctionOfX[0])+", "+QString().number(correctionOfX[1])+"\n"
+                                       +"corrected radius: "+ QString().number(((correctionOfX[1]-correctionOfX[0])/2)));
+                msg.exec();
+
+                probableXY[1]=probableXY[2]-radiusXY[0];
+                radiusXY[0] = ((correctionOfX[1]-correctionOfX[0])/2);
+            }
+        }
+        msg.setText("probXY: "+QString().number(probableXY[0])+", "+QString().number(probableXY[1])+", "+QString().number(probableXY[2])+", "+QString().number(probableXY[3]));
+        msg.setInformativeText("correctionX[0,1]: "+QString().number(correctionOfX[0])+", "+QString().number(correctionOfX[1])+"\n"
+                               +"corrected radius: "+ QString().number(((correctionOfX[1]-correctionOfX[0])/2)));
+        msg.exec();
+            radius = radiusXY[0];
+    }else{
+        radius = radiusXY[1];
+    }
+
+        //radius =(((probableXY[2] - probableXY[1]) < ((correctionOfX[1]-correctionOfX[0])/2)) ? ((probableXY[2] - probableXY[1])/2) : ((correctionOfX[1]-correctionOfX[0])/2));
 
     fastCenter->x = probableXY[0];
     fastCenter->y = probableXY[1];
