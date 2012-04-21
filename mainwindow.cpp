@@ -1320,7 +1320,7 @@ void MainWindow::on_pushButton_snakePromo_clicked()
     namedWindow("Snake Show Matrix");
     openedCVWindowNames.append("Snake Show Matrix");
     imshow("Snake Show Matrix",activeContour->showImage);
-openedCVWindowNames.append("Sum Matrix");
+
 }
 
 void MainWindow::on_pushButton_moveSnake_clicked()

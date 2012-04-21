@@ -62,7 +62,6 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     float centerX;
     float centerY;
     float radius;
-    QMessageBox msg;
     snake->showImage = snake->originalImage.clone();
     switch(energy_int_type){
     case EnergyInternalTemplate::ClosedContour_Circle:
@@ -70,9 +69,6 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
         radius = snake->fastCenterLocalizationAlgorithm(snake->originalImage, fastCenter, fastInitKernel);
         centerX = fastCenter->x + offsetX;
         centerY = fastCenter->y + offsetY;
-
-        msg.setText("in X: "+QString().number(fastCenter->x)+"\nin Y: "+QString().number(fastCenter->y)+"\nin Radius:"+QString().number(radius));
-        msg.exec();
         //set coordinates to circle
         snake->setCirclePositions(snake->contour,  centerX, centerY, radius, snake->getImageOriginal().cols, snake->getImageOriginal().rows);
 
@@ -83,7 +79,7 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     }
     //creation of external energy and control class
     initSnakeExtField(snake, energy_ext_type, deviation);
-    snake->showMatrix(snake);
+    snake->showMatrix(snake);//writes points into snake->showImage
 }
 
 void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float centerY, float radius, int maxX, int maxY){
@@ -314,144 +310,23 @@ bool Snake::saveSnakeToTextFile(Snake *snake)
 
 
 float Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastCenter, int k){
-    //pre
-//    Mat processedImage = image.clone();
     Mat sum = processedImage.clone();
-//    Mat sum = Mat(processedImage.rows,processedImage.cols, CV_32FC1);;
-//    cv::convertScaleAbs(processedImage, sum);
-    namedWindow("Sum Matrix");
-    imshow("Sum Matrix", sum);
     threshold(sum, sum, 60, 0, THRESH_TOZERO);
     threshold(sum, sum, 190, 0, THRESH_TOZERO_INV);
     medianBlur(sum, sum, 3);
     sum+=150;
     threshold(sum, sum, 160, 0, THRESH_TOZERO);
     Mat sumBackup = sum.clone();
-    QMessageBox msg;
-    msg.setText("filtered by Pupil filter");
-    msg.exec();
-
-    imshow("Sum Matrix", sum);
-
-    //    namedWindow( "test", CV_WINDOW_AUTOSIZE );
-    //    imshow( "test", sum );
-
-    //    destroyWindow( "test" );
-
-    //rectangle of boundaries for circle found in the middle of sum
-//    float borders[4] = {0,0,0,0}; //top,bottom,left,right
-
-
 
     //30% * 30% rectangle in the middle of sum
     int xMax = (int)(sum.cols*0.3)+1;
     int yMax = (int)(sum.rows*0.3)+1;
-//    int maxSize = floor(xMax*(yMax*0.1));
     int xOffset = (int)(sum.cols*0.35);
     int yOffset = (int)(sum.rows*0.35);
 
-    msg.setText("xOffset: "+QString().number(xOffset)+"\n"
-                +"yOffset: "+QString().number(yOffset)+"\n"
-                +"xMax: "+QString().number(xMax)+"\n"
-                +"yMax: "+QString().number(yMax)+"\n"
-                );
-
-    msg.exec();
-//    borders[3] = floor(xOffset+(xMax/2));
-//    borders[2] = floor(xOffset+(xMax/2));
-//    borders[1] = floor(yOffset+(yMax/2));
-//    borders[0] = floor(yOffset+(yMax/2));
-
-
-
-//    //as this function was not generating strong pseudorandom numbers have to use another aproach
-//    //seed of random number depends on system time
-//    QTime time = QTime().currentTime();
-//    qsrand(131*time.msec());
-//    int actX = 0;
-//    int actY = 0;
-//    for(int i=0; i<maxSize; i++){
-//        int randomN = qrand()+time.msec();
-//        //intensity of random pixel in 30% * 30% rectangle in the middle of sum
-//        //(sum.data.ptr + ((yOffset + randomN)%yMax)*sum.step + ((xOffset+randomN) % xMax))
-//        //(sum.data.ptr + actY*sum.step + actX)
-
-//        actX = (yOffset + (randomN % yMax));
-//        actY = (xOffset + (randomN % xMax));
-
-//        if( sum.at<float>(actY, actX) == 0 )
-//        {
-//            if(borders[0] > actY)
-//                borders[0] = actY;
-//            if(borders[1] < actY)
-//                borders[1] = actY;
-//            if(borders[2] > actX)
-//                borders[2] = actX;
-//            if(borders[3] < actX)
-//                borders[3] = actX;
-//        }
-//    }
-
-
-    //new aproach of finding center of pupil
-    //as we know that picture is preprocessed and has mostly black or white areas this locates those whitch black
-    //as we also know pupil center or part of pupil near its center is located inaprox 30% middle rectangle of original matrix
-    //there we apply kernel of sum for aroung points to get divergence free areas highest or lowest magnitude
-
-    //setting of kernel
-    //int k = 17;
-//    Mat kernel = Mat().ones(k, k, CV_32F);
-//    for(int i = 0; i < k; i++){
-//        for(int j = 0; j < k; j++){
-//            if(j<4){
-//                if(i<=(((k-1)/2)-j)){
-//                    kernel.at<float>(j, i)=0;
-//                }else if(i>=(k-((k-1)/2)+j)){
-//                    kernel.at<float>(j, i)=0;
-//                }
-//            }else if(j>k-((k-1)/2)-1){
-//                if(i<=(k-1-j)){
-//                    kernel.at<float>(j, i)=0;
-//                }else if(k-1+k-((k-1)/2)-j){
-//                    kernel.at<float>(j, i)=0;
-//                }
-//            }
-//        }
-//    }
-//    kernel.at<float>((((k-1)/2)+1), (((k-1)/2)+1))=0;
-
-    //then apply filter2d for konvolution by this kernel
-    //Mat sum = Mat(sum.rows,sum.cols, CV_32FC1);;
-    //sum=255-sum;
-//*    filter2D(sum, sum, CV_32F, kernel);
-//    kernel = Mat().ones(k, k, CV_32F);
-//    filter2D(sum, sum, sum.depth(), kernel);
-    //sum = sum;
-    //sum = sum;
-
-//    //boarder finder try
-//    for(int i = xOffset; i < xOffset+xMax; i++){
-//        for(int j = yOffset; j < yOffset+yMax; j++){
-//            if(sum.at<float>(j,i)==0){
-//                if(borders[0] > j)
-//                    borders[0] = j;
-//                if(borders[1] < j)
-//                    borders[1] = j;
-//                if(borders[2] > i)
-//                    borders[2] = i;
-//                if(borders[3] < i)
-//                    borders[3] = i;
-//            }
-//        }
-//    }
-
-    //2d list finder try
+    //2d list finder + multiple chcks if radius is right
     Mat kernel;
     QList<int> x,y;
-  //  QList<int*> l;
-    //kernel sizes (k , k+2, k+4, k+6, k+8, k+10) => 6 tests of potential center
-    //in every test konvolution kernel rizes to even number
-
     for(int kernelSize = k; kernelSize < k+11; kernelSize+=2){
         //reset picture matrix for summing
         sum = sumBackup.clone();
@@ -471,80 +346,46 @@ float Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fast
                     }else if(kernelSize-1+kernelSize-((kernelSize-1)/2)-j){
                         kernel.at<unsigned char>(j, i)=0;
                     }
-                }/*else if((((kernelSize-1)/2)-1)<=j && j<=(((kernelSize-1)/2)+1)){
-                    if((((kernelSize-1)/2)-1)<=i && i<=(((kernelSize-1)/2)+1))
-                        kernel.at<unsigned char>(j, i)=3;
-                }*/
+                }
             }
         }
         kernel.at<float>((((kernelSize-1)/2)), (((kernelSize-1)/2)))=5;
         //apply new kernel
         filter2D(sum, sum, sum.type(), kernel);
         for(int j = yOffset; j < yOffset+yMax; j++){
-         //   unsigned char* ptr = (unsigned char*) (sum.ptr() + j*sum.step + xOffset);
             for(int i = xOffset; i < xOffset+xMax; i++){
 
                 if(sum.at<unsigned char>(j,i) == 0){
-                  //  int h[2];
-                  //  h[0] = i;
-                   // h[1] = j;
                     x.append(i);
                     y.append(j);
-                 //   l.append(h);
                 }
                 if(i==xOffset || j == yOffset || i==(xOffset+xMax-1) || j == (yOffset+yMax-1))
                     sum.at<unsigned char>(j,i) =120;
-//                *ptr = 120;
-               // ptr++;
-                //sum.at<unsigned char>(j,i)=120;
             }
         }
-        imshow("Sum Matrix", sum);
+        //uncomment this to see area of searching and vision of matrix sum after using this custom kernel
 
-
+        //imshow("Sum Matrix", sum);
+        //QMessageBox msg;
+        //msg.setText("Custom kernel = "+QString().number(kernelSize));
+        //msg.exec();
     }
-    //qSort(x.begin(), x.end());
-    //qSort(y.begin(), y.end());
-  //  QString a;
+
     int probableXY[4]={0, (int)(sum.rows/2), 0, yOffset+yMax};
-//    probableXY[4] = x coordinate
-//    probableXY[4] = center of picture
-//                    y coordinate of last occurance for x value in y list
-//                    y coordinate of top of pupil
-    //probableXY[4] = count of x
-//                    y coordinate of botom of pupil
-    //probableXY[4] = botom border
 
     for(int i= 0; i<x.size(); i++){
         int countOfAtI = 0;
         qCount(x.begin(), x.end(), x.at(i), countOfAtI);
-        //while(x.at(i)== x.at(i+1)){
-            //countOfAtI++;
-            if(probableXY[1]<countOfAtI){
-                probableXY[0] = x.at(i);
-                probableXY[2] = countOfAtI;
-            }
-//            if(i!=(x.size()-2))
-//                i++;
-        //}
+        if(probableXY[1]<countOfAtI){
+            probableXY[0] = x.at(i);
+            probableXY[2] = countOfAtI;
+        }
         probableXY[1]=y.at(i);
         i+=(countOfAtI-1);
     }
 
-
-    msg.setText("probX: "+QString().number(probableXY[0])+", "+QString().number(probableXY[1])+", "+QString().number(probableXY[2])+", "+QString().number(probableXY[3]));
-//    for(int i= 0; i<x.size(); i++){
-//        int countOfAtI = 0;
-//        qCount(x.begin(), x.end(), x.at(i), countOfAtI);
-//        a.append(QString().number(x.at(i))+", "+QString().number(y.at(i))+", "+QString().number(countOfAtI)+"\n");
-//    }
-//    msg.setDetailedText(a);
-    msg.exec();
-    //int probableBottom = probableXY[3];
-    //finding of bottom y coordinate
     sum = sumBackup.clone();
     probableXY[2] = probableXY[3];
-    imshow("Sum Matrix", sum);
     for(int j = probableXY[1]; j < probableXY[3]; j++){
         if(sum.at<unsigned char>(j,probableXY[0]) == 0){
             if(sum.at<unsigned char>(j,probableXY[0]) == sum.at<unsigned char>(j+1,probableXY[0])){
@@ -586,36 +427,7 @@ float Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fast
     //if old x not equal new x then set new x as x
     probableXY[0] = ((((correctionOfX[1]-correctionOfX[0])/2)+correctionOfX[0])!=probableXY[0] ? (((correctionOfX[1]-correctionOfX[0])/2)+correctionOfX[0]) : probableXY[0]);
 
-
-    msg.setText("probXY: "+QString().number(probableXY[0])+", "+QString().number(probableXY[1])+", "+QString().number(probableXY[2])+", "+QString().number(probableXY[3]));
-    msg.setInformativeText("correctionX[0,1]: "+QString().number(correctionOfX[0])+", "+QString().number(correctionOfX[1])+"\n"
-                           +"corrected radius: "+ QString().number(((correctionOfX[1]-correctionOfX[0])/2)));
-    msg.exec();
-//int probableY[2]={0,0};
-//int maxCount = 0;
-//    for(int i= 0; i<y.size(); i++){
-//        int countOfAtI = 0;
-//        qCount(y.begin(), y.end(), y.at(i), countOfAtI);
-//        if(maxCount < countOfAtI)
-//            maxCount = countOfAtI;
-//        if(probableY[1]<countOfAtI){
-//            probableY[0] = y.at(i);
-//            probableY[1] = countOfAtI;
-//        }
-//        i+=countOfAtI-1;
-//    }
-
-//    msg.setText("probY: "+QString().number(probableY[0])+", "+QString().number(probableY[1]));
-//    msg.setInformativeText("maxCount: "+QString().number(maxCount));
-//    for(int i= 0; i<y.size(); i++){
-//        int countOfAtI = 0;
-//        qCount(y.begin(), y.end(), y.at(i), countOfAtI);
-//        a.append(QString().number(y.at(i))+", "+QString().number(y.at(i))+", "+QString().number(countOfAtI)+"\n");
-//    }
-//    msg.setDetailedText(a);
-//    msg.exec();
-
-//    correction of y and setting radius
+    //    correction of y and setting radius
     float radius = 0;
     float radiusXY[2] = {((correctionOfX[1]-correctionOfX[0])/2),(probableXY[2] - probableXY[1])};
     if(radiusXY[0] < radiusXY[1]){
@@ -646,38 +458,18 @@ float Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fast
                 //if old x not equal new x then set new x as x
                 probableXY[0] = ((((correctionOfX[1]-correctionOfX[0])/2)+correctionOfX[0])!=probableXY[0] ? (((correctionOfX[1]-correctionOfX[0])/2)+correctionOfX[0]) : probableXY[0]);
 
-                msg.setText("probXY: "+QString().number(probableXY[0])+", "+QString().number(probableXY[1])+", "+QString().number(probableXY[2])+", "+QString().number(probableXY[3]));
-                msg.setInformativeText("correctionX[0,1]: "+QString().number(correctionOfX[0])+", "+QString().number(correctionOfX[1])+"\n"
-                                       +"corrected radius: "+ QString().number(((correctionOfX[1]-correctionOfX[0])/2)));
-                msg.exec();
-
                 probableXY[1]=probableXY[2]-radiusXY[0];
                 radiusXY[0] = ((correctionOfX[1]-correctionOfX[0])/2);
             }
         }
-        msg.setText("probXY: "+QString().number(probableXY[0])+", "+QString().number(probableXY[1])+", "+QString().number(probableXY[2])+", "+QString().number(probableXY[3]));
-        msg.setInformativeText("correctionX[0,1]: "+QString().number(correctionOfX[0])+", "+QString().number(correctionOfX[1])+"\n"
-                               +"corrected radius: "+ QString().number(((correctionOfX[1]-correctionOfX[0])/2)));
-        msg.exec();
-            radius = radiusXY[0];
+        radius = radiusXY[0];
     }else{
         radius = radiusXY[1];
     }
 
-        //radius =(((probableXY[2] - probableXY[1]) < ((correctionOfX[1]-correctionOfX[0])/2)) ? ((probableXY[2] - probableXY[1])/2) : ((correctionOfX[1]-correctionOfX[0])/2));
-
     fastCenter->x = probableXY[0];
     fastCenter->y = probableXY[1];
 
-    msg.setText("out X: "+QString().number(fastCenter->x)+"\nout Y: "+QString().number(fastCenter->y)+"\nout Radius:"+QString().number(radius));
-    msg.exec();
-
-//    fastCenter->x = borders[3]-borders[2]+xOffset;
-//    fastCenter->y = borders[1]-borders[0]+yOffset;
-//    radius = 0;
-//    radius = min((borders[3]-borders[2])/2,(borders[1]-borders[0])/2);
-
-    imshow("Sum Matrix", sum);
     return radius;
 }
 
