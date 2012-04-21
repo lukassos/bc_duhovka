@@ -1293,9 +1293,10 @@ void MainWindow::on_pushButton_snakePromo_clicked()
     activeContour->initSnakeContour(activeContour, 300,
                                     EnergyInternalTemplate::ClosedContour_Circle,
                                     EnergyExternalField::GradientMagnitudes,
-                                    0, 0, 0.5, 0.2,
-                                    10,
-                                    1 );
+                                    0, 0,       //Offset [X, Y] of initial contour
+                                    0.5, 0.2,   //alpha, beta,
+                                    10,         //gausian deviation
+                                    1 );        //step or neighborhood size of control point
     namedWindow("Snake Orig Matrix");
     openedCVWindowNames.append("Snake Orig Matrix");
     imshow("Snake Orig Matrix",activeContour->originalImage);

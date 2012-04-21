@@ -61,12 +61,13 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     cv::Point *fastCenter = new cv::Point();
     float centerX;
     float centerY;
-    float radius;QMessageBox msg;
+    float radius;
+    QMessageBox msg;
     snake->showImage = snake->originalImage.clone();
     switch(energy_int_type){
     case EnergyInternalTemplate::ClosedContour_Circle:
         //finds center of pupil and its radius
-        snake->fastCenterLocalizationAlgorithm(snake->originalImage, fastCenter, &radius, fastInitKernel);
+        radius = snake->fastCenterLocalizationAlgorithm(snake->originalImage, fastCenter, fastInitKernel);
         centerX = fastCenter->x + offsetX;
         centerY = fastCenter->y + offsetY;
 
@@ -312,7 +313,7 @@ bool Snake::saveSnakeToTextFile(Snake *snake)
 }
 
 
-void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastCenter, float *radius, int k){
+float Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastCenter, int k){
     //pre
 //    Mat processedImage = image.clone();
     Mat sum = processedImage.clone();
@@ -540,6 +541,7 @@ void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastC
 //    msg.setDetailedText(a);
     msg.exec();
     //int probableBottom = probableXY[3];
+    //finding of bottom y coordinate
     sum = sumBackup.clone();
     probableXY[2] = probableXY[3];
     imshow("Sum Matrix", sum);
@@ -552,6 +554,7 @@ void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastC
             }
         }
     }
+    //finding of top y coordinate
     bool notFound = true;
     while(notFound){
         if(sum.at<unsigned char>(probableXY[1],probableXY[0]) == sum.at<unsigned char>(probableXY[1]-1,probableXY[0])){
@@ -560,13 +563,33 @@ void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastC
             notFound = false; //did not found black point above actual => edge of pupil
         }
     }
+    //setting y center
+    probableXY[1]= probableXY[1]+((probableXY[2] - probableXY[1])/2);
+    //correction of x coordinate = find right x and left x then find center between then compate with old one x in probableXY[0]
+    int correctionOfX[2] = {probableXY[0],probableXY[0]}; //{old x/ most left x, old x/most right x}
+    notFound = true;
+    while(notFound){
+        if(sum.at<unsigned char>(probableXY[1],correctionOfX[1]) == sum.at<unsigned char>(probableXY[1],correctionOfX[1]+1)){
+            correctionOfX[1]++;
+        }else{
+            notFound = false; //did not found black point at right of actual => edge of pupil
+        }
+    }
+    notFound = true;
+    while(notFound){
+        if(sum.at<unsigned char>(probableXY[1],correctionOfX[0]) == sum.at<unsigned char>(probableXY[1],correctionOfX[0]-1)){
+            correctionOfX[0]--;
+        }else{
+            notFound = false; //did not found black point at left of actual => edge of pupil
+        }
+    }
+    //if old x not equal new x then set new x as x
+    probableXY[0] = ((((correctionOfX[1]-correctionOfX[0])/2)+correctionOfX[0])!=probableXY[0] ? (((correctionOfX[1]-correctionOfX[0])/2)+correctionOfX[0]) : probableXY[0]);
+
+
     msg.setText("probXY: "+QString().number(probableXY[0])+", "+QString().number(probableXY[1])+", "+QString().number(probableXY[2])+", "+QString().number(probableXY[3]));
-//    for(int i= 0; i<x.size(); i++){
-//        int countOfAtI = 0;
-//        qCount(x.begin(), x.end(), x.at(i), countOfAtI);
-//        a.append(QString().number(x.at(i))+", "+QString().number(y.at(i))+", "+QString().number(countOfAtI)+"\n");
-//    }
-//    msg.setDetailedText(a);
+    msg.setInformativeText("correctionX[0,1]: "+QString().number(correctionOfX[0])+", "+QString().number(correctionOfX[1])+"\n"
+                           +"corrected radius: "+ QString().number(((correctionOfX[1]-correctionOfX[0])/2)));
     msg.exec();
 //int probableY[2]={0,0};
 //int maxCount = 0;
@@ -592,11 +615,11 @@ void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastC
 //    msg.setDetailedText(a);
 //    msg.exec();
 
-    //
+    float radius = 0;
+    radius =(((probableXY[2] - probableXY[1]) < ((correctionOfX[1]-correctionOfX[0])/2)) ? ((probableXY[2] - probableXY[1])/2) : ((correctionOfX[1]-correctionOfX[0])/2));
+
     fastCenter->x = probableXY[0];
     fastCenter->y = probableXY[1];
-    *radius = 0;
-    *radius = (probableXY[2] - probableXY[1])/2;
 
     msg.setText("out X: "+QString().number(fastCenter->x)+"\nout Y: "+QString().number(fastCenter->y)+"\nout Radius:"+QString().number(radius));
     msg.exec();
@@ -607,6 +630,7 @@ void Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastC
 //    radius = min((borders[3]-borders[2])/2,(borders[1]-borders[0])/2);
 
     imshow("Sum Matrix", sum);
+    return radius;
 }
 
 
