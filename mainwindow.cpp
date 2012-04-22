@@ -120,18 +120,21 @@ bool MainWindow::on_actionSet_Mass_Save_Directory_triggered()
     return true;
 }
 
-void MainWindow::on_actionLoad_picture_triggered()
+bool MainWindow::on_actionLoad_picture_triggered()
 {
     QString filePath = QFileDialog::getOpenFileName(this, tr("Load Picture"), QDir::currentPath(), tr("JPEG(*.jpg)"));
     if (!filePath.isEmpty()){
         imagePath = filePath;
         workImg = imread(filePath.toStdString(),0);
         initGraphicsImages(filePath);
+        return true;
     }else{
         QMessageBox msg;
         msg.setText("Failed opening picture");
+        msg.setInformativeText("You need to load a picture to correctly run this program");
         msg.exec();
     }
+    return false;
 }
 
 QPixmap* MainWindow::loadPictureToPixmap(QString filePath)
@@ -839,7 +842,8 @@ void MainWindow::on_pushButton_run_clicked()
     }
     ui->actualTime->setText("0");
     if(imagePath.isEmpty()){
-       on_actionLoad_picture_triggered();
+        while(!on_actionLoad_picture_triggered());
+
     }else{
        workImg = imread(imagePath.toStdString(),0);
        origImg = workImg;
@@ -1283,7 +1287,8 @@ void MainWindow::on_pushButton_snakePromo_clicked()
 {
     //runs snake
     if(imagePath.isEmpty()){
-       on_actionLoad_picture_triggered();
+        while(!on_actionLoad_picture_triggered());
+
     }else{
        workImg = imread(imagePath.toStdString(),0);
        origImg = workImg;
@@ -1294,22 +1299,22 @@ void MainWindow::on_pushButton_snakePromo_clicked()
                                     EnergyInternalTemplate::ClosedContour_Circle,
                                     EnergyExternalField::GradientMagnitudes,
                                     0, 0,       //Offset [X, Y] of initial contour
-                                    0.5, 0.2,   //alpha, beta,
-                                    10,         //gausian deviation
-                                    1 );        //step or neighborhood size of control point
+                                    ui->doubleSpinBox_snake_alpha->value(), ui->doubleSpinBox_snake_beta->value(),   //alpha, beta,
+                                    ui->doubleSpinBox_snake_gausianDeviation->value(),         //gausian deviation
+                                    ui->spinBox_snake_step->value() );        //step or neighborhood size of control point
     namedWindow("Snake Orig Matrix");
     openedCVWindowNames.append("Snake Orig Matrix");
     imshow("Snake Orig Matrix",activeContour->originalImage);
 
     namedWindow("VectorField0");
     openedCVWindowNames.append("VectorField0");
-    imshow("VectorField0",activeContour->vectorField->getOneLayerFromVectorField(0));
+    imshow("VectorField0",activeContour->vectorField->getVectorField(0));
     namedWindow("VectorField1");
     openedCVWindowNames.append("VectorField1");
-    imshow("VectorField1",activeContour->vectorField->getOneLayerFromVectorField(1));
+    imshow("VectorField1",activeContour->vectorField->getVectorField(1));
     namedWindow("VectorField2");
     openedCVWindowNames.append("VectorField2");
-    imshow("VectorField2",activeContour->vectorField->getOneLayerFromVectorField(2));
+    imshow("VectorField2",activeContour->vectorField->getVectorField(2));
 
     namedWindow("Snake Point Matrix");
     openedCVWindowNames.append("Snake Point Matrix");

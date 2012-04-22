@@ -58,7 +58,7 @@ public slots:
     void setListOfFiles(QStringList f,QStringList p){listOfFiles.operator =(f);listOfFilePaths.operator =(p);}
 private slots:
     //buttons and QT gui item calls
-    void on_actionLoad_picture_triggered();
+    bool on_actionLoad_picture_triggered();
     void updateGraphics_orig();
     void updateGraphics_gray();
     void updateGraphics_active();

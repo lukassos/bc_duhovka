@@ -126,7 +126,7 @@ void Snake::initSnakeExtField(Snake *snake, int energy_ext_type, float deviation
 void Snake::countTotalEnergyExt(Snake *snake){
     snake->total_E_ext = 0;
     for (int i=0; i<snake->contour.size(); i++){
-        snake->contour.at(i)->E_ext=snake->vectorField->getValueFromVectorField(snake->contour.at(i)->x,snake->contour.at(i)->y, 2);
+        snake->contour.at(i)->E_ext=snake->vectorField->getValueFromVectorField(0, snake->contour.at(i)->x,snake->contour.at(i)->y);
         snake->total_E_ext += snake->contour.at(i)->E_ext;
     }
 }
@@ -173,7 +173,7 @@ void Snake::moveSnakeContour(Snake *snake)
                         if( (0 <= actual_x) && (actual_x < border_x) && (0 <= actual_y) && (actual_y < border_y) )
                         {
                             if(actual_x != snake->contour.at(i)->x && actual_y != snake->contour.at(i)->y){
-                                actual_local_ext_E = snake->vectorField->getValueFromVectorField(actual_x, actual_y, 2)/255;
+                                actual_local_ext_E = snake->vectorField->getValueFromVectorField( 0, actual_x, actual_y)/255;
                                 actual_local_int_E = EnergyInternalTemplate().countLocalEnergyInt(*snake, i, actual_x, actual_y);
                             }
 //                            //if not found better point before and can move to another point with same energy
@@ -204,7 +204,7 @@ void Snake::moveSnakeContour(Snake *snake)
                     snake->contour.at(i)->y = best_y;
                     snake->contour.at(i)->E_ext = best_local_ext_E;
                     snake->contour.at(i)->E_int = best_local_int_E;
-                    snake->contour.at(i)->E_ext = snake->vectorField->getValueFromVectorField(best_x, best_y);
+                    snake->contour.at(i)->E_ext = snake->vectorField->getValueFromVectorField(0, best_x, best_y);
                     snake->total_E_int += best_local_ext_E;
                     movedCount++;
                 }
@@ -269,7 +269,7 @@ bool Snake::saveSnakeToTextFile(Snake *snake)
                 << "Total Energy Internal =\t" << snake->total_E_int << endl
                 << "Type of Contour =\t" << snake->typeOfContour << endl
                 << "Type of Vector Field =\t" << snake->vectorField->getTypeOfVectorField() << endl
-                << "Type of Vector Field (OpenCV) =\t" << snake->vectorField->getCV_typeOfVectorField() << endl
+                << "Type of Vector Field (OpenCV) =\t" << snake->vectorField->getCV_typeOfVectorField(0) << endl
                 << "Type of Gausian Deviation =\t" << snake->vectorField->getGausianDeviation() << endl
                 << "Type of Vector Field =\t" << snake->vectorField->getTypeOfVectorField() << endl
                 << "Number of SnakePoints =\t" << snake->contour.size() << endl;
@@ -301,12 +301,15 @@ bool Snake::saveSnakeToTextFile(Snake *snake)
         outputFile.close();
         return true;
     }else{
-        QMessageBox mess;
-        mess.setText("Could not save file");
-        mess.exec();
+        QMessageBox msg;
+        msg.setText("Something went wrong!");
+        msg.setInformativeText("Could not open file "+path);
+        msg.exec();
     }
     return false;
 }
+
+
 
 
 float Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fastCenter, int k){

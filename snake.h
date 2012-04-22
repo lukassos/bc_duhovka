@@ -66,9 +66,10 @@ public:
     // ITERATIONS OF SNAKE
     void moveSnakeContour(Snake *snake);
 
-    // demo
+    // visual/output interface functions
     void showMatrix(Snake *snake);
     bool saveSnakeToTextFile(Snake *snake);
+    bool saveMatToTextFile(Mat output);
 
     Mat getImageOriginal(){return this->originalImage;}
     Mat* getImageOriginalPointer(){return &this->originalImage;}
