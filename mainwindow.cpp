@@ -1315,6 +1315,12 @@ void MainWindow::on_pushButton_snakePromo_clicked()
     namedWindow("VectorField2");
     openedCVWindowNames.append("VectorField2");
     imshow("VectorField2",activeContour->vectorField->getVectorField(2));
+    namedWindow("VectorField3");
+    openedCVWindowNames.append("VectorField3");
+    imshow("VectorField3",activeContour->vectorField->getVectorField(3));
+    namedWindow("VectorField4");
+    openedCVWindowNames.append("VectorField4");
+    imshow("VectorField4",activeContour->vectorField->getVectorField(4));
 
     namedWindow("Snake Point Matrix");
     openedCVWindowNames.append("Snake Point Matrix");

@@ -50,6 +50,8 @@ public:
 
     Mat getScaledVectorField(int at);
 
+    void scaleVectorField(Mat matrix);
+
     void scaleConvertMat(Mat in, Mat out);
 
     bool saveMatToTextFile(Mat output, QString path = "");
