@@ -1282,6 +1282,8 @@ void MainWindow::on_actionLast_Setup_triggered()
     }
 }
 
+ ///////////////////////////
+//     SNAKE UI PART     //
 
 void MainWindow::on_pushButton_snakePromo_clicked()
 {
@@ -1308,19 +1310,19 @@ void MainWindow::on_pushButton_snakePromo_clicked()
 
     namedWindow("VectorField0");
     openedCVWindowNames.append("VectorField0");
-    imshow("VectorField0",activeContour->vectorField->getVectorField(0));
+    imshow("VectorField0",activeContour->vectorField->getConvertedVectorField(0));
     namedWindow("VectorField1");
     openedCVWindowNames.append("VectorField1");
-    imshow("VectorField1",activeContour->vectorField->getVectorField(1));
+    imshow("VectorField1",activeContour->vectorField->getConvertedVectorField(1));
     namedWindow("VectorField2");
     openedCVWindowNames.append("VectorField2");
-    imshow("VectorField2",activeContour->vectorField->getVectorField(2));
+    imshow("VectorField2",activeContour->vectorField->getConvertedVectorField(2));
     namedWindow("VectorField3");
     openedCVWindowNames.append("VectorField3");
-    imshow("VectorField3",activeContour->vectorField->getVectorField(3));
+    imshow("VectorField3",activeContour->vectorField->getConvertedVectorField(3));
     namedWindow("VectorField4");
     openedCVWindowNames.append("VectorField4");
-    imshow("VectorField4",activeContour->vectorField->getVectorField(4));
+    imshow("VectorField4",activeContour->vectorField->getConvertedVectorField(4));
 
     namedWindow("Snake Point Matrix");
     openedCVWindowNames.append("Snake Point Matrix");
@@ -1341,4 +1343,14 @@ void MainWindow::on_pushButton_moveSnake_clicked()
     namedWindow("Snake Show Matrix");
     openedCVWindowNames.append("Snake Show Matrix");
     imshow("Snake Show Matrix",activeContour->showImage);
+}
+
+void MainWindow::on_doubleSpinBox_snake_alpha_editingFinished()
+{
+    activeContour->setAlphaToAllPoints(ui->doubleSpinBox_snake_alpha->value());
+}
+
+void MainWindow::on_doubleSpinBox_snake_beta_editingFinished()
+{
+    activeContour->setBetaToAllPoints(ui->doubleSpinBox_snake_beta->value());
 }

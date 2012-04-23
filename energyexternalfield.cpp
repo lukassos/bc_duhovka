@@ -123,6 +123,18 @@ Mat EnergyExternalField::getScaledVectorField(int at){
     return temp;
 }
 
+Mat EnergyExternalField::getConvertedVectorField(int at){
+    //only for CV_32F
+    //this function scales all values in field so no will be above maximum 1 that coresponds to CV_32F)
+    Mat temp = Mat(this->vectorField.at(at).rows, this->vectorField.at(at).cols, CV_8UC1);
+    for(int i = 0; i < temp.rows; i++){
+        for(int j = 0; j < temp.cols; j++){
+            temp.at<unsigned char>(i,j) = (unsigned char)(this->vectorField.at(at).at<float>(i,j) * 255);
+        }
+    }
+    return temp;
+}
+
 void EnergyExternalField::scaleVectorField(Mat matrix){
     //only for CV_32F
     //this function scales all values in field so no will be above maximum 1 that coresponds to CV_32F1

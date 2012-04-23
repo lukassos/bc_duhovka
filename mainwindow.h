@@ -170,6 +170,10 @@ private slots:
 
     void on_pushButton_moveSnake_clicked();
 
+    void on_doubleSpinBox_snake_alpha_editingFinished();
+
+    void on_doubleSpinBox_snake_beta_editingFinished();
+
 private:
     Ui::MainWindow *ui;
     QGraphicsScene *sc_orig;

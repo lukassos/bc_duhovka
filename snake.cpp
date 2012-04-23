@@ -123,6 +123,16 @@ void Snake::initSnakeExtField(Snake *snake, int energy_ext_type, float deviation
     countTotalEnergyExt(snake);
 }
 
+void Snake::setAlphaToAllPoints(float alpha){
+    for(int i=0; i<this->contour.size(); i++)
+        this->contour.at(i)->setAlpha(alpha);
+}
+
+void Snake::setBetaToAllPoints(float beta){
+    for(int i=0; i<this->contour.size(); i++)
+        this->contour.at(i)->setBeta(beta);
+}
+
 void Snake::countTotalEnergyExt(Snake *snake){
     snake->total_E_ext = 0;
     for (int i=0; i<snake->contour.size(); i++){
@@ -162,8 +172,6 @@ void Snake::moveSnakeContour(Snake *snake)
                 best_local_ext_E = actual_local_ext_E;
                 best_local_int_E = actual_local_int_E;
                 //for steps*steps points around snake->contour.at(i)
-                int hint_x1 = snake->contour.at(i)->x - snake->contour.at(i)->step;
-                int hint_x2 = snake->contour.at(i)->x + snake->contour.at(i)->step;
                 foundBetter = false;
                 for (int actual_x = (snake->contour.at(i)->x -  snake->contour.at(i)->step); actual_x <= (snake->contour.at(i)->x + snake->contour.at(i)->step); actual_x++)
                 {
@@ -173,8 +181,9 @@ void Snake::moveSnakeContour(Snake *snake)
                         if( (0 <= actual_x) && (actual_x < border_x) && (0 <= actual_y) && (actual_y < border_y) )
                         {
                             if(actual_x != snake->contour.at(i)->x && actual_y != snake->contour.at(i)->y){
-                                actual_local_ext_E = snake->vectorField->getValueFromVectorField( 0, actual_x, actual_y)/255;
-                                actual_local_int_E = EnergyInternalTemplate().countLocalEnergyInt(*snake, i, actual_x, actual_y);
+                                actual_local_ext_E = weight_E_ext * snake->vectorField->getValueFromVectorField( 0, actual_x, actual_y);
+                                        // was divided by /255 when ext en was only intensity of vector from unsignet char , now ti is from float field witch is normalized
+                                actual_local_int_E =weight_E_int * EnergyInternalTemplate().countLocalEnergyInt(*snake, i, actual_x, actual_y);
                             }
 //                            //if not found better point before and can move to another point with same energy
 //                            if(!foundBetter){

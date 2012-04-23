@@ -32,6 +32,8 @@ public:
     Mat originalImage;
     Mat showImage;
     Mat matrixOfPoints;
+    float weight_E_ext;
+    float weight_E_int;
 
 
 
@@ -52,6 +54,11 @@ public:
     //functions called during initialization
     float fastCenterLocalizationAlgorithm(Mat image, cv::Point *fastCenter, int k  = 11);
     void setCirclePositions(QList <SnakePoint*> points, float centerX, float ceterY, float radius, int maxX, int maxY);
+
+    void setAlphaToAllPoints(float alpha);
+
+    void setBetaToAllPoints(float beta);
+
 
     // EXTERNAL ENERGY
 
