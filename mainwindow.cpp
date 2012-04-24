@@ -1300,10 +1300,14 @@ void MainWindow::on_pushButton_snakePromo_clicked()
     activeContour->initSnakeContour(activeContour, 300,
                                     EnergyInternalTemplate::ClosedContour_Circle,
                                     EnergyExternalField::GradientMagnitudes,
-                                    0, 0,       //Offset [X, Y] of initial contour
-                                    ui->doubleSpinBox_snake_alpha->value(), ui->doubleSpinBox_snake_beta->value(),   //alpha, beta,
-                                    ui->doubleSpinBox_snake_gausianDeviation->value(),         //gausian deviation
-                                    ui->spinBox_snake_step->value() );        //step or neighborhood size of control point
+                                    //weights of internal and external energies
+                                    ui->doubleSpinBox_snake_weight_extE->value(), ui->doubleSpinBox_snake_weight_intE->value(),
+                                    //alpha, beta,
+                                    ui->doubleSpinBox_snake_alpha->value(), ui->doubleSpinBox_snake_beta->value(),
+                                    //gausian deviation, sobel scale factor
+                                    ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value(),
+                                    //step or neighborhood size of control point
+                                    ui->spinBox_snake_step->value() );
     namedWindow("Snake Orig Matrix");
     openedCVWindowNames.append("Snake Orig Matrix");
     imshow("Snake Orig Matrix",activeContour->originalImage);
@@ -1322,7 +1326,7 @@ void MainWindow::on_pushButton_snakePromo_clicked()
     imshow("VectorField3",activeContour->vectorField->getConvertedVectorField(3));
     namedWindow("VectorField4");
     openedCVWindowNames.append("VectorField4");
-    imshow("VectorField4",activeContour->vectorField->getConvertedVectorField(4));
+    imshow("VectorField4",activeContour->vectorField->getVectorField(4));
 
     namedWindow("Snake Point Matrix");
     openedCVWindowNames.append("Snake Point Matrix");
@@ -1353,4 +1357,25 @@ void MainWindow::on_doubleSpinBox_snake_alpha_editingFinished()
 void MainWindow::on_doubleSpinBox_snake_beta_editingFinished()
 {
     activeContour->setBetaToAllPoints(ui->doubleSpinBox_snake_beta->value());
+}
+
+void MainWindow::on_doubleSpinBox_snake_sobelScale_editingFinished()
+{
+    activeContour->initSnakeExtField(activeContour, EnergyExternalField::GradientMagnitudes, ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value());
+}
+
+void MainWindow::on_doubleSpinBox_snake_gausianDeviation_editingFinished()
+{
+    activeContour->initSnakeExtField(activeContour, EnergyExternalField::GradientMagnitudes, ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value());
+}
+
+
+void MainWindow::on_doubleSpinBox_snake_weight_intE_editingFinished()
+{
+    activeContour->weight_E_int = ui->doubleSpinBox_snake_weight_intE->value();
+}
+
+void MainWindow::on_doubleSpinBox_snake_weight_extE_editingFinished()
+{
+    activeContour->weight_E_ext = ui->doubleSpinBox_snake_weight_extE->value();
 }

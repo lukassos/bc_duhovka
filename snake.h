@@ -46,9 +46,10 @@ public:
 
     //set`s coordinates to snakePoints and sets radius circle/polygon created by those points
     void initSnakeContour(Snake* snakeToInit, int numberOfPoints, int energy_int_type, int energy_ext_type,
-                  float offsetX=0, float offsetY=0,
+                  float weight_Eext = 1, float weight_Eint = 1,
                   float baseAlpha = 0.2, float baseBeta = 0.5,
-                  float deviation = 24, int baseStep = 1,
+                  float deviation = 24, float scale = 35.5,
+                  int baseStep = 1,
                   int fastInitKernel = 17);
 
     //functions called during initialization
@@ -64,7 +65,7 @@ public:
 
     //input is picture read into matrix in grayscale
     //set`s
-    void initSnakeExtField(Snake *snake, int type, float deviation);
+    void initSnakeExtField(Snake *snake, int type, float deviation, float scale);
 
     //this function sets external energy to all snake control points and counts total external energy
     //same functionality is included in moveSnakeContour
@@ -77,6 +78,7 @@ public:
     void showMatrix(Snake *snake);
     bool saveSnakeToTextFile(Snake *snake);
     bool saveMatToTextFile(Mat output);
+
 
     Mat getImageOriginal(){return this->originalImage;}
     Mat* getImageOriginalPointer(){return &this->originalImage;}

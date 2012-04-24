@@ -17,11 +17,12 @@ protected:
     QList <Mat> vectorField;
     int typeOfVectorField;
     float gausianDeviation;
+    float sobelScale;
 
 public:
 
     EnergyExternalField();
-    EnergyExternalField(Mat inputImage, int energy_ext_type, float deviation);
+    EnergyExternalField(Mat inputImage, int energy_ext_type, float deviation, float scale);
 
     void countVectorField(int type);
 
@@ -42,6 +43,8 @@ public:
     int getTypeOfVectorField(){return this->typeOfVectorField;}
 
     float getGausianDeviation(){return this->gausianDeviation;}
+
+    float getSobelScale(){return this->sobelScale;}
 
     //use only if vectorField is CV_32F1
     float getValueFromVectorField(int at, int x, int y){return this->vectorField.at(at).at<float>(y, x);}

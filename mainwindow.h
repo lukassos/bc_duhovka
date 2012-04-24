@@ -174,6 +174,14 @@ private slots:
 
     void on_doubleSpinBox_snake_beta_editingFinished();
 
+    void on_doubleSpinBox_snake_sobelScale_editingFinished();
+
+    void on_doubleSpinBox_snake_gausianDeviation_editingFinished();
+
+    void on_doubleSpinBox_snake_weight_intE_editingFinished();
+
+    void on_doubleSpinBox_snake_weight_extE_editingFinished();
+
 private:
     Ui::MainWindow *ui;
     QGraphicsScene *sc_orig;

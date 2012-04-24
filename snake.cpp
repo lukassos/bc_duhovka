@@ -38,15 +38,17 @@ Snake::Snake(Mat image, QList<SnakePoint*> points)
 
 void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
                              int energy_int_type, int energy_ext_type,
-                             float offsetX, float offsetY,
+                             float weight_Eext, float weight_Eint,
                              float baseAlpha, float baseBeta,/*energy internal parameters*/
-                             float deviation,/*energy external parameters*/
+                             float deviation, float scale,/*energy external parameters*/
                              int baseStep,
                              int fastInitKernel)
 {
 
    // snake.contourTemplate.type=decision;
     snake->typeOfContour = energy_int_type;
+    snake->weight_E_ext = weight_Eext;
+    snake->weight_E_int = weight_Eint;
 
     snake->contour.clear();
     if(snake->contour.isEmpty() || numberOfPoints!=snake->contour.size()){
@@ -67,8 +69,8 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     case EnergyInternalTemplate::ClosedContour_Circle:
         //finds center of pupil and its radius
         radius = snake->fastCenterLocalizationAlgorithm(snake->originalImage, fastCenter, fastInitKernel);
-        centerX = fastCenter->x + offsetX;
-        centerY = fastCenter->y + offsetY;
+        centerX = fastCenter->x;
+        centerY = fastCenter->y;
         //set coordinates to circle
         snake->setCirclePositions(snake->contour,  centerX, centerY, radius, snake->getImageOriginal().cols, snake->getImageOriginal().rows);
 
@@ -78,7 +80,7 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     default:;
     }
     //creation of external energy and control class
-    initSnakeExtField(snake, energy_ext_type, deviation);
+    initSnakeExtField(snake, energy_ext_type, deviation, scale);
     snake->showMatrix(snake);//writes points into snake->showImage
 }
 
@@ -109,11 +111,11 @@ void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float 
 //        outputFile.close();
 }
 
-void Snake::initSnakeExtField(Snake *snake, int energy_ext_type, float deviation){
+void Snake::initSnakeExtField(Snake *snake, int energy_ext_type, float deviation, float scale){
 
     switch(energy_ext_type){
     case EnergyExternalField::GradientMagnitudes:
-        snake->vectorField = new EnergyExternalField(snake->getImageOriginal(), energy_ext_type, deviation);
+        snake->vectorField = new EnergyExternalField(snake->getImageOriginal(), energy_ext_type, deviation, scale);
         snake->vectorField->countVectorField(EnergyExternalField::GradientMagnitudes);
 
         break;
@@ -181,9 +183,9 @@ void Snake::moveSnakeContour(Snake *snake)
                         if( (0 <= actual_x) && (actual_x < border_x) && (0 <= actual_y) && (actual_y < border_y) )
                         {
                             if(actual_x != snake->contour.at(i)->x && actual_y != snake->contour.at(i)->y){
-                                actual_local_ext_E = weight_E_ext * snake->vectorField->getValueFromVectorField( 0, actual_x, actual_y);
+                                actual_local_ext_E = snake->weight_E_ext * snake->vectorField->getValueFromVectorField( 0, actual_x, actual_y);
                                         // was divided by /255 when ext en was only intensity of vector from unsignet char , now ti is from float field witch is normalized
-                                actual_local_int_E =weight_E_int * EnergyInternalTemplate().countLocalEnergyInt(*snake, i, actual_x, actual_y);
+                                actual_local_int_E = snake->weight_E_int * EnergyInternalTemplate().countLocalEnergyInt(*snake, i, actual_x, actual_y);
                             }
 //                            //if not found better point before and can move to another point with same energy
 //                            if(!foundBetter){
@@ -196,7 +198,7 @@ void Snake::moveSnakeContour(Snake *snake)
 //                                }
 //                            //if found better point before then can move to another point only with lower energy
 //                            }else{
-                                if(abs(best_local_int_E - best_local_ext_E) > abs(actual_local_int_E - actual_local_ext_E)){
+                                if((best_local_int_E - best_local_ext_E) > (actual_local_int_E - actual_local_ext_E)){
                                     best_x = actual_x;
                                     best_y = actual_y;
                                     best_local_ext_E = actual_local_ext_E;

@@ -5,10 +5,11 @@ EnergyExternalField::EnergyExternalField()
 }
 
 
-EnergyExternalField::EnergyExternalField(Mat inputImage, int energy_ext_type, float deviation)
+EnergyExternalField::EnergyExternalField(Mat inputImage, int energy_ext_type, float deviation, float scale)
 {
     this->setVectorField(inputImage);
     this->gausianDeviation = deviation;
+    this->sobelScale = scale;
     this->typeOfVectorField = energy_ext_type;
 }
 
@@ -19,12 +20,12 @@ void EnergyExternalField::countVectorField(int type){
     Mat dy = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_32FC1);
     //this->vectorField.at(0).convertTo(gaus, gaus.depth(), 1, 15);
     scaleConvertMat(this->vectorField.at(0), gaus);
-    this->vectorField.insert(0, gaus.clone());
+
     //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\input_origina.png",this->vectorField.at(0));
     //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\input_scaled.png",gaus);
     //cv::convertScaleAbs(this->vectorField.at(0),  gaus, 1, 15); did not work - uses the same type
-    //cv::imshow("EXTERNAL VECTORFIELD at 0", this->vectorField.at(0));
-    //cv::imshow("EXTERNAL GAUSIAN", gaus);
+    cv::imshow("EXTERNAL VECTORFIELD at 0", this->vectorField.at(0));
+    cv::imshow("EXTERNAL first gausian", gaus);
 
     //saveMatToTextFile(this->vectorField.at(0), "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\input_origina.txt");
     //saveMatToTextFile(gaus, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\input_scaled.txt");
@@ -34,15 +35,16 @@ void EnergyExternalField::countVectorField(int type){
         //remove noise and scale image for furher range of gradient
         GaussianBlur(this->vectorField.at(0), gaus, Size(3,3), this->gausianDeviation, this->gausianDeviation);
         //saveMatToTextFile(gaus, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gausianBlur.txt");
-        //cv::imshow("EXTERNAL GAUSIAN", gaus);
+        this->vectorField.insert(0, gaus.clone());
+        cv::imshow("EXTERNAL GAUSIAN", gaus);
 
         //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gausianBlur.png",gaus);
         //derivates of matrices by sobel operator
 
         Sobel(gaus, dx,  CV_32FC1, 1, 0, 3, 35.5);
         Sobel(gaus, dy,  CV_32FC1, 0, 1, 3, 35.5);
-        //cv::imshow("EXTERNAL sobel DX", dx);
-        //cv::imshow("EXTERNAL sobel DY", dy);
+        cv::imshow("EXTERNAL sobel DX", dx);
+        cv::imshow("EXTERNAL sobel DY", dy);
         //gradient magnitude = sqrt(power_2(derivation by x) + power_2(derivation by y))
         //        for(int i = 0; i < this->vectorField.rows; i++)
         //            for(int j = 0; j < this->vectorField.cols; j++){
@@ -71,9 +73,9 @@ void EnergyExternalField::countVectorField(int type){
         //scaleVectorField(gaus);
 
 
-        //imshow("gradient field", gaus);
+        imshow("gradient field", gaus);
         //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gradient.png",gaus);
-        //saveMatToTextFile(gaus, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gradient.txt");
+        saveMatToTextFile(gaus, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gradient.txt");
 
         //                for(int i = 0; i < this->vectorField.rows; i++)
         //                    for(int j = 0; j < this->vectorField.cols; j++){
