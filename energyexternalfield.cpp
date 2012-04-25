@@ -15,17 +15,19 @@ EnergyExternalField::EnergyExternalField(Mat inputImage, int energy_ext_type, fl
 
 
 void EnergyExternalField::countVectorField(int type){
-    Mat gaus = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_32FC1);
-    Mat dx = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_32FC1);
-    Mat dy = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_32FC1);
+    Mat gaus = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
+    Mat dx = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
+    Mat dy = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
     //this->vectorField.at(0).convertTo(gaus, gaus.depth(), 1, 15);
-    scaleConvertMat(this->vectorField.at(0), gaus);
+    //scaleConvertMat(this->vectorField.at(0), gaus);
 
     //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\input_origina.png",this->vectorField.at(0));
     //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\input_scaled.png",gaus);
     //cv::convertScaleAbs(this->vectorField.at(0),  gaus, 1, 15); did not work - uses the same type
-    cv::imshow("EXTERNAL VECTORFIELD at 0", this->vectorField.at(0));
-    cv::imshow("EXTERNAL first gausian", gaus);
+
+    cv::imshow("Input for E EXT counting", this->vectorField.at(0));
+
+    //cv::imshow("EXTERNAL first gausian", gaus);
 
     //saveMatToTextFile(this->vectorField.at(0), "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\input_origina.txt");
     //saveMatToTextFile(gaus, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\input_scaled.txt");
@@ -33,7 +35,7 @@ void EnergyExternalField::countVectorField(int type){
     case EnergyExternalField::GradientMagnitudes:
 
         //remove noise and scale image for furher range of gradient
-        GaussianBlur(this->vectorField.at(0), gaus, Size(3,3), this->gausianDeviation, this->gausianDeviation);
+        GaussianBlur(this->vectorField.at(0), gaus, Size((3* this->gausianDeviation), (3* this->gausianDeviation)), this->gausianDeviation, this->gausianDeviation);
         //saveMatToTextFile(gaus, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gausianBlur.txt");
         this->vectorField.insert(0, gaus.clone());
         cv::imshow("EXTERNAL GAUSIAN", gaus);
@@ -41,8 +43,8 @@ void EnergyExternalField::countVectorField(int type){
         //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gausianBlur.png",gaus);
         //derivates of matrices by sobel operator
 
-        Sobel(gaus, dx,  CV_32FC1, 1, 0, 3, 35.5);
-        Sobel(gaus, dy,  CV_32FC1, 0, 1, 3, 35.5);
+        Sobel(gaus, dx,  CV_8UC1, 1, 0, 3, this->sobelScale);
+        Sobel(gaus, dy,  CV_8UC1, 0, 1, 3, this->sobelScale);
         cv::imshow("EXTERNAL sobel DX", dx);
         cv::imshow("EXTERNAL sobel DY", dy);
         //gradient magnitude = sqrt(power_2(derivation by x) + power_2(derivation by y))
@@ -94,22 +96,40 @@ void EnergyExternalField::countVectorField(int type){
     }
 }
 
+Mat EnergyExternalField::getNeighborhoodExtE(int x, int y, int step, int at){
+    Mat temp = Mat(size, size, CV_8UC1);
+    int index_neighbor_x = 0;
+    int index_neighbor_y = 0;
+    for (int actual_x = (x - step); actual_x <= (x + step); actual_x++)
+    {
+        for (int actual_y = (y - step); actual_y <= (y + step); actual_y++)
+        {
+            temp.at<unsigned char>(actual_y, actual_x)= this->vectorField.at(at).at<unsigned char>(actual_y, actual_x);
+            index_neighbor_y++;
+        }
+        index_neighbor_x++;
+    }
+}
+
+
 void EnergyExternalField::scaleConvertMat(Mat in, Mat out){
     //this function converts one matrix type to other with proportialy scaling colours
-    if(out.type() == CV_32FC1){
+    if(out.type() == CV_32FC1 && in.type() == CV_8UC1){
         for(int i = 0; i < in.rows; i++){
             for(int j = 0; j < in.cols; j++){
                 out.at<float>(i,j) = in.at<unsigned char>(i,j);
             }
         }
         out = out/255;
-    }else if(out.type() == CV_8UC1){
+    }else if(out.type() == CV_8UC1 && in.type() == CV_32FC1){
         for(int i = 0; i < in.rows; i++){
             for(int j = 0; j < in.cols; j++){
                 out.at<unsigned char>(i,j) = in.at<float>(i,j) * 255;
             }
         }
 
+    }else{
+        out = in.clone();
     }
 }
 
@@ -137,14 +157,16 @@ Mat EnergyExternalField::getConvertedVectorField(int at){
     return temp;
 }
 
-void EnergyExternalField::scaleVectorField(Mat matrix){
+void EnergyExternalField::scaleVectorField(Mat in, Mat out){
     //only for CV_32F
     //this function scales all values in field so no will be above maximum 1 that coresponds to CV_32F1
     double *max = new double;
     double *min;
-    cv::minMaxLoc(matrix, min, max);
+    cv::minMaxLoc(in, min, max);
     if (*max > 1){
-        matrix = matrix/ (*max);
+        out = in/ (*max);
+    }else{
+        out = in.clone();
     }
 }
 

@@ -49,13 +49,15 @@ public:
     //use only if vectorField is CV_32F1
     float getValueFromVectorField(int at, int x, int y){return this->vectorField.at(at).at<float>(y, x);}
 
+    Mat getNeighborhoodExtE(int x, int y, int step, int at);
+
     int getCV_typeOfVectorField(int at){return this->vectorField.at(at).type();}
 
     Mat getScaledVectorField(int at);
 
     Mat getConvertedVectorField(int at);
 
-    void scaleVectorField(Mat matrix);
+    void scaleVectorField(Mat in, Mat out);
 
     void scaleConvertMat(Mat in, Mat out);
 

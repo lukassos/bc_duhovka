@@ -28,7 +28,12 @@ public:
     float countPotentialPositionY(int pointNumber, Snake snake);
 
     float countLocalEnergyInt(Snake snake, int point, int newX, int newY);
+    float countLocalEnergyInt1stage(Snake snake, int point, int newX, int newY);
+    float countLocalEnergyInt2stage(Snake snake, int point, int newX, int newY);
+    float getAverageDistance(Snake snake);
+
     void countTotalEnergyInt(Snake *snake);
+
     enum ContourType{
         ClosedContour_Circle,
         ClosedContour_Polygon,
