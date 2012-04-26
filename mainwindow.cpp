@@ -1314,16 +1314,16 @@ void MainWindow::on_pushButton_snakePromo_clicked()
 
     namedWindow("VectorField0");
     openedCVWindowNames.append("VectorField0");
-    imshow("VectorField0",activeContour->vectorField->getConvertedVectorField(0));
+    imshow("VectorField0",activeContour->vectorField->getVectorField(0));
     namedWindow("VectorField1");
     openedCVWindowNames.append("VectorField1");
-    imshow("VectorField1",activeContour->vectorField->getConvertedVectorField(1));
+    imshow("VectorField1",activeContour->vectorField->getVectorField(1));
     namedWindow("VectorField2");
     openedCVWindowNames.append("VectorField2");
-    imshow("VectorField2",activeContour->vectorField->getConvertedVectorField(2));
+    imshow("VectorField2",activeContour->vectorField->getVectorField(2));
     namedWindow("VectorField3");
     openedCVWindowNames.append("VectorField3");
-    imshow("VectorField3",activeContour->vectorField->getConvertedVectorField(3));
+    imshow("VectorField3",activeContour->vectorField->getVectorField(3));
     namedWindow("VectorField4");
     openedCVWindowNames.append("VectorField4");
     imshow("VectorField4",activeContour->vectorField->getVectorField(4));
@@ -1361,6 +1361,7 @@ void MainWindow::on_doubleSpinBox_snake_beta_editingFinished()
 
 void MainWindow::on_doubleSpinBox_snake_sobelScale_editingFinished()
 {
+
     activeContour->initSnakeExtField(activeContour, EnergyExternalField::GradientMagnitudes, ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value());
 }
 

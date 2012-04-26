@@ -18,6 +18,8 @@ void EnergyExternalField::countVectorField(int type){
     Mat gaus = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
     Mat dx = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
     Mat dy = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
+    Mat gradient = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_32FC1);;
+
     //this->vectorField.at(0).convertTo(gaus, gaus.depth(), 1, 15);
     //scaleConvertMat(this->vectorField.at(0), gaus);
 
@@ -35,7 +37,7 @@ void EnergyExternalField::countVectorField(int type){
     case EnergyExternalField::GradientMagnitudes:
 
         //remove noise and scale image for furher range of gradient
-        GaussianBlur(this->vectorField.at(0), gaus, Size((3* this->gausianDeviation), (3* this->gausianDeviation)), this->gausianDeviation, this->gausianDeviation);
+        GaussianBlur(this->vectorField.at(0), gaus, Size(3, 3), this->gausianDeviation, 0);
         //saveMatToTextFile(gaus, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gausianBlur.txt");
         this->vectorField.insert(0, gaus.clone());
         cv::imshow("EXTERNAL GAUSIAN", gaus);
@@ -56,28 +58,28 @@ void EnergyExternalField::countVectorField(int type){
         //                this->vectorField.at<Vec3b>(i,j)[2] = sqrt(sqr(dx.at<float>(i,j)) + sqr(dy.at<float>(i,j))) ;
         //            }
 
-        //saveMatToTextFile(dx, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_scale_0.01.txt");
+        saveMatToTextFile(dx, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_scale_0.01.txt");
         //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_scale_0.01.png",dx);
-        //saveMatToTextFile(dy, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dy_scale_0.01.txt");
+        saveMatToTextFile(dy, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dy_scale_0.01.txt");
         //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_scale_0.01.png",dy);
-        cv::pow(dx, 2, dx);
-        cv::pow(dy, 2, dy);
+        //cv::pow(dx, 2, dx);
+        //cv::pow(dy, 2, dy);
 
-//        saveMatToTextFile(dx, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_pow_2.txt");
-//        imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_pow_2.png",dx);
-//        saveMatToTextFile(dy, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dy_pow_2.txt");
-//        imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dy_pow_2.png",dy);
-        gaus = dx+dy;
-        //saveMatToTextFile(gaus, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_dy_sum.txt");
-        //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_dy_sum.png",gaus);
+        //saveMatToTextFile(dx, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_pow_2.txt");
+        //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_pow_2.png",dx);
+        //saveMatToTextFile(dy, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dy_pow_2.txt");
+        //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dy_pow_2.png",dy);
+        gradient = dx + dy;
+        saveMatToTextFile(gradient, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_dy_sum.txt");
+        imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_dy_sum.png",gradient);
 
-        cv::sqrt(gaus, gaus);
+        //cv::sqrt(gradient, gradient);
         //scaleVectorField(gaus);
 
 
-        imshow("gradient field", gaus);
+        imshow("gradient field", gradient);
         //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gradient.png",gaus);
-        saveMatToTextFile(gaus, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gradient.txt");
+        saveMatToTextFile(gradient, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gradient.txt");
 
         //                for(int i = 0; i < this->vectorField.rows; i++)
         //                    for(int j = 0; j < this->vectorField.cols; j++){
@@ -85,7 +87,7 @@ void EnergyExternalField::countVectorField(int type){
         //                        this->vectorField.at<Vec3b>(i,j)[1] = dy.at<float>(i,j);
         //                        this->vectorField.at<Vec3b>(i,j)[2] = gaus.at<float>(i,j);
         //                    }
-        this->vectorField.insert(0,gaus);
+        this->vectorField.insert(0, gradient);
         this->vectorField.insert(1, dx);
         this->vectorField.insert(2, dy);
         //        || equals ||
@@ -97,9 +99,10 @@ void EnergyExternalField::countVectorField(int type){
 }
 
 Mat EnergyExternalField::getNeighborhoodExtE(int x, int y, int step, int at){
-    Mat temp = Mat(size, size, CV_8UC1);
+    Mat temp = Mat(((step * 2) + 1 ), ((step * 2) + 1 ), CV_8UC1);
     int index_neighbor_x = 0;
     int index_neighbor_y = 0;
+
     for (int actual_x = (x - step); actual_x <= (x + step); actual_x++)
     {
         for (int actual_y = (y - step); actual_y <= (y + step); actual_y++)
@@ -109,6 +112,7 @@ Mat EnergyExternalField::getNeighborhoodExtE(int x, int y, int step, int at){
         }
         index_neighbor_x++;
     }
+    return temp;
 }
 
 
@@ -137,10 +141,10 @@ Mat EnergyExternalField::getScaledVectorField(int at){
     //only for CV_32F
     //this function scales all values in field so no will be above maximum 1 that coresponds to CV_32F)
     Mat temp = Mat(this->vectorField.at(at).rows, this->vectorField.at(at).cols, CV_32FC1);
-    double *min, *max;
-    cv::minMaxLoc(this->vectorField.at(at), min, max);
-    if (*max > 1){
-        temp = this->vectorField.at(at)/ (*max);
+    double min, max;
+    cv::minMaxLoc(this->vectorField.at(at), &min, &max);
+    if (max > 1){
+        temp = this->vectorField.at(at)/ max;
     }
     return temp;
 }
@@ -160,11 +164,11 @@ Mat EnergyExternalField::getConvertedVectorField(int at){
 void EnergyExternalField::scaleVectorField(Mat in, Mat out){
     //only for CV_32F
     //this function scales all values in field so no will be above maximum 1 that coresponds to CV_32F1
-    double *max = new double;
-    double *min;
-    cv::minMaxLoc(in, min, max);
-    if (*max > 1){
-        out = in/ (*max);
+    double max;
+    double min;
+    cv::minMaxLoc(in, &min, &max);
+    if (max > 1){
+        out = in / max;
     }else{
         out = in.clone();
     }

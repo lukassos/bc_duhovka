@@ -74,7 +74,7 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
         //set coordinates to circle
         snake->setCirclePositions(snake->contour,  centerX, centerY, radius, snake->getImageOriginal().cols, snake->getImageOriginal().rows);
 
-        EnergyInternalTemplate().countTotalEnergyInt(snake);
+        //EnergyInternalTemplate().countTotalEnergyInt(snake);
         break;
 
     default:;
@@ -122,7 +122,7 @@ void Snake::initSnakeExtField(Snake *snake, int energy_ext_type, float deviation
 
     default:;
     }
-    countTotalEnergyExt(snake);
+    //countTotalEnergyExt(snake);
 }
 
 void Snake::setAlphaToAllPoints(float alpha){
@@ -146,17 +146,6 @@ void Snake::countTotalEnergyExt(Snake *snake){
 
 void Snake::moveSnakeContour(Snake *snake)
 {
-    int best_x, best_y;
-    float actual_local_ext_E, actual_local_int_E,
-            best_local_ext_E, best_local_int_E;
-    float lastRun_tot_ext_E = 0;
-    float lastRun_tot_int_E = 0;
-    int border_x = snake->originalImage.cols;
-    int border_y = snake->originalImage.rows;
-    bool equilibrium = false;
-    int test_equilibrium = 10;
-    bool foundBetter = false;
-    int movedCount = 0;
     //int n = snake->contour.size();
     //saveSnakeToTextFile(snake);
     switch(snake->vectorField->getTypeOfVectorField()){
@@ -165,27 +154,32 @@ void Snake::moveSnakeContour(Snake *snake)
         for (int cycles = 0; cycles < 200; cycles++){
         //while(!equilibrium){
             //for all points count locally external and internal energy and look if is in neighborhood point witl lower energy
+            int movedCount = 0;
 
-            for (int i=0; i<snake->contour.size(); i++){
+            for (int i=0; i <= snake->contour.size(); i++){
 
                 int neighborhoodSize = (snake->contour.at(i)->step * 2) + 1 ;
+                Mat actual_x_coordinate = Mat().zeros(neighborhoodSize, neighborhoodSize, CV_32FC1);
+                Mat actual_y_coordinate = Mat().zeros(neighborhoodSize, neighborhoodSize, CV_32FC1);
+
                 Mat actual_local_int_E_1stg = Mat().zeros(neighborhoodSize, neighborhoodSize, CV_32FC1);
                 Mat actual_local_int_E_2stg = Mat().zeros(neighborhoodSize, neighborhoodSize, CV_32FC1);
 
-                Mat actual_local_ext_E = snake->vectorField->getNeighborhoodExtE(snake->contour.at(i)->x, snake->contour.at(i)->y, step, 0).clone();
+                Mat actual_local_ext_E = snake->vectorField->getNeighborhoodExtE(snake->contour.at(i)->x, snake->contour.at(i)->y, snake->contour.at(i)->step, 0).clone();
                 Mat actual_local_ext_E_norm = Mat().zeros(neighborhoodSize, neighborhoodSize, CV_32FC1);
 
-                Mat actual_local_snake_E = Mat().zeros(neighborhoodSize, neighborhoodSize, CV_32FC1);
-                float minExtE = 0;
-                float maxExtE = 0;
+                double minExtE = 0;
+                double maxExtE = 0;
                 cv::minMaxIdx(actual_local_ext_E, &minExtE, &maxExtE);
 
                 if((maxExtE - minExtE) < 5){
                     minExtE = maxExtE - 5;
                 }
 
+                avgDist = EnergyInternalTemplate().getAverageDistance(*snake);
+
+
                 //for steps*steps points around snake->contour.at(i)
-                foundBetter = false;
                 int index_neighbor_x = 0;
                 int index_neighbor_y = 0;
                 for (int actual_x = (snake->contour.at(i)->x -  snake->contour.at(i)->step); actual_x <= (snake->contour.at(i)->x + snake->contour.at(i)->step); actual_x++)
@@ -200,24 +194,36 @@ void Snake::moveSnakeContour(Snake *snake)
                                 EnergyInternalTemplate().countLocalEnergyInt2stage(*snake, i, actual_x, actual_y);
                         //Normalized External Energy
                         actual_local_ext_E_norm.at<float>(index_neighbor_y, index_neighbor_x) =
-                                ( minExtE - actual_local_ext_E.at<unsigned char>(index_neighbor_y, index_neighbor_x)) / ( maxExtE - minExtE );
+                                ( (float) minExtE - actual_local_ext_E.at<unsigned char>(index_neighbor_y, index_neighbor_x)) / ( (float)maxExtE - (float)minExtE );
+                        //fill coordinates to matrixes
+                        actual_x_coordinate.at<float>(index_neighbor_y, index_neighbor_x) = actual_x;
+                        actual_y_coordinate.at<float>(index_neighbor_y, index_neighbor_x) = actual_y;
 
                         index_neighbor_y++;
                     }
                     index_neighbor_x++;
                 }
-                float maxIntE_1stg = 0;
-                float maxIntE_2stg = 0;
+                double maxIntE_1stg = 0;
+                double maxIntE_2stg = 0;
                 cv::minMaxIdx(actual_local_int_E_1stg, 0, &maxIntE_1stg);
                 cv::minMaxIdx(actual_local_int_E_2stg, 0, &maxIntE_2stg);
                 //normalization of internal energy
                 actual_local_int_E_1stg = actual_local_int_E_1stg/maxIntE_1stg;
                 actual_local_int_E_2stg = actual_local_int_E_2stg/maxIntE_2stg;
 
+
+                int best_x = -1;
+                int best_y = -1;
+                float actual_local_snake_E;
+                //set big value for further comparision with local minima
+                snake->contour.at(i)->E_snake = snake->weight_E_int * (snake->contour.at(i)->alpha + snake->contour.at(i)->beta)
+                                                +
+                                                snake->weight_E_ext * (255);
+
                 //sum of all Energies actual_local_snake_E = weightInt * ( alpha * 1stage + beta * 2stage) + weightExt * nomalizedExt
                 for (index_neighbor_x = 0; index_neighbor_x < neighborhoodSize; index_neighbor_x++){
                      for(index_neighbor_y = 0; index_neighbor_y < neighborhoodSize; index_neighbor_y++){
-                         actual_local_snake_E.at<float>(index_neighbor_y, index_neighbor_x) =
+                         actual_local_snake_E=
                                  ( snake->weight_E_int *
                                        ( snake->contour.at(i)->alpha * ( actual_local_int_E_1stg.at<float>(index_neighbor_y, index_neighbor_x) )
                                            +
@@ -226,56 +232,30 @@ void Snake::moveSnakeContour(Snake *snake)
                                      +
                                    snake->weight_E_ext * actual_local_ext_E_norm.at<float>(index_neighbor_y, index_neighbor_x)
                                   );
+                         if(actual_local_snake_E < snake->contour.at(i)->E_snake){
+                             snake->contour.at(i)->E_snake = actual_local_snake_E;
+                             best_x = actual_x_coordinate.at<float>(index_neighbor_y, index_neighbor_x);
+                             best_y = actual_y_coordinate.at<float>(index_neighbor_y, index_neighbor_x);
+                         }
                      }
                 }
-
-            if( (0 <= actual_x) && (actual_x < border_x) && (0 <= actual_y) && (actual_y < border_y) )
-            {
-                if(actual_x != snake->contour.at(i)->x && actual_y != snake->contour.at(i)->y){
-                    actual_local_ext_E = snake->weight_E_ext * snake->vectorField->getValueFromVectorField( 0, actual_x, actual_y);
-                            // was divided by /255 when ext en was only intensity of vector from unsignet char , now ti is from float field witch is normalized
-
-                }
-//                            //if not found better point before and can move to another point with same energy
-//                            if(!foundBetter){
-//                                if(abs(best_local_int_E - best_local_ext_E) >= abs(actual_local_int_E - actual_local_ext_E)){
-//                                    best_x = actual_x;
-//                                    best_y = actual_y;
-//                                    best_local_ext_E = actual_local_ext_E;
-//                                    best_local_int_E = actual_local_int_E;
-//                                    foundBetter = true;
-//                                }
-//                            //if found better point before then can move to another point only with lower energy
-//                            }else{
-                    if(abs(best_local_int_E - best_local_ext_E) > abs(actual_local_int_E - actual_local_ext_E)){
-                        best_x = actual_x;
-                        best_y = actual_y;
-                        best_local_ext_E = actual_local_ext_E;
-                        best_local_int_E = actual_local_int_E;
-                        foundBetter = true;
-                    }
-//                            }
-                if(foundBetter){
-                    snake->total_E_int -= snake->contour.at(i)->E_ext;
+                //if coordinates changed then movedCount increase and move point
+                if (best_x != snake->contour.at(i)->x && best_y != snake->contour.at(i)->y){
                     snake->contour.at(i)->x = best_x;
                     snake->contour.at(i)->y = best_y;
-                    snake->contour.at(i)->E_ext = best_local_ext_E;
-                    snake->contour.at(i)->E_int = best_local_int_E;
-                    snake->contour.at(i)->E_ext = snake->vectorField->getValueFromVectorField(0, best_x, best_y);
-                    snake->total_E_int += best_local_ext_E;
                     movedCount++;
                 }
             }
-            EnergyInternalTemplate().countTotalEnergyInt(snake);
-
-            if((lastRun_tot_ext_E+lastRun_tot_int_E)==(snake->total_E_ext+snake->total_E_int)){
-                test_equilibrium--;
-                if(test_equilibrium < 0)
-                    equilibrium = true;
-            }else{
-                test_equilibrium = 10;
-                lastRun_tot_ext_E=snake->total_E_ext;
-                lastRun_tot_int_E=snake->total_E_int;
+//            //here goes energy curvature estimation for better beta parameter setting
+//            //curvature is counted for all snake points
+//            EnergyInternalTemplate().countContourEstimation(snake);
+//            //if curvature is maximal then set beta
+//            for( int i=0; i < snake->contour.size(); i++){
+//                if()
+//            }
+            //if only 3 points moved then stop iteration of snake
+            if (movedCount < 3){
+                break;
             }
         }
 
@@ -283,6 +263,7 @@ void Snake::moveSnakeContour(Snake *snake)
 
     default:;
     }
+    //write snake points into image matrix for showing
     showMatrix(snake);
     //saveSnakeToTextFile(snake);
 }

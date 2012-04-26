@@ -90,8 +90,15 @@ float EnergyInternalTemplate::countLocalEnergyInt2stage(Snake snake, int pointOf
 float EnergyInternalTemplate::getAverageDistance(Snake snake){
     //this function counts average distance for further counting of 1st stage equation of internal energy
     float summary = 0;
+    int s_i_x, s_i_m1_x, s_i_y, s_i_m1_y;
+    int n = snake.contour.size();
 
-    for(int i = 0; i < snake.contour.size(); i++){
+    for(int i = 0; i < n; i++){
+        s_i_x = snake.contour.at(i)->x;
+        s_i_m1_x = snake.contour.at((i==0) ? (n-1) : (i-1))->x;
+        s_i_y = snake.contour.at(i)->y;
+        s_i_m1_y = snake.contour.at((i==0) ? (n-1) : (i-1))->y;
+
         summary = ( sqr( qAbs((int)( s_i_x - s_i_m1_x )))
                      +
                     sqr( qAbs((int)( s_i_y - s_i_m1_y ))) );
@@ -101,7 +108,36 @@ float EnergyInternalTemplate::getAverageDistance(Snake snake){
     return average;
 }
 
-void EnergyInternalTemplate::countTotalEnergyInt(Sna *snake){
+void EnergyInternalTemplate::countContourEstimation(Snake *snake){
+    //this function counts total energy for snake contour at actual coordinates of points
+    int n = snake->contour.size();
+    int s_i_p1_x, s_i_x, s_i_m1_x, s_i_p1_y, s_i_y, s_i_m1_y;
+
+    for(int i = 0; i < n; i++){
+        s_i_p1_x = snake->contour.at((i+1)%n)->x;
+        s_i_x = snake->contour.at(i)->x;
+        s_i_m1_x = snake->contour.at((i==0) ? (n-1) : (i-1))->x;
+        s_i_p1_y = snake->contour.at((i+1)%n)->y;
+        s_i_y = snake->contour.at(i)->y;
+        s_i_m1_y = snake->contour.at((i==0) ? (n-1) : (i-1))->y;
+
+        snake->contour.at(i)->E_int = sqr( abs((s_i_x-s_i_m1_x)/abs(s_i_x-s_i_m1_x)
+                                               -
+                                               (s_i_p1_x-s_i_x)/abs(s_i_p1_x-s_i_x)
+                                              ))
+                                        +
+                                      sqr( abs((s_i_y-s_i_m1_y)/abs(s_i_y-s_i_m1_y)
+                                               -
+                                              (s_i_p1_y-s_i_y)/abs(s_i_p1_y-s_i_y)
+                                              )
+                                      );
+    }
+
+}
+
+
+
+void EnergyInternalTemplate::countTotalEnergyInt(Snake *snake){
     //this function counts total energy for snake contour at actual coordinates of points
     float totalEnergy = 0;
 

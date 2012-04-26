@@ -34,8 +34,7 @@ public:
     Mat matrixOfPoints;
     float weight_E_ext;
     float weight_E_int;
-
-
+    float avgDist;
 
     //constructors
     Snake();

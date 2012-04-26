@@ -2309,7 +2309,7 @@ Deviation</string>
        <number>50</number>
       </property>
       <property name="singleStep">
-       <number>2</number>
+       <number>1</number>
       </property>
       <property name="value">
        <number>1</number>
@@ -2532,7 +2532,7 @@ Deviation</string>
        <double>0.100000000000000</double>
       </property>
       <property name="value">
-       <double>35.500000000000000</double>
+       <double>5.500000000000000</double>
       </property>
      </widget>
      <widget class="QLabel" name="label_snake_sobelScale">

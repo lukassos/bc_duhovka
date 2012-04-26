@@ -31,6 +31,7 @@ public:
     float countLocalEnergyInt1stage(Snake snake, int point, int newX, int newY);
     float countLocalEnergyInt2stage(Snake snake, int point, int newX, int newY);
     float getAverageDistance(Snake snake);
+    void countContourEstimation(Snake *snake);
 
     void countTotalEnergyInt(Snake *snake);
 
