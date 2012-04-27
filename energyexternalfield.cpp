@@ -63,8 +63,8 @@ void EnergyExternalField::countVectorField(int type){
         //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_scale_0.01.png",dx);
         saveMatToTextFile(dy, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dy_scale_0.01.txt");
         //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_scale_0.01.png",dy);
-        cv::pow(dx, 2, dx);
-        cv::pow(dy, 2, dy);
+        //cv::pow(dx, 2, dx);
+        //cv::pow(dy, 2, dy);
 
         //saveMatToTextFile(dx, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_pow_2.txt");
         //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_pow_2.png",dx);
@@ -109,8 +109,12 @@ Mat EnergyExternalField::getNeighborhoodExtE(int x, int y, int step, int at){
         index_neighbor_y=0;
         for (int actual_y = (y - step); actual_y <= (y + step); actual_y++)
         {
-            temp.at<unsigned char>(actual_y, actual_x)= this->vectorField.at(at).at<unsigned char>(actual_y, actual_x);
+            temp.at<unsigned char>(index_neighbor_y, index_neighbor_x)= this->vectorField.at(at).at<unsigned char>(actual_y, actual_x);
             index_neighbor_y++;
+//            QMessageBox msg;
+//            msg.setText(QString().number(this->vectorField.at(at).at<unsigned char>(actual_y, actual_x)));
+//            msg.setInformativeText("coordinates and indexes \n["+QString().number(actual_x)+", "+QString().number(actual_y)+"] i:"+QString().number(index_neighbor_x)+", "+QString().number(index_neighbor_y) );
+//            msg.exec();
         }
         index_neighbor_x++;
     }
