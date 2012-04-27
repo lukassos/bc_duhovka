@@ -1297,7 +1297,7 @@ void MainWindow::on_pushButton_snakePromo_clicked()
     }
     openedCVWindowNames.append("Snake After Init");
     activeContour = new Snake(workImg);
-    activeContour->initSnakeContour(activeContour, 300,
+    activeContour->initSnakeContour(activeContour, 30,
                                     EnergyInternalTemplate::ClosedContour_Circle,
                                     EnergyExternalField::GradientMagnitudes,
                                     //weights of internal and external energies

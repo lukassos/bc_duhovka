@@ -99,9 +99,9 @@ float EnergyInternalTemplate::getAverageDistance(Snake snake){
         s_i_y = snake.contour.at(i)->y;
         s_i_m1_y = snake.contour.at((i==0) ? (n-1) : (i-1))->y;
 
-        summary = ( sqr( qAbs((int)( s_i_x - s_i_m1_x )))
+        summary += ( sqr( s_i_x - s_i_m1_x )
                      +
-                    sqr( qAbs((int)( s_i_y - s_i_m1_y ))) );
+                    sqr( s_i_y - s_i_m1_y ) );
     }
     float average = summary / snake.contour.size();
 

@@ -37,13 +37,14 @@ void EnergyExternalField::countVectorField(int type){
     case EnergyExternalField::GradientMagnitudes:
 
         //remove noise and scale image for furher range of gradient
-        GaussianBlur(this->vectorField.at(0), gaus, Size(3, 3), this->gausianDeviation, 0);
-        //saveMatToTextFile(gaus, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gausianBlur.txt");
+        GaussianBlur(this->vectorField.at(0), gaus, Size(7, 7), this->gausianDeviation, 0);
+        saveMatToTextFile(gaus, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gausianBlur.txt");
         this->vectorField.insert(0, gaus.clone());
         cv::imshow("EXTERNAL GAUSIAN", gaus);
-
+        //medianBlur(gaus, gaus, 3);
         //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gausianBlur.png",gaus);
         //derivates of matrices by sobel operator
+        //Laplacian(gaus, gradient, gradient.depth(), 3, this->sobelScale);
 
         Sobel(gaus, dx,  CV_8UC1, 1, 0, 3, this->sobelScale);
         Sobel(gaus, dy,  CV_8UC1, 0, 1, 3, this->sobelScale);
@@ -62,8 +63,8 @@ void EnergyExternalField::countVectorField(int type){
         //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_scale_0.01.png",dx);
         saveMatToTextFile(dy, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dy_scale_0.01.txt");
         //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_scale_0.01.png",dy);
-        //cv::pow(dx, 2, dx);
-        //cv::pow(dy, 2, dy);
+        cv::pow(dx, 2, dx);
+        cv::pow(dy, 2, dy);
 
         //saveMatToTextFile(dx, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_pow_2.txt");
         //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_pow_2.png",dx);
@@ -105,6 +106,7 @@ Mat EnergyExternalField::getNeighborhoodExtE(int x, int y, int step, int at){
 
     for (int actual_x = (x - step); actual_x <= (x + step); actual_x++)
     {
+        index_neighbor_y=0;
         for (int actual_y = (y - step); actual_y <= (y + step); actual_y++)
         {
             temp.at<unsigned char>(actual_y, actual_x)= this->vectorField.at(at).at<unsigned char>(actual_y, actual_x);
@@ -112,6 +114,7 @@ Mat EnergyExternalField::getNeighborhoodExtE(int x, int y, int step, int at){
         }
         index_neighbor_x++;
     }
+    saveMatToTextFile(temp, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_beforeextE.txt");
     return temp;
 }
 
