@@ -32,12 +32,14 @@ public:
     float countLocalEnergyInt2stage(Snake snake, int point, int newX, int newY);
     float getAverageDistance(Snake snake);
     void countContourEstimation(Snake *snake);
+    bool largerThanContourOfNeighbors(Snake snake, int pointOfSnake, bool plus_not_minus);
 
     void countTotalEnergyInt(Snake *snake);
 
     enum ContourType{
         ClosedContour_Circle,
         ClosedContour_Polygon,
+        ClosedContour_Rectangle,
         OpenContou_Line,
         OpenContour_Arc
     };

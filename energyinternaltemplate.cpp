@@ -121,21 +121,43 @@ void EnergyInternalTemplate::countContourEstimation(Snake *snake){
         s_i_y = snake->contour.at(i)->y;
         s_i_m1_y = snake->contour.at((i==0) ? (n-1) : (i-1))->y;
 
-        snake->contour.at(i)->E_int = sqr( abs((s_i_x-s_i_m1_x)/abs(s_i_x-s_i_m1_x)
-                                               -
-                                               (s_i_p1_x-s_i_x)/abs(s_i_p1_x-s_i_x)
-                                              ))
+        snake->contour.at(i)->C_int = sqr( qAbs( ((s_i_x-s_i_m1_x)/
+                                                          qAbs( ((s_i_x - s_i_m1_x)==0) ? 1 :  (s_i_x - s_i_m1_x) ))
+                                                -
+                                                ((s_i_p1_x-s_i_x)/
+                                                          qAbs( ((s_i_p1_x - s_i_x)==0) ? 1 :  (s_i_p1_x - s_i_x) ))
+                                                )
+                                           )
                                         +
-                                      sqr( abs((s_i_y-s_i_m1_y)/abs(s_i_y-s_i_m1_y)
-                                               -
-                                              (s_i_p1_y-s_i_y)/abs(s_i_p1_y-s_i_y)
-                                              )
-                                      );
+                                      sqr( qAbs( ((s_i_y-s_i_m1_y)/
+                                                          qAbs( ((s_i_y - s_i_m1_y)==0) ? 1 :  (s_i_y - s_i_m1_y) ))
+                                                -
+                                                ((s_i_p1_y-s_i_y)/
+                                                          qAbs( ((s_i_p1_y - s_i_y)==0) ? 1 :  (s_i_p1_y - s_i_y) ))
+                                                )
+                                           );
+
     }
 
 }
 
+bool EnergyInternalTemplate::largerThanContourOfNeighbors(Snake snake, int pointOfSnake, bool plus_not_minus){
+    int n = snake.contour.size();
 
+    //indexes of deformable contour, has to be moduled to n
+    //s_i_p1 = s with index (i + 1) // s_i = s with index i at new possiblepoint// s_i_m1 = s with index (i - 1)
+    int C_i_p1, C_i, C_i_m1;
+
+    C_i_p1 = snake.contour.at((pointOfSnake+1)%n)->C_int;
+    C_i = snake.contour.at(pointOfSnake)->C_int;
+    C_i_m1 = snake.contour.at((pointOfSnake==0) ? (n-1) : (pointOfSnake-1))->C_int;
+    if(plus_not_minus){
+        return (C_i > C_i_p1);
+    }else{
+        return (C_i > C_i_m1);
+    }
+
+}
 
 void EnergyInternalTemplate::countTotalEnergyInt(Snake *snake){
     //this function counts total energy for snake contour at actual coordinates of points

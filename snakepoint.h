@@ -32,7 +32,7 @@ public:
 
     float x, y; // coordnates
     float alpha, beta, step;
-    float E_int, E_ext, E_snake;
+    float E_int, E_ext, E_snake, C_int;
 };
 
 #endif // SNAKEPOINT_H

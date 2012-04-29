@@ -35,6 +35,9 @@ public:
     float weight_E_ext;
     float weight_E_int;
     float avgDist;
+    float contourThreshold;
+    float edgeStrenghtThreshold;
+
 
     //constructors
     Snake();
@@ -46,14 +49,17 @@ public:
     //set`s coordinates to snakePoints and sets radius circle/polygon created by those points
     void initSnakeContour(Snake* snakeToInit, int numberOfPoints, int energy_int_type, int energy_ext_type,
                   float weight_Eext = 1, float weight_Eint = 1,
-                  float baseAlpha = 0.2, float baseBeta = 0.5,
-                  float deviation = 24, float scale = 35.5,
+                  float baseAlpha = 0.7, float baseBeta = 0.4,
+                  float contourThresh = 0.3, float edgeStrenghtThresh = 120,
+                  float deviation = 100, float scale = 3.5,
                   int baseStep = 1,
-                  int fastInitKernel = 17);
+                  int fastInitKernel = 17,
+                  int offsetX = 0, int offsetY = 0);
 
     //functions called during initialization
     float fastCenterLocalizationAlgorithm(Mat image, cv::Point *fastCenter, int k  = 11);
     void setCirclePositions(QList <SnakePoint*> points, float centerX, float ceterY, float radius, int maxX, int maxY);
+    void setRectanglePositions(QList <SnakePoint*> points, float offsetX, float offsetY, float side_a, float side_b, int maxX, int maxY);
 
     void setAlphaToAllPoints(float alpha);
 

@@ -40,17 +40,21 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
                              int energy_int_type, int energy_ext_type,
                              float weight_Eext, float weight_Eint,
                              float baseAlpha, float baseBeta,/*energy internal parameters*/
+                             float contourThresh, float edgeStrenghtThresh,
                              float deviation, float scale,/*energy external parameters*/
                              int baseStep,
-                             int fastInitKernel)
+                             int fastInitKernelSize,
+                             int offsetX, int offsetY)
 {
 
    // snake.contourTemplate.type=decision;
     snake->typeOfContour = energy_int_type;
     snake->weight_E_ext = weight_Eext;
     snake->weight_E_int = weight_Eint;
-
+    snake->contourThreshold = contourThresh;
+    snake->edgeStrenghtThreshold = edgeStrenghtThresh;
     snake->contour.clear();
+
     if(snake->contour.isEmpty() || numberOfPoints!=snake->contour.size()){
         for(int i=0; i<numberOfPoints; i++){
             SnakePoint* temp = new SnakePoint();
@@ -68,7 +72,7 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     switch(energy_int_type){
     case EnergyInternalTemplate::ClosedContour_Circle:
         //finds center of pupil and its radius
-        radius = snake->fastCenterLocalizationAlgorithm(snake->originalImage, fastCenter, fastInitKernel);
+        radius = snake->fastCenterLocalizationAlgorithm(snake->originalImage, fastCenter, fastInitKernelSize);
         centerX = fastCenter->x;
         centerY = fastCenter->y;
         //set coordinates to circle
@@ -76,7 +80,14 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
 
         //EnergyInternalTemplate().countTotalEnergyInt(snake);
         break;
+    case EnergyInternalTemplate::ClosedContour_Rectangle:
+        //set appropriate rectangle due to found pupil
 
+        //set coordinates to circle
+        snake->setRectanglePositions(snake->contour,  offsetX, offsetY, snake->originalImage.cols, snake->originalImage.rows, snake->getImageOriginal().cols, snake->getImageOriginal().rows);
+
+        //EnergyInternalTemplate().countTotalEnergyInt(snake);
+        break;
     default:;
     }
     //creation of external energy and control class
@@ -111,12 +122,44 @@ void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float 
 //        outputFile.close();
 }
 
-void Snake::initSnakeExtField(Snake *snake, int energy_ext_type, float deviation, float scale){
+void Snake::setRectanglePositions(QList <SnakePoint*> points, float offsetX, float offsetY, float side_a, float side_b, int maxX, int maxY){
+    int count = points.size();
+    float periphery = ((2 * side_a) + (2 * side_b));
+    float distance = periphery/count;
+    float i = 0;
+    for(int n = count - 1; n >= 0; n--){
+         if( i <= side_a ){
+            points.at(n)->x = (offsetX + i);
+            points.at(n)->y = offsetY;
+        }else if( i > side_a  && i <= (side_a + side_b) ){
+            points.at(n)->x = (offsetX + side_a);
+            points.at(n)->y = (offsetY + i - side_a);
+        }else if( i > (side_a + side_b)  && i <= ((2 * side_a) + side_b) ){
+            points.at(n)->x = (offsetX + side_a - i + side_a + side_b);
+            points.at(n)->y = (offsetY + side_b);
+        }else if( i > ((2 * side_a) + side_b)  && i < periphery ){
+            points.at(n)->x = offsetX;
+            points.at(n)->y = (offsetY + side_b - i + (2 * side_a) + side_b);
+        }
 
+        if(points.at(n)->x >= maxX)
+            points.at(n)->x = maxX - 1;
+
+        if(points.at(n)->y >= maxY)
+            points.at(n)->y = maxY - 1;
+
+        i += distance;
+    }
+}
+
+
+void Snake::initSnakeExtField(Snake *snake, int energy_ext_type, float deviation, float scale){
+    cv::Point *fastCenter = new cv::Point();
     switch(energy_ext_type){
     case EnergyExternalField::GradientMagnitudes:
         snake->vectorField = new EnergyExternalField(snake->getImageOriginal(), energy_ext_type, deviation, scale);
-        snake->vectorField->countVectorField(EnergyExternalField::GradientMagnitudes);
+        fastCenterLocalizationAlgorithm(snake->getImageOriginal(), fastCenter);
+        snake->vectorField->countVectorField(EnergyExternalField::GradientMagnitudes, floor((double)fastCenter->x -1), floor((double)fastCenter->y -1));
 
         break;
 
@@ -159,8 +202,8 @@ void Snake::moveSnakeContour(Snake *snake)
             if (!equilibrium){
             //for all points count locally external and internal energy and look if is in neighborhood point witl lower energy
 
-                for (int i=0; i < snake->contour.size(); i++){
-
+                for (int n=0; n <= snake->contour.size(); n++){
+                    int i = n%snake->contour.size();
                     int neighborhoodSize = (snake->contour.at(i)->step * 2) + 1 ;
                     Mat actual_x_coordinate =  Mat(neighborhoodSize, neighborhoodSize, CV_32FC1);
                     Mat actual_y_coordinate =  Mat(neighborhoodSize, neighborhoodSize, CV_32FC1);
@@ -170,7 +213,7 @@ void Snake::moveSnakeContour(Snake *snake)
 
                     Mat actual_local_ext_E = Mat(snake->vectorField->getNeighborhoodExtE(snake->contour.at(i)->x, snake->contour.at(i)->y, snake->contour.at(i)->step, 0).clone());
                     Mat actual_local_ext_E_norm = Mat(neighborhoodSize, neighborhoodSize, CV_32FC1);
-                    snake->vectorField->saveMatToTextFile(actual_local_ext_E, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_extE.txt");
+//                    snake->vectorField->saveMatToTextFile(actual_local_ext_E, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_extE.txt");
                     double minExtE = 0;
                     double maxExtE = 0;
                     cv::minMaxIdx(actual_local_ext_E, &minExtE, &maxExtE);
@@ -202,17 +245,35 @@ void Snake::moveSnakeContour(Snake *snake)
                             actual_local_ext_E_norm.at<float>(index_neighbor_y, index_neighbor_x) =
                                     ( (float) minExtE - actual_local_ext_E.at<unsigned char>(index_neighbor_y, index_neighbor_x)) / ( (float)maxExtE - (float)minExtE );
                             //fill coordinates to matrixes
-                            actual_x_coordinate.at<float>(index_neighbor_y, index_neighbor_x) = actual_x;
-                            actual_y_coordinate.at<float>(index_neighbor_y, index_neighbor_x) = actual_y;
+                            if(actual_x < 0){
+                                actual_x_coordinate.at<float>(index_neighbor_y, index_neighbor_x) = 0;
+                            }else if(actual_x >= snake->originalImage.cols){
+                                actual_x_coordinate.at<float>(index_neighbor_y, index_neighbor_x) = snake->originalImage.cols - 1;
+                            }else{
+                                actual_x_coordinate.at<float>(index_neighbor_y, index_neighbor_x) = actual_x;
+                            }
+                            if(actual_y < 0){
+                                actual_y_coordinate.at<float>(index_neighbor_y, index_neighbor_x) = 0;
+                            }else if(actual_y >= snake->originalImage.cols){
+                                actual_y_coordinate.at<float>(index_neighbor_y, index_neighbor_x) = snake->originalImage.rows - 1;
+                            }else{
+                                actual_y_coordinate.at<float>(index_neighbor_y, index_neighbor_x) = actual_y;
+                            }
+                            //constrain energy of picture border
+                            if( actual_x < 0 || actual_x >= snake->originalImage.cols
+                                    || actual_y < 0 || actual_y >= snake->originalImage.rows)
+                            {
+                                actual_local_ext_E_norm.at<float>(index_neighbor_y, index_neighbor_x) = 1;
+                            }
                             index_neighbor_x++;
                         }
                         index_neighbor_y++;
                     }
-                    snake->vectorField->saveMatToTextFile(actual_local_int_E_1stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_1stage.txt");
-                    snake->vectorField->saveMatToTextFile(actual_local_int_E_2stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_2stage.txt");
-                    snake->vectorField->saveMatToTextFile(actual_local_ext_E_norm, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_extNorm.txt");
-                    snake->vectorField->saveMatToTextFile(actual_x_coordinate, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_coordinatesX.txt");
-                    snake->vectorField->saveMatToTextFile(actual_y_coordinate, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_coordinatesY.txt");
+//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_1stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_1stage.txt");
+//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_2stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_2stage.txt");
+//                    snake->vectorField->saveMatToTextFile(actual_local_ext_E_norm, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_extNorm.txt");
+//                    snake->vectorField->saveMatToTextFile(actual_x_coordinate, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_coordinatesX.txt");
+//                    snake->vectorField->saveMatToTextFile(actual_y_coordinate, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_coordinatesY.txt");
 
                     double maxIntE_1stg = 0;
                     double maxIntE_2stg = 0;
@@ -221,12 +282,14 @@ void Snake::moveSnakeContour(Snake *snake)
                     //normalization of internal energy
                     actual_local_int_E_1stg = actual_local_int_E_1stg/maxIntE_1stg;
                     actual_local_int_E_2stg = actual_local_int_E_2stg/maxIntE_2stg;
-                    snake->vectorField->saveMatToTextFile(actual_local_int_E_1stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_1stageNorm.txt");
-                    snake->vectorField->saveMatToTextFile(actual_local_int_E_2stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_2stageNorm.txt");
+//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_1stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_1stageNorm.txt");
+//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_2stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_2stageNorm.txt");
 
 
                     int best_x = -1;
+                    int best_intex_x = snake->contour.at(i)->step;
                     int best_y = -1;
+                    int best_intex_y = snake->contour.at(i)->step;
                     float actual_local_snake_E;
                     //set big value for further comparision with local minima
                     snake->contour.at(i)->E_snake = snake->weight_E_int * (snake->contour.at(i)->alpha + snake->contour.at(i)->beta)
@@ -245,10 +308,27 @@ void Snake::moveSnakeContour(Snake *snake)
                                       +
                                       snake->weight_E_ext * actual_local_ext_E_norm.at<float>(index_neighbor_y, index_neighbor_x)
                                       );
+
                             if(actual_local_snake_E < snake->contour.at(i)->E_snake){
                                 snake->contour.at(i)->E_snake = actual_local_snake_E;
                                 best_x = actual_x_coordinate.at<float>(index_neighbor_y, index_neighbor_x);
                                 best_y = actual_y_coordinate.at<float>(index_neighbor_y, index_neighbor_x);
+                                if( best_x < 0 ){
+                                    best_x = 0;
+                                }else if(best_x >= snake->originalImage.cols){
+                                    best_x = snake->originalImage.cols - 1;
+                                }else{
+                                    best_intex_x = index_neighbor_x;
+                                }
+
+                                if( best_y < 0 ){
+                                    best_y = 0;
+                                }else if(best_y >= snake->originalImage.rows){
+                                    best_y = snake->originalImage.rows - 1;
+                                }else{
+                                    best_intex_y = index_neighbor_y;
+                                }
+
                             }
                         }
                     }
@@ -256,18 +336,27 @@ void Snake::moveSnakeContour(Snake *snake)
                     //if coordinates changed then movedCount increase and move point
                     if (best_x != snake->contour.at(i)->x && best_y != snake->contour.at(i)->y){
                         snake->contour.at(i)->x = best_x;
-                        snake->contour.at(i)->y = best_y;
+                        snake->contour.at(i)->y = best_y;    
                         movedCount++;
                     }
-
+                    snake->contour.at(i)->E_ext = actual_local_ext_E.at<float>(best_intex_y, best_intex_x);
                 }
-            //            //here goes energy curvature estimation for better beta parameter setting
-//            //curvature is counted for all snake points
-//            EnergyInternalTemplate().countContourEstimation(snake);
-//            //if curvature is maximal then set beta
-//            for( int i=0; i < snake->contour.size(); i++){
-//                if()
-//            }
+
+                //here goes energy curvature estimation for better beta parameter setting
+                //curvature is counted for all snake points
+                EnergyInternalTemplate().countContourEstimation(snake);
+                //if curvature is maximal then set beta
+                for( int i=0; i < snake->contour.size(); i++){
+                    if(  EnergyInternalTemplate().largerThanContourOfNeighbors(*snake, i, true)
+                         &&
+                         EnergyInternalTemplate().largerThanContourOfNeighbors(*snake, i, false)
+                         &&
+                         snake->contour.at(i)->C_int > snake->contourThreshold
+                         &&
+                         snake->contour.at(i)->E_ext > snake->edgeStrenghtThreshold )
+
+                        snake->contour.at(i)->beta = 0;
+                }
 
 
                 //if only 3 points moved then stop iteration of snake
@@ -275,6 +364,7 @@ void Snake::moveSnakeContour(Snake *snake)
                     equilibrium = true;
                 }
             }
+
             cycles++;
         }
 
@@ -283,7 +373,7 @@ void Snake::moveSnakeContour(Snake *snake)
     default:;
     }
     QMessageBox casedone;
-    casedone.setText("case done");
+    casedone.setText("Moving done in "+QString().number(cycles)+" cycles");
     casedone.exec();
     //write snake points into image matrix for showing
     showMatrix(snake);
@@ -292,10 +382,11 @@ void Snake::moveSnakeContour(Snake *snake)
 
 
 void Snake::showMatrix(Snake *snake){
-    Mat zeromat = Mat().zeros(snake->originalImage.rows,snake->originalImage.cols, CV_8U);
+    //Mat zeromat = Mat().zeros(snake->originalImage.rows,snake->originalImage.cols, CV_8U);
     snake->matrixOfPoints.release();
     snake->matrixOfPoints = Mat(snake->originalImage.rows,snake->originalImage.cols, CV_32FC3, 0);
-    cvtColor(zeromat, snake->matrixOfPoints, CV_GRAY2RGBA);
+    cvtColor(snake->vectorField->getConvertedVectorField(0), snake->matrixOfPoints, CV_GRAY2RGBA);
+    //cvtColor(zeromat, snake->matrixOfPoints, CV_GRAY2RGBA);
     snake->showImage.release();
     snake->showImage = Mat(snake->originalImage.rows,snake->originalImage.cols, CV_32FC3, 0);
     cvtColor(snake->originalImage, snake->showImage, CV_GRAY2RGBA);
@@ -305,7 +396,7 @@ void Snake::showMatrix(Snake *snake){
     //            imageToShow.at<Vec3b>(i,j)[2]=155;
         for(int i=0; i<snake->contour.size(); i++){
             snake->matrixOfPoints.at<Vec3b>((int)(snake->contour.at(i)->y), (int)(snake->contour.at(i)->x))[0] = 0;//255 - imageToShow.at<float>(snake->contour.at(i)->y, snake->contour.at(i)->x);
-            snake->matrixOfPoints.at<Vec3b>((int)(snake->contour.at(i)->y), (int)(snake->contour.at(i)->x))[1] = 255;
+            snake->matrixOfPoints.at<Vec3b>((int)(snake->contour.at(i)->y), (int)(snake->contour.at(i)->x))[1] = 0;
             snake->matrixOfPoints.at<Vec3b>((int)(snake->contour.at(i)->y), (int)(snake->contour.at(i)->x))[2] = 255;
             snake->showImage.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[0] = 0;//255 - imageToShow.at<float>(snake->contour.at(i)->y, snake->contour.at(i)->x);
             snake->showImage.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[1] = 0;

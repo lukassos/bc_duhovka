@@ -981,10 +981,10 @@ void MainWindow::on_pushButton_sobel_clicked()
 {
     if(1<=(ui->comboBox_sobel_ksize->currentText().toInt()*ui->doubleSpinBox_sobel_scale->value()) && (ui->comboBox_sobel_ksize->currentText().toInt()*ui->doubleSpinBox_sobel_scale->value())<31){
         activeSetup.append(ImageManip::Sobel_flag);
-        ui->textEdit_setup->append("Sobel { "+ui->comboBox_sobel_ksize->currentText()+"; "+ui->comboBox_sobel_xDerivOrder->currentText()+"; "+ui->comboBox_sobel_yDerivOrder->currentText()+"; "+ui->doubleSpinBox_sobel_scale->text()+"; "+ui->doubleSpinBox_sobel_DeltaIntensityOffset->text()+"; }");
-        intBuffer.append(ui->comboBox_sobel_ksize->currentText().toInt());
+        ui->textEdit_setup->append("Sobel { "+ui->comboBox_sobel_xDerivOrder->currentText()+"; "+ui->comboBox_sobel_yDerivOrder->currentText()+"; "+ui->comboBox_sobel_ksize->currentText()+"; "+ui->doubleSpinBox_sobel_scale->text()+"; "+ui->doubleSpinBox_sobel_DeltaIntensityOffset->text()+"; }");
         intBuffer.append(ui->comboBox_sobel_xDerivOrder->currentText().toInt());
         intBuffer.append(ui->comboBox_sobel_yDerivOrder->currentText().toInt());
+        intBuffer.append(ui->comboBox_sobel_ksize->currentText().toInt());
         doubleBuffer.append(ui->doubleSpinBox_sobel_scale->value());
         doubleBuffer.append(ui->doubleSpinBox_sobel_DeltaIntensityOffset->value());
     }else{
@@ -1304,9 +1304,11 @@ void MainWindow::on_pushButton_snakePromo_clicked()
                                     ui->doubleSpinBox_snake_weight_extE->value(), ui->doubleSpinBox_snake_weight_intE->value(),
                                     //alpha, beta,
                                     ui->doubleSpinBox_snake_alpha->value(), ui->doubleSpinBox_snake_beta->value(),
+                                    //thresholds for curvature estimation
+                                    ui->doubleSpinBox_snake_curvThresh->value(), ui->doubleSpinBox_snake_edgeThresh->value(),
                                     //gausian deviation, sobel scale factor
                                     ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value(),
-                                    //step or neighborhood size of control point
+                                    //step or neighborhood size where can control point move
                                     ui->spinBox_snake_step->value() );
     namedWindow("Snake Orig Matrix");
     openedCVWindowNames.append("Snake Orig Matrix");
@@ -1314,7 +1316,7 @@ void MainWindow::on_pushButton_snakePromo_clicked()
 
     namedWindow("VectorField0");
     openedCVWindowNames.append("VectorField0");
-    imshow("VectorField0",activeContour->vectorField->getVectorField(0));
+    imshow("VectorField0",activeContour->vectorField->getConvertedVectorField(0));
     namedWindow("VectorField1");
     openedCVWindowNames.append("VectorField1");
     imshow("VectorField1",activeContour->vectorField->getVectorField(1));
@@ -1347,36 +1349,39 @@ void MainWindow::on_pushButton_moveSnake_clicked()
     namedWindow("Snake Show Matrix");
     openedCVWindowNames.append("Snake Show Matrix");
     imshow("Snake Show Matrix",activeContour->showImage);
+    namedWindow("Snake Point Matrix");
+    openedCVWindowNames.append("Snake Point Matrix");
+    imshow("Snake Point Matrix",activeContour->matrixOfPoints);
 }
 
 void MainWindow::on_doubleSpinBox_snake_alpha_editingFinished()
 {
-    activeContour->setAlphaToAllPoints(ui->doubleSpinBox_snake_alpha->value());
+    //activeContour->setAlphaToAllPoints(ui->doubleSpinBox_snake_alpha->value());
 }
 
 void MainWindow::on_doubleSpinBox_snake_beta_editingFinished()
 {
-    activeContour->setBetaToAllPoints(ui->doubleSpinBox_snake_beta->value());
+    //activeContour->setBetaToAllPoints(ui->doubleSpinBox_snake_beta->value());
 }
 
 void MainWindow::on_doubleSpinBox_snake_sobelScale_editingFinished()
 {
 
-    activeContour->initSnakeExtField(activeContour, EnergyExternalField::GradientMagnitudes, ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value());
+    //activeContour->initSnakeExtField(activeContour, EnergyExternalField::GradientMagnitudes, ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value());
 }
 
 void MainWindow::on_doubleSpinBox_snake_gausianDeviation_editingFinished()
 {
-    activeContour->initSnakeExtField(activeContour, EnergyExternalField::GradientMagnitudes, ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value());
+    //activeContour->initSnakeExtField(activeContour, EnergyExternalField::GradientMagnitudes, ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value());
 }
 
 
 void MainWindow::on_doubleSpinBox_snake_weight_intE_editingFinished()
 {
-    activeContour->weight_E_int = ui->doubleSpinBox_snake_weight_intE->value();
+    //activeContour->weight_E_int = ui->doubleSpinBox_snake_weight_intE->value();
 }
 
 void MainWindow::on_doubleSpinBox_snake_weight_extE_editingFinished()
 {
-    activeContour->weight_E_ext = ui->doubleSpinBox_snake_weight_extE->value();
+    //activeContour->weight_E_ext = ui->doubleSpinBox_snake_weight_extE->value();
 }

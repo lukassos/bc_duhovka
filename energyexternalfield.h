@@ -24,7 +24,7 @@ public:
     EnergyExternalField();
     EnergyExternalField(Mat inputImage, int energy_ext_type, float deviation, float scale);
 
-    void countVectorField(int type);
+    void countVectorField(int type, int centerX, int centerY);
 
     //copy image into new instance to 1 layered 2 dimensional field of float
     void setVectorField(Mat inputImage){

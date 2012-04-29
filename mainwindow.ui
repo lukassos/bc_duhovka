@@ -2240,34 +2240,34 @@ Threshold</string>
      <widget class="QPushButton" name="pushButton_snakePromo">
       <property name="geometry">
        <rect>
-        <x>40</x>
+        <x>0</x>
+        <y>40</y>
+        <width>71</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Snake Init</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_moveSnake">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
         <y>40</y>
         <width>75</width>
         <height>23</height>
        </rect>
       </property>
       <property name="text">
-       <string>Snake Promo</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="pushButton_moveSnake">
-      <property name="geometry">
-       <rect>
-        <x>40</x>
-        <y>340</y>
-        <width>75</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>move snake</string>
+       <string>Snake Move</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_snake_gausianDeviation">
       <property name="geometry">
        <rect>
         <x>9</x>
-        <y>230</y>
+        <y>290</y>
         <width>71</width>
         <height>21</height>
        </rect>
@@ -2312,7 +2312,7 @@ Deviation</string>
        <number>1</number>
       </property>
       <property name="value">
-       <number>1</number>
+       <number>3</number>
       </property>
      </widget>
      <widget class="QDoubleSpinBox" name="doubleSpinBox_snake_beta">
@@ -2401,7 +2401,7 @@ Deviation</string>
       <property name="geometry">
        <rect>
         <x>80</x>
-        <y>230</y>
+        <y>290</y>
         <width>65</width>
         <height>20</height>
        </rect>
@@ -2422,7 +2422,7 @@ Deviation</string>
        <double>0.100000000000000</double>
       </property>
       <property name="value">
-       <double>80.000000000000000</double>
+       <double>97.000000000000000</double>
       </property>
      </widget>
      <widget class="QLabel" name="label_snake_weight_extE">
@@ -2511,7 +2511,7 @@ Deviation</string>
       <property name="geometry">
        <rect>
         <x>80</x>
-        <y>260</y>
+        <y>320</y>
         <width>65</width>
         <height>20</height>
        </rect>
@@ -2532,10 +2532,71 @@ Deviation</string>
        <double>0.100000000000000</double>
       </property>
       <property name="value">
-       <double>5.500000000000000</double>
+       <double>3.500000000000000</double>
       </property>
      </widget>
      <widget class="QLabel" name="label_snake_sobelScale">
+      <property name="geometry">
+       <rect>
+        <x>9</x>
+        <y>320</y>
+        <width>71</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="text">
+       <string>Sobel Scale</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_snake_gausianDeviation_2">
+      <property name="geometry">
+       <rect>
+        <x>9</x>
+        <y>230</y>
+        <width>71</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="text">
+       <string>Curvature
+Threshold</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="doubleSpinBox_snake_curvThresh">
+      <property name="geometry">
+       <rect>
+        <x>80</x>
+        <y>230</y>
+        <width>65</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="decimals">
+       <number>2</number>
+      </property>
+      <property name="minimum">
+       <double>0.010000000000000</double>
+      </property>
+      <property name="maximum">
+       <double>999.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>0.100000000000000</double>
+      </property>
+      <property name="value">
+       <double>0.300000000000000</double>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_snake_sobelScale_2">
       <property name="geometry">
        <rect>
         <x>9</x>
@@ -2548,7 +2609,35 @@ Deviation</string>
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="text">
-       <string>Sobel Scale</string>
+       <string>Edge Strenght</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="doubleSpinBox_snake_edgeThresh">
+      <property name="geometry">
+       <rect>
+        <x>80</x>
+        <y>260</y>
+        <width>65</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="decimals">
+       <number>2</number>
+      </property>
+      <property name="minimum">
+       <double>0.010000000000000</double>
+      </property>
+      <property name="maximum">
+       <double>999.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="value">
+       <double>120.000000000000000</double>
       </property>
      </widget>
     </widget>
