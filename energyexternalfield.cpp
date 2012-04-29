@@ -23,7 +23,7 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
     Mat kernelSobelMdx = Mat(3, 3, CV_8UC1);
     Mat kernelSobelMdy = Mat(3, 3, CV_8UC1);
     Mat canny = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
-
+    Mat laplace = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
     Mat gradient = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_32FC1);;
 
     //this->vectorField.at(0).convertTo(gaus, gaus.depth(), 1, 15);
@@ -51,7 +51,7 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
         //medianBlur(gaus, gaus, 3);
         imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gausianBlur.png",gaus);
         //derivates of matrices by sobel operator
-        //Laplacian(gaus, gradient, gradient.depth(), 3, this->sobelScale);
+        Laplacian(gaus, laplace, gradient.depth(), 3, this->sobelScale);
 
         Sobel(gaus, dx,  CV_8UC1, 1, 0, 3, this->sobelScale);
         Sobel(gaus, dy,  CV_8UC1, 0, 1, 3, this->sobelScale);
@@ -96,23 +96,30 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
         //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dy_pow_2.png",dy);
         //gradient = dx + dy;
 
+
         for(int j = 0; j < gradient.rows; j++)
             for(int i = 0; i < gradient.cols; i++){
                 gradient.at<float>(j,i) = sqrt( pow(dx.at<unsigned char>(j,i),2) + pow(dy.at<unsigned char>(j,i),2) );
                 //gradient.at<float>(j,i) = sqr( (float)dx.at<unsigned char>(j,i) - 125) + sqr( (float)dy.at<unsigned char>(j,i) - 125);// + ((sqr(dy.at<unsigned char>(j,i) - 125) * 255)/6000) ;
                 //dx.at<unsigned char>(j,i) = (((dx.at<unsigned char>(j,i) - 125) * 255)/15625);
                 //dy.at<unsigned char>(j,i) = (((dy.at<unsigned char>(j,i) - 125) * 255)/15625);
-                if(gradient.at<float>(j,i) < 70){//60-good
+                 float dist = (abs(i-centerX+1)+abs(j-centerY+1))/2;
+                 if(dist < 10){
+                     dist = 500;
+                 }
+                 if(gradient.at<float>(j,i) < 70){//70-good
                     //vector to center = ( intensity addition in center ) / ( distance from center )
-                    float dist = (abs(i-centerX+1)+abs(j-centerY+1))/2;
-                    if(dist < 10){
-                        dist = 500;
-                    }
-                    gradient.at<float>(j,i) = (500/ dist);
+
+                     gradient.at<float>(j,i) =0;
+                    //gradient.at<float>(j,i) = (abs(gradient.at<float>(j,i) - 255)/ dist);
+
+                    //laplace.at<unsigned char>(j,i); //(1000/ dist);
 
                 }else if(canny.at<unsigned char>(j,i) == 255){
                     gradient.at<float>(j,i) = 255;
                 }
+                 if(dist > 150)
+                    ; //gradient.at<float>(j,i) = (1000/ dist);
             }
 
        // blur(dx, dx, Size(5, 5));

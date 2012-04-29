@@ -76,7 +76,7 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
         centerX = fastCenter->x;
         centerY = fastCenter->y;
         //set coordinates to circle
-        snake->setCirclePositions(snake->contour,  centerX, centerY, radius, snake->getImageOriginal().cols, snake->getImageOriginal().rows);
+        snake->setCirclePositions(snake->contour,  centerX, centerY, radius+10, snake->getImageOriginal().cols, snake->getImageOriginal().rows);
 
         //EnergyInternalTemplate().countTotalEnergyInt(snake);
         break;
@@ -176,6 +176,11 @@ void Snake::setAlphaToAllPoints(float alpha){
 void Snake::setBetaToAllPoints(float beta){
     for(int i=0; i<this->contour.size(); i++)
         this->contour.at(i)->setBeta(beta);
+}
+
+void Snake::setStepToAllPoints(float step){
+    for(int i=0; i<this->contour.size(); i++)
+        this->contour.at(i)->setStep(step);
 }
 
 void Snake::countTotalEnergyExt(Snake *snake){
@@ -395,9 +400,16 @@ void Snake::showMatrix(Snake *snake){
     //        for(int j = 0; j < imageToShow.cols; j++)
     //            imageToShow.at<Vec3b>(i,j)[2]=155;
         for(int i=0; i<snake->contour.size(); i++){
-            snake->matrixOfPoints.at<Vec3b>((int)(snake->contour.at(i)->y), (int)(snake->contour.at(i)->x))[0] = 0;//255 - imageToShow.at<float>(snake->contour.at(i)->y, snake->contour.at(i)->x);
+            if(i < (snake->contour.size() - 1) ){
+                cv::line(snake->matrixOfPoints,cv::Point((int)(snake->contour.at(i)->x), (int)(snake->contour.at(i)->y)),cv::Point((int)(snake->contour.at(i+1)->x), (int)(snake->contour.at(i+1)->y)), cv::Scalar(0,105,230));
+            }else{
+                cv::line(snake->matrixOfPoints,cv::Point((int)(snake->contour.at(i)->x), (int)(snake->contour.at(i)->y)),cv::Point((int)(snake->contour.at(0)->x), (int)(snake->contour.at(0)->y)), cv::Scalar(0,105,230));
+            }
+
+            snake->matrixOfPoints.at<Vec3b>((int)(snake->contour.at(i)->y), (int)(snake->contour.at(i)->x))[0] = 255;//255 - imageToShow.at<float>(snake->contour.at(i)->y, snake->contour.at(i)->x);
             snake->matrixOfPoints.at<Vec3b>((int)(snake->contour.at(i)->y), (int)(snake->contour.at(i)->x))[1] = 0;
-            snake->matrixOfPoints.at<Vec3b>((int)(snake->contour.at(i)->y), (int)(snake->contour.at(i)->x))[2] = 255;
+            snake->matrixOfPoints.at<Vec3b>((int)(snake->contour.at(i)->y), (int)(snake->contour.at(i)->x))[2] = 0;
+
             snake->showImage.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[0] = 0;//255 - imageToShow.at<float>(snake->contour.at(i)->y, snake->contour.at(i)->x);
             snake->showImage.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[1] = 0;
             snake->showImage.at<Vec3b>(snake->contour.at(i)->y, snake->contour.at(i)->x)[2] = 255;

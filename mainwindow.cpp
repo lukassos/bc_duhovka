@@ -1297,7 +1297,7 @@ void MainWindow::on_pushButton_snakePromo_clicked()
     }
     openedCVWindowNames.append("Snake After Init");
     activeContour = new Snake(workImg);
-    activeContour->initSnakeContour(activeContour, 30,
+    activeContour->initSnakeContour(activeContour, 50,
                                     EnergyInternalTemplate::ClosedContour_Circle,
                                     EnergyExternalField::GradientMagnitudes,
                                     //weights of internal and external energies
@@ -1344,8 +1344,17 @@ void MainWindow::on_pushButton_snakePromo_clicked()
 
 void MainWindow::on_pushButton_moveSnake_clicked()
 {
+    activeContour->setAlphaToAllPoints(ui->doubleSpinBox_snake_alpha->value());
+    activeContour->setBetaToAllPoints(ui->doubleSpinBox_snake_beta->value());
+    activeContour->setStepToAllPoints(ui->spinBox_snake_step->value());
+    activeContour->weight_E_int = ui->doubleSpinBox_snake_weight_intE->value();
+    activeContour->weight_E_ext = ui->doubleSpinBox_snake_weight_extE->value();
+    activeContour->contourThreshold = ui->doubleSpinBox_snake_curvThresh->value();
+    activeContour->edgeStrenghtThreshold = ui->doubleSpinBox_snake_edgeThresh->value();
+    activeContour->initSnakeExtField(activeContour, EnergyExternalField::GradientMagnitudes, ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value());
     //activeContour->saveSnakeToTextFile(activeContour);
     activeContour->moveSnakeContour(activeContour);
+
     namedWindow("Snake Show Matrix");
     openedCVWindowNames.append("Snake Show Matrix");
     imshow("Snake Show Matrix",activeContour->showImage);

@@ -2394,7 +2394,7 @@ Deviation</string>
        <double>0.010000000000000</double>
       </property>
       <property name="value">
-       <double>0.500000000000000</double>
+       <double>0.700000000000000</double>
       </property>
      </widget>
      <widget class="QDoubleSpinBox" name="doubleSpinBox_snake_gausianDeviation">
@@ -2463,7 +2463,7 @@ Deviation</string>
        <double>0.010000000000000</double>
       </property>
       <property name="value">
-       <double>1.000000000000000</double>
+       <double>1.200000000000000</double>
       </property>
      </widget>
      <widget class="QDoubleSpinBox" name="doubleSpinBox_snake_weight_extE">
@@ -2491,7 +2491,7 @@ Deviation</string>
        <double>0.010000000000000</double>
       </property>
       <property name="value">
-       <double>1.000000000000000</double>
+       <double>0.600000000000000</double>
       </property>
      </widget>
      <widget class="QLabel" name="label_snake_weight_intE">
@@ -2593,7 +2593,7 @@ Threshold</string>
        <double>0.100000000000000</double>
       </property>
       <property name="value">
-       <double>0.300000000000000</double>
+       <double>1.300000000000000</double>
       </property>
      </widget>
      <widget class="QLabel" name="label_snake_sobelScale_2">

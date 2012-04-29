@@ -65,6 +65,7 @@ public:
 
     void setBetaToAllPoints(float beta);
 
+    void setStepToAllPoints(float step);
 
     // EXTERNAL ENERGY
 
