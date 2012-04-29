@@ -65,7 +65,8 @@ public:
 
     enum FieldType{
         GradientMagnitudes,
-        GradientVectorFlow
+        GradientMagnitudes_pupil,
+        GradientMagnitudes_corona
     };
 };
 

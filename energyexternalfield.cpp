@@ -24,8 +24,9 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
     Mat kernelSobelMdy = Mat(3, 3, CV_8UC1);
     Mat canny = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
     Mat laplace = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
-    Mat gradient = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_32FC1);;
-
+    Mat gradient = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_32FC1);
+    Mat gradient_bg = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_32FC1);
+    Mat modified_corona = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_32FC1);
     //this->vectorField.at(0).convertTo(gaus, gaus.depth(), 1, 15);
     //scaleConvertMat(this->vectorField.at(0), gaus);
 
@@ -177,6 +178,115 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
         //        || equals ||
         //        cv::magnitude(this->vectorField[0],this->vectorField[1],this->vectorField.channels()[3])
 
+        break;
+    case EnergyExternalField::GradientMagnitudes_pupil:
+
+        //remove noise and scale image for further range of gradient
+        GaussianBlur(this->vectorField.at(0), gaus, Size(5, 5), this->gausianDeviation, 0);
+        Canny(gaus, canny, 30, 90, 5, false);
+        this->vectorField.insert(0, gaus.clone());
+        cv::imshow("EXTERNAL GAUSIAN", gaus);
+        //derivates of matrices by sobel operator
+        Sobel(gaus, dx,  CV_8UC1, 1, 0, 3, this->sobelScale);
+        Sobel(gaus, dy,  CV_8UC1, 0, 1, 3, this->sobelScale);
+        cv::imshow("EXTERNAL sobel DX", dx);
+        cv::imshow("EXTERNAL sobel DY", dy);
+        medianBlur(dx, dx, 7);medianBlur(dx, dx, 3);
+        medianBlur(dy, dy, 7);medianBlur(dy, dy, 3);
+
+
+        cv::imshow("EXTERNAL sobel grad_bg", gradient_bg);
+
+        for(int j = 0; j < gradient.rows; j++)
+            for(int i = 0; i < gradient.cols; i++){
+                gradient.at<float>(j,i) = sqrt( pow(dx.at<unsigned char>(j,i),2) + pow(dy.at<unsigned char>(j,i),2) );
+                //gradient.at<float>(j,i) = sqr( (float)dx.at<unsigned char>(j,i) - 125) + sqr( (float)dy.at<unsigned char>(j,i) - 125);// + ((sqr(dy.at<unsigned char>(j,i) - 125) * 255)/6000) ;
+                //dx.at<unsigned char>(j,i) = (((dx.at<unsigned char>(j,i) - 125) * 255)/15625);
+                //dy.at<unsigned char>(j,i) = (((dy.at<unsigned char>(j,i) - 125) * 255)/15625);
+                 float dist = (abs(i-centerX+1)+abs(j-centerY+1))/2;
+                 if(dist < 10){
+                     dist = 500;
+                 }
+                 if(gradient.at<float>(j,i) < 70){//70-good
+                    //vector to center = ( intensity addition in center ) / ( distance from center )
+
+                     gradient.at<float>(j,i) = 0;// gradient_bg.at<float>(j,i);
+                    //gradient.at<float>(j,i) = (abs(gradient.at<float>(j,i) - 255)/ dist);
+
+                    //laplace.at<unsigned char>(j,i); //(1000/ dist);
+
+                }else if(canny.at<unsigned char>(j,i) == 255){
+                    gradient.at<float>(j,i) = 255;
+                }
+                 if(dist > 150)
+                    ; //gradient.at<float>(j,i) = (1000/ dist);
+            }
+
+        imshow("gradient field", gradient);
+        this->vectorField.insert(0, gradient);
+        this->vectorField.insert(1, dx);
+        this->vectorField.insert(2, dy);
+        break;
+
+    case EnergyExternalField::GradientMagnitudes_corona:
+        //input of corona is not the original but modified image then it is the same as pupil gradient
+        //center of pupil is used the same as in pupil therefore is needed to be handled outside
+        modified_corona = this->vectorField.at(0).clone();
+        threshold(modified_corona, modified_corona, 50, 0, THRESH_TOZERO);
+        threshold(modified_corona, modified_corona, 195, 0, THRESH_TOZERO_INV);
+        modified_corona+=170;
+        threshold(modified_corona, modified_corona, 250, 0, THRESH_TOZERO);
+        medianBlur(modified_corona, modified_corona, 5);
+        medianBlur(modified_corona, modified_corona, 3);
+
+        //remove noise and scale image for further range of gradient
+        GaussianBlur(modified_corona, gaus, Size(5, 5), this->gausianDeviation, 0);
+        Canny(gaus, canny, 30, 90, 5, false);
+        this->vectorField.insert(0, gaus.clone());
+        cv::imshow("EXTERNAL GAUSIAN", gaus);
+        //derivates of matrices by sobel operator
+        Sobel(gaus, dx,  CV_8UC1, 1, 0, 3, this->sobelScale);
+        Sobel(gaus, dy,  CV_8UC1, 0, 1, 3, this->sobelScale);
+        cv::imshow("EXTERNAL sobel DX", dx);
+        cv::imshow("EXTERNAL sobel DY", dy);
+        medianBlur(dx, dx, 7);medianBlur(dx, dx, 3);
+        medianBlur(dy, dy, 7);medianBlur(dy, dy, 3);
+
+        gradient_bg = Mat().zeros(gradient_bg.rows, gradient_bg.cols, gradient_bg.type());
+        for(float i = 0; i < qAbs(centerX-gradient.cols); i++){
+            double value = qAbs(centerX-gradient.cols) / ((i>0) ? i : 1) ;
+            cv::circle(gradient_bg, cv::Point(centerX, centerY), i, cv::Scalar(value));
+        }
+
+        for(int j = 0; j < gradient.rows; j++)
+            for(int i = 0; i < gradient.cols; i++){
+                gradient.at<float>(j,i) = sqrt( pow(dx.at<unsigned char>(j,i),2) + pow(dy.at<unsigned char>(j,i),2) );
+                //gradient.at<float>(j,i) = sqr( (float)dx.at<unsigned char>(j,i) - 125) + sqr( (float)dy.at<unsigned char>(j,i) - 125);// + ((sqr(dy.at<unsigned char>(j,i) - 125) * 255)/6000) ;
+                //dx.at<unsigned char>(j,i) = (((dx.at<unsigned char>(j,i) - 125) * 255)/15625);
+                //dy.at<unsigned char>(j,i) = (((dy.at<unsigned char>(j,i) - 125) * 255)/15625);
+                 float dist = (abs(i-centerX+1)+abs(j-centerY+1))/2;
+                 if(dist < 10){
+                     dist = 500;
+                 }
+                 if(gradient.at<float>(j,i) < 70){//70-good
+                    //vector to center = ( intensity addition in center ) / ( distance from center )
+
+                     gradient.at<float>(j,i) =0;
+                    //gradient.at<float>(j,i) = (abs(gradient.at<float>(j,i) - 255)/ dist);
+
+                    //laplace.at<unsigned char>(j,i); //(1000/ dist);
+
+                }else if(canny.at<unsigned char>(j,i) == 255){
+                    gradient.at<float>(j,i) = 255;
+                }
+                 if(dist > 150)
+                    ; //gradient.at<float>(j,i) = (1000/ dist);
+            }
+
+        imshow("gradient field", gradient);
+        this->vectorField.insert(0, gradient);
+        this->vectorField.insert(1, dx);
+        this->vectorField.insert(2, dy);
         break;
     default:;
     }

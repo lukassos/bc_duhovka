@@ -37,7 +37,7 @@ public:
     float avgDist;
     float contourThreshold;
     float edgeStrenghtThreshold;
-
+    cv::Point possiblePupilCenter;
 
     //constructors
     Snake();
@@ -71,7 +71,7 @@ public:
 
     //input is picture read into matrix in grayscale
     //set`s
-    void initSnakeExtField(Snake *snake, int type, float deviation, float scale);
+    void initSnakeExtField(Snake *snake, int energy_ext_type, float deviation, float scale, cv::Point possibleCenter =  cv::Point(0,0));
 
     //this function sets external energy to all snake control points and counts total external energy
     //same functionality is included in moveSnakeContour
@@ -80,8 +80,13 @@ public:
     // ITERATIONS OF SNAKE
     void moveSnakeContour(Snake *snake);
 
+    // preconfigured function for finding iris, output is image map
+    Mat Snake::iris_snake_function();
+
     // visual/output interface functions
     void showMatrix(Snake *snake);
+    Mat showMatrix(Snake *snake_pupil, Snake *snake_corona, int type);
+
     bool saveSnakeToTextFile(Snake *snake);
     bool saveMatToTextFile(Mat output);
 
@@ -90,6 +95,19 @@ public:
     Mat* getImageOriginalPointer(){return &this->originalImage;}
     Mat getMatrixOfPoints(){return this->matrixOfPoints;}
 
+
+    enum showType{
+        Original_with_points,
+        Original_with_lines,
+        Original_with_polygons,
+        Gradient_with_points,
+        Gradient_with_lines,
+        Gradient_with_polygons,
+        Blank_with_points,
+        Blank_with_lines,
+        Blank_with_polygons,
+        IrisMap
+    };
 };
 
 

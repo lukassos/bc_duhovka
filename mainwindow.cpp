@@ -1299,7 +1299,7 @@ void MainWindow::on_pushButton_snakePromo_clicked()
     activeContour = new Snake(workImg);
     activeContour->initSnakeContour(activeContour, 50,
                                     EnergyInternalTemplate::ClosedContour_Circle,
-                                    EnergyExternalField::GradientMagnitudes,
+                                    EnergyExternalField::GradientMagnitudes_pupil,
                                     //weights of internal and external energies
                                     ui->doubleSpinBox_snake_weight_extE->value(), ui->doubleSpinBox_snake_weight_intE->value(),
                                     //alpha, beta,
@@ -1309,7 +1309,7 @@ void MainWindow::on_pushButton_snakePromo_clicked()
                                     //gausian deviation, sobel scale factor
                                     ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value(),
                                     //step or neighborhood size where can control point move
-                                    ui->spinBox_snake_step->value() );
+                                    ui->spinBox_snake_step->value());
     namedWindow("Snake Orig Matrix");
     openedCVWindowNames.append("Snake Orig Matrix");
     imshow("Snake Orig Matrix",activeContour->originalImage);
@@ -1351,13 +1351,13 @@ void MainWindow::on_pushButton_moveSnake_clicked()
     activeContour->weight_E_ext = ui->doubleSpinBox_snake_weight_extE->value();
     activeContour->contourThreshold = ui->doubleSpinBox_snake_curvThresh->value();
     activeContour->edgeStrenghtThreshold = ui->doubleSpinBox_snake_edgeThresh->value();
-    activeContour->initSnakeExtField(activeContour, EnergyExternalField::GradientMagnitudes, ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value());
+    activeContour->initSnakeExtField(activeContour, activeContour->vectorField->getTypeOfVectorField(), ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value(), activeContour->possiblePupilCenter);
     //activeContour->saveSnakeToTextFile(activeContour);
     activeContour->moveSnakeContour(activeContour);
 
     namedWindow("Snake Show Matrix");
     openedCVWindowNames.append("Snake Show Matrix");
-    imshow("Snake Show Matrix",activeContour->showImage);
+    imshow("Snake Show Matrix",activeContour->showMatrix(activeContour, activeContour, Snake::Original_with_polygons));
     namedWindow("Snake Point Matrix");
     openedCVWindowNames.append("Snake Point Matrix");
     imshow("Snake Point Matrix",activeContour->matrixOfPoints);
