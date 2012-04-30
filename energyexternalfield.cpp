@@ -252,35 +252,94 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
         medianBlur(dx, dx, 7);medianBlur(dx, dx, 3);
         medianBlur(dy, dy, 7);medianBlur(dy, dy, 3);
 
-        gradient_bg = Mat().zeros(gradient_bg.rows, gradient_bg.cols, gradient_bg.type());
-        for(float i = 0; i < qAbs(centerX-gradient.cols); i++){
-            double value = qAbs(centerX-gradient.cols) / ((i>0) ? i : 1) ;
-            cv::circle(gradient_bg, cv::Point(centerX, centerY), i, cv::Scalar(value));
-        }
 
+        //        for(float i = 0; i < qAbs(centerX-gradient.cols); i++){
+        //            double value = qAbs(centerX-gradient.cols) / ((i>0) ? i : 1) ;
+        //            cv::circle(gradient_bg, cv::Point(centerX, centerY), i, cv::Scalar(value));
+        //        }
+        //set zeros to gradient vector addition
+        gradient_bg = Mat().zeros(gradient_bg.rows, gradient_bg.cols, gradient_bg.type());
+
+        //counting gradient vector field from gradient maximas
+        for(int j = 0; j < gradient_bg.rows; j++){
+            for(int i = 0; i < gradient_bg.cols; i++){
+                if(70 >= sqrt( pow(dx.at<unsigned char>(j,i),2) + pow(dy.at<unsigned char>(j,i),2) )
+                        &&
+                    canny.at<unsigned char>(j,i) == 255){
+
+                    //when canny found then it is 255 = maximal
+                    gradient_bg.at<float>(j,i) += 255;
+
+                    //count distances from borderso of matrix
+                    int dist_l = i;
+                    int dist_r =  abs(i-gradient.cols+1);
+                    int dist_u = j;
+                    int dist_d = abs(j-gradient.rows+1);
+                    //l, r, d, u == left, right, up, down
+
+                    //in four direction make gradient pointing to this point
+                    //short distance term
+                    for(int d = 3; d > 0; d--){
+                        if(d<=dist_l)
+                            gradient.at<float>(j,i-d) += (150 /d);
+                        if(d<=dist_r)
+                            gradient.at<float>(j,i+d) += (150 /d);
+                        if(d<=dist_u)
+                            gradient.at<float>(j-d,i) += (150 /d);
+                        if(d<=dist_d)
+                            gradient.at<float>(j+d,i) += (150 /d);
+                    }
+                    //mid distance term
+                    for(int d = 7; d > 0; d--){
+                        if(d<=dist_l)
+                            gradient.at<float>(j,i-d) += (50 /d);
+                        if(d<=dist_r)
+                            gradient.at<float>(j,i+d) += (50 /d);
+                        if(d<=dist_u)
+                            gradient.at<float>(j-d,i) += (50 /d);
+                        if(d<=dist_d)
+                            gradient.at<float>(j+d,i) += (50 /d);
+                    }
+                    //long distance term
+                    for(int d = dist_l; d > 0; d--){
+                        gradient.at<float>(j,i-d) += (16 / d);
+                    }
+                    for(int d = dist_r; d > 0; d--){
+                        gradient.at<float>(j,i+d) += (16 / d);
+                    }
+                    for(int d = dist_u; d > 0; d--){
+                        gradient.at<float>(j-d,i) += (16 / d);
+                    }
+                    for(int d = dist_d; d > 0; d--){
+                        gradient.at<float>(j+d,i) += (16 / d);
+                    }
+                };
+            }
+        }
+        //normalization of gradient vector field
+        imshow("gradient vector field before normalization", gradient_bg);
+        if(true){
+            double maxGradient_bg = 0;
+            cv::minMaxIdx(gradient_bg, 0, &maxGradient_bg);
+            gradient_bg = ((255 * gradient_bg) / maxGradient_bg);
+
+        }
+        imshow("gradient vector field", gradient_bg);
         for(int j = 0; j < gradient.rows; j++)
             for(int i = 0; i < gradient.cols; i++){
                 gradient.at<float>(j,i) = sqrt( pow(dx.at<unsigned char>(j,i),2) + pow(dy.at<unsigned char>(j,i),2) );
                 //gradient.at<float>(j,i) = sqr( (float)dx.at<unsigned char>(j,i) - 125) + sqr( (float)dy.at<unsigned char>(j,i) - 125);// + ((sqr(dy.at<unsigned char>(j,i) - 125) * 255)/6000) ;
                 //dx.at<unsigned char>(j,i) = (((dx.at<unsigned char>(j,i) - 125) * 255)/15625);
                 //dy.at<unsigned char>(j,i) = (((dy.at<unsigned char>(j,i) - 125) * 255)/15625);
-                 float dist = (abs(i-centerX+1)+abs(j-centerY+1))/2;
-                 if(dist < 10){
-                     dist = 500;
-                 }
-                 if(gradient.at<float>(j,i) < 70){//70-good
-                    //vector to center = ( intensity addition in center ) / ( distance from center )
-
-                     gradient.at<float>(j,i) =0;
-                    //gradient.at<float>(j,i) = (abs(gradient.at<float>(j,i) - 255)/ dist);
-
-                    //laplace.at<unsigned char>(j,i); //(1000/ dist);
-
+//                float dist = (abs(i-centerX+1)+abs(j-centerY+1))/2;
+//                if(dist < 10){
+//                    dist = 500;
+//                }
+                if(gradient.at<float>(j,i) < 70){
+                    gradient.at<float>(j,i) = gradient_bg.at<float>(j,i);
                 }else if(canny.at<unsigned char>(j,i) == 255){
                     gradient.at<float>(j,i) = 255;
                 }
-                 if(dist > 150)
-                    ; //gradient.at<float>(j,i) = (1000/ dist);
             }
 
         imshow("gradient field", gradient);

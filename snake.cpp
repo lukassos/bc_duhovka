@@ -43,8 +43,10 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
                              float contourThresh, float edgeStrenghtThresh,
                              float deviation, float scale,/*energy external parameters*/
                              int baseStep,
+                             cv::Point *fastCenter, float radius,
                              int fastInitKernelSize,
-                             int offsetX, int offsetY)
+                             int offsetX, int offsetY
+                             )
 {
 
    // snake.contourTemplate.type=decision;
@@ -54,8 +56,19 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     snake->contourThreshold = contourThresh;
     snake->edgeStrenghtThreshold = edgeStrenghtThresh;
     snake->contour.clear();
-    snake->showImage = snake->originalImage.clone();
 
+    if(energy_ext_type == EnergyExternalField::GradientMagnitudes_corona){
+        QMessageBox gsgd;
+        gsgd.setText(" 1");
+        gsgd.exec();
+
+    snake->showImage = snake->originalImage.clone();
+    imshow(" 1",snake->originalImage);
+
+    imshow(" 2", snake->showImage);
+            gsgd.setText(" 2");
+            gsgd.exec();
+    }
 
     if(snake->contour.isEmpty() || numberOfPoints!=snake->contour.size()){
         for(int i=0; i<numberOfPoints; i++){
@@ -66,28 +79,34 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
             snake->contour.append(temp);
         }
     }
-    cv::Point *fastCenter = new cv::Point();
     float centerX;
     float centerY;
-    float radius;
 
     switch(energy_int_type){
     case EnergyInternalTemplate::ClosedContour_Circle:
-        //finds center of pupil and its radius
-        radius = 1.25 * snake->fastCenterLocalizationAlgorithm(snake->originalImage, fastCenter, fastInitKernelSize);
-        centerX = fastCenter->x;
-        centerY = fastCenter->y;
-        //save possible pupil center to snake
+        if(energy_ext_type == EnergyExternalField::GradientMagnitudes_pupil){
+            //finds center of pupil and its radius
+            radius = 1.25 * snake->fastCenterLocalizationAlgorithm(snake->originalImage, fastCenter, fastInitKernelSize);
+            centerX = fastCenter->x;
+            centerY = fastCenter->y;
+        }else if(energy_ext_type == EnergyExternalField::GradientMagnitudes_corona){
+            centerX = fastCenter->x;
+            centerY = fastCenter->y;
+            radius = 1.1 * (snake->originalImage.cols /6);
+        }else{
+            centerX = fastCenter->x;
+            centerY = fastCenter->y;
+        }
+
         snake->possiblePupilCenter = *fastCenter;
         //set coordinates to circle
         snake->setCirclePositions(snake->contour,  centerX, centerY, radius, snake->getImageOriginal().cols, snake->getImageOriginal().rows);
-
         //EnergyInternalTemplate().countTotalEnergyInt(snake);
         break;
     case EnergyInternalTemplate::ClosedContour_Rectangle:
         //set appropriate rectangle, as corona is mostly taking about 1/3 of picure it is forced meassure
         snake->setRectanglePositions(snake->contour,  offsetX, offsetY, 0.33 * snake->originalImage.cols, 0.33 * snake->originalImage.rows, snake->getImageOriginal().cols, snake->getImageOriginal().rows);
-
+        snake->possiblePupilCenter = *fastCenter;
         //EnergyInternalTemplate().countTotalEnergyInt(snake);
         break;
     default:;
@@ -208,15 +227,59 @@ void Snake::countTotalEnergyExt(Snake *snake){
     }
 }
 
-Mat Snake::iris_snake_function(Mat image){
+Mat Snake::iris_snake_function(Mat image)
+{
+    imshow("test",image);
+    QMessageBox gsgd;
+    gsgd.setText("test");
+    gsgd.exec();
     Mat irisMap;
     Snake *snake_pupil = new Snake(image);
     Snake *snake_corona = new Snake(image);
+    cv::Point *possiblePupilCenter = new cv::Point();
+    initSnakeContour(snake_pupil, 50,
+                                    EnergyInternalTemplate::ClosedContour_Circle,
+                                    EnergyExternalField::GradientMagnitudes_pupil,
+                                    //weights of internal and external energies
+                                    1.2, 0.6,
+                                    //alpha, beta,
+                                    0.7, 0.55,
+                                    //thresholds for curvature estimation
+                                    1.3, 120,
+                                    //gausian deviation, sobel scale factor
+                                    97, 3.5,
+                                    //step or neighborhood size where can control point move
+                                    3,
+                                    possiblePupilCenter);
+    moveSnakeContour(snake_pupil);
 
+    imshow("Iris Function after moving snake_pupil orig", showMatrix(snake_pupil, snake_pupil, Original_with_lines));
+    imshow("Iris Function after moving snake_pupil grad", showMatrix(snake_pupil, snake_pupil, Gradient_with_lines));
+
+    initSnakeContour(snake_corona, 100,
+                                    EnergyInternalTemplate::ClosedContour_Circle,
+                                    EnergyExternalField::GradientMagnitudes_corona,
+                                    //weights of internal and external energies
+                                    1.2, 0.6,
+                                    //alpha, beta,
+                                    0.7, 0.55,
+                                    //thresholds for curvature estimation
+                                    1.3, 150,
+                                    //gausian deviation, sobel scale factor
+                                    97, 3.5,
+                                    //step or neighborhood size where can control point move
+                                    3,
+                                    possiblePupilCenter);
+    moveSnakeContour(snake_corona);
+
+    imshow("Iris Function after moving snake_corona orig", showMatrix(snake_pupil, snake_corona, Original_with_lines));
+    imshow("Iris Function after moving snake_corona grad", showMatrix(snake_pupil, snake_corona, Gradient_with_lines));
+
+    irisMap = showMatrix(snake_pupil, snake_corona, IrisMap);
     return irisMap;
 }
 
-void Snake::moveSnakeContour(Snake *snake)
+int Snake::moveSnakeContour(Snake *snake)
 {
     //int n = snake->contour.size();
     //saveSnakeToTextFile(snake);
@@ -749,12 +812,10 @@ void Snake::moveSnakeContour(Snake *snake)
 
     default:;
     }
-    QMessageBox casedone;
-    casedone.setText("Moving done in "+QString().number(cycles)+" cycles");
-    casedone.exec();
     //write snake points into image matrix for showing
     showMatrix(snake);
     //saveSnakeToTextFile(snake);
+    return cycles;
 }
 
 
@@ -790,7 +851,7 @@ void Snake::showMatrix(Snake *snake){
 }
 
 Mat Snake::showMatrix(Snake *snake_pupil, Snake *snake_corona, int type){
-    Mat out =  Mat(snake_pupil->originalImage.rows,snake_pupil->originalImage.cols, CV_32FC3, 0);
+    Mat out =  Mat(snake_corona->originalImage.rows,snake_corona->originalImage.cols, CV_32FC3, 0);
 
     cv::Point countour_polygon[snake_corona->contour.size()];
     cv::Point pupil_polygon[snake_pupil->contour.size()];
@@ -798,14 +859,14 @@ Mat Snake::showMatrix(Snake *snake_pupil, Snake *snake_corona, int type){
     switch(type){
     case Snake::Original_with_lines:
         //set background
-        cvtColor(snake_pupil->originalImage, out, CV_GRAY2RGBA);
+        cvtColor(snake_corona->originalImage, out, CV_GRAY2RGBA);
 
         //draw corona snake
         for(int i=0; i<snake_corona->contour.size(); i++){
             if(i < (snake_corona->contour.size() - 1) ){
-                cv::line(snake_corona->matrixOfPoints,cv::Point((int)(snake_corona->contour.at(i)->x), (int)(snake_corona->contour.at(i)->y)),cv::Point((int)(snake_corona->contour.at(i+1)->x), (int)(snake_corona->contour.at(i+1)->y)), cv::Scalar(0,105,230));
+                cv::line(out,cv::Point((int)(snake_corona->contour.at(i)->x), (int)(snake_corona->contour.at(i)->y)),cv::Point((int)(snake_corona->contour.at(i+1)->x), (int)(snake_corona->contour.at(i+1)->y)), cv::Scalar(0,105,230));
             }else{
-                cv::line(snake_corona->matrixOfPoints,cv::Point((int)(snake_corona->contour.at(i)->x), (int)(snake_corona->contour.at(i)->y)),cv::Point((int)(snake_corona->contour.at(0)->x), (int)(snake_corona->contour.at(0)->y)), cv::Scalar(0,105,230));
+                cv::line(out,cv::Point((int)(snake_corona->contour.at(i)->x), (int)(snake_corona->contour.at(i)->y)),cv::Point((int)(snake_corona->contour.at(0)->x), (int)(snake_corona->contour.at(0)->y)), cv::Scalar(0,105,230));
             }
             out.at<Vec3b>((int)(snake_corona->contour.at(i)->y), (int)(snake_corona->contour.at(i)->x))[0] = 255;
             out.at<Vec3b>((int)(snake_corona->contour.at(i)->y), (int)(snake_corona->contour.at(i)->x))[1] = 0;
@@ -826,7 +887,7 @@ Mat Snake::showMatrix(Snake *snake_pupil, Snake *snake_corona, int type){
 
     case Snake::Original_with_points:
         //set background
-        cvtColor(snake_pupil->originalImage, out, CV_GRAY2RGBA);
+        cvtColor(snake_corona->originalImage, out, CV_GRAY2RGBA);
 
         //draw corona snake
         for(int i=0; i<snake_corona->contour.size(); i++){
@@ -844,7 +905,7 @@ Mat Snake::showMatrix(Snake *snake_pupil, Snake *snake_corona, int type){
 
     case Snake::Original_with_polygons:
         //set background
-        cvtColor(snake_pupil->originalImage, out, CV_GRAY2RGBA);
+        cvtColor(snake_corona->originalImage, out, CV_GRAY2RGBA);
 
         //set points to polygon of corona snake
         for(int i=0; i<snake_corona->contour.size(); i++){
@@ -867,9 +928,9 @@ Mat Snake::showMatrix(Snake *snake_pupil, Snake *snake_corona, int type){
         //draw corona snake
         for(int i=0; i<snake_corona->contour.size(); i++){
             if(i < (snake_corona->contour.size() - 1) ){
-                cv::line(snake_corona->matrixOfPoints,cv::Point((int)(snake_corona->contour.at(i)->x), (int)(snake_corona->contour.at(i)->y)),cv::Point((int)(snake_corona->contour.at(i+1)->x), (int)(snake_corona->contour.at(i+1)->y)), cv::Scalar(0,105,230));
+                cv::line(out,cv::Point((int)(snake_corona->contour.at(i)->x), (int)(snake_corona->contour.at(i)->y)),cv::Point((int)(snake_corona->contour.at(i+1)->x), (int)(snake_corona->contour.at(i+1)->y)), cv::Scalar(0,105,230));
             }else{
-                cv::line(snake_corona->matrixOfPoints,cv::Point((int)(snake_corona->contour.at(i)->x), (int)(snake_corona->contour.at(i)->y)),cv::Point((int)(snake_corona->contour.at(0)->x), (int)(snake_corona->contour.at(0)->y)), cv::Scalar(0,105,230));
+                cv::line(out,cv::Point((int)(snake_corona->contour.at(i)->x), (int)(snake_corona->contour.at(i)->y)),cv::Point((int)(snake_corona->contour.at(0)->x), (int)(snake_corona->contour.at(0)->y)), cv::Scalar(0,105,230));
             }
             out.at<Vec3b>((int)(snake_corona->contour.at(i)->y), (int)(snake_corona->contour.at(i)->x))[0] = 255;
             out.at<Vec3b>((int)(snake_corona->contour.at(i)->y), (int)(snake_corona->contour.at(i)->x))[1] = 0;
@@ -878,9 +939,9 @@ Mat Snake::showMatrix(Snake *snake_pupil, Snake *snake_corona, int type){
         //draw pupil snake
         for(int i=0; i<snake_pupil->contour.size(); i++){
             if(i < (snake_pupil->contour.size() - 1) ){
-                cv::line(snake_pupil->matrixOfPoints,cv::Point((int)(snake_pupil->contour.at(i)->x), (int)(snake_pupil->contour.at(i)->y)),cv::Point((int)(snake_pupil->contour.at(i+1)->x), (int)(snake_pupil->contour.at(i+1)->y)), cv::Scalar(0,105,230));
+                cv::line(out,cv::Point((int)(snake_pupil->contour.at(i)->x), (int)(snake_pupil->contour.at(i)->y)),cv::Point((int)(snake_pupil->contour.at(i+1)->x), (int)(snake_pupil->contour.at(i+1)->y)), cv::Scalar(0,105,230));
             }else{
-                cv::line(snake_pupil->matrixOfPoints,cv::Point((int)(snake_pupil->contour.at(i)->x), (int)(snake_pupil->contour.at(i)->y)),cv::Point((int)(snake_pupil->contour.at(0)->x), (int)(snake_pupil->contour.at(0)->y)), cv::Scalar(0,105,230));
+                cv::line(out,cv::Point((int)(snake_pupil->contour.at(i)->x), (int)(snake_pupil->contour.at(i)->y)),cv::Point((int)(snake_pupil->contour.at(0)->x), (int)(snake_pupil->contour.at(0)->y)), cv::Scalar(0,105,230));
             }
             out.at<Vec3b>((int)(snake_pupil->contour.at(i)->y), (int)(snake_pupil->contour.at(i)->x))[0] = 255;
             out.at<Vec3b>((int)(snake_pupil->contour.at(i)->y), (int)(snake_pupil->contour.at(i)->x))[1] = 0;
@@ -926,14 +987,14 @@ Mat Snake::showMatrix(Snake *snake_pupil, Snake *snake_corona, int type){
         break;
     case Snake::Gradient_with_lines:
         //set background
-        cvtColor(snake_pupil->vectorField->getConvertedVectorField(0), out, CV_GRAY2RGBA);
+        cvtColor(snake_corona->vectorField->getConvertedVectorField(0), out, CV_GRAY2RGBA);
 
         //draw corona snake
         for(int i=0; i<snake_corona->contour.size(); i++){
             if(i < (snake_corona->contour.size() - 1) ){
-                cv::line(snake_corona->matrixOfPoints,cv::Point((int)(snake_corona->contour.at(i)->x), (int)(snake_corona->contour.at(i)->y)),cv::Point((int)(snake_corona->contour.at(i+1)->x), (int)(snake_corona->contour.at(i+1)->y)), cv::Scalar(0,105,230));
+                cv::line(out,cv::Point((int)(snake_corona->contour.at(i)->x), (int)(snake_corona->contour.at(i)->y)),cv::Point((int)(snake_corona->contour.at(i+1)->x), (int)(snake_corona->contour.at(i+1)->y)), cv::Scalar(0,105,230));
             }else{
-                cv::line(snake_corona->matrixOfPoints,cv::Point((int)(snake_corona->contour.at(i)->x), (int)(snake_corona->contour.at(i)->y)),cv::Point((int)(snake_corona->contour.at(0)->x), (int)(snake_corona->contour.at(0)->y)), cv::Scalar(0,105,230));
+                cv::line(out,cv::Point((int)(snake_corona->contour.at(i)->x), (int)(snake_corona->contour.at(i)->y)),cv::Point((int)(snake_corona->contour.at(0)->x), (int)(snake_corona->contour.at(0)->y)), cv::Scalar(0,105,230));
             }
             out.at<Vec3b>((int)(snake_corona->contour.at(i)->y), (int)(snake_corona->contour.at(i)->x))[0] = 255;
             out.at<Vec3b>((int)(snake_corona->contour.at(i)->y), (int)(snake_corona->contour.at(i)->x))[1] = 0;
@@ -942,9 +1003,9 @@ Mat Snake::showMatrix(Snake *snake_pupil, Snake *snake_corona, int type){
         //draw pupil snake
         for(int i=0; i<snake_pupil->contour.size(); i++){
             if(i < (snake_pupil->contour.size() - 1) ){
-                cv::line(snake_pupil->matrixOfPoints,cv::Point((int)(snake_pupil->contour.at(i)->x), (int)(snake_pupil->contour.at(i)->y)),cv::Point((int)(snake_pupil->contour.at(i+1)->x), (int)(snake_pupil->contour.at(i+1)->y)), cv::Scalar(0,105,230));
+                cv::line(out,cv::Point((int)(snake_pupil->contour.at(i)->x), (int)(snake_pupil->contour.at(i)->y)),cv::Point((int)(snake_pupil->contour.at(i+1)->x), (int)(snake_pupil->contour.at(i+1)->y)), cv::Scalar(0,105,230));
             }else{
-                cv::line(snake_pupil->matrixOfPoints,cv::Point((int)(snake_pupil->contour.at(i)->x), (int)(snake_pupil->contour.at(i)->y)),cv::Point((int)(snake_pupil->contour.at(0)->x), (int)(snake_pupil->contour.at(0)->y)), cv::Scalar(0,105,230));
+                cv::line(out,cv::Point((int)(snake_pupil->contour.at(i)->x), (int)(snake_pupil->contour.at(i)->y)),cv::Point((int)(snake_pupil->contour.at(0)->x), (int)(snake_pupil->contour.at(0)->y)), cv::Scalar(0,105,230));
             }
             out.at<Vec3b>((int)(snake_pupil->contour.at(i)->y), (int)(snake_pupil->contour.at(i)->x))[0] = 255;
             out.at<Vec3b>((int)(snake_pupil->contour.at(i)->y), (int)(snake_pupil->contour.at(i)->x))[1] = 0;
@@ -954,7 +1015,7 @@ Mat Snake::showMatrix(Snake *snake_pupil, Snake *snake_corona, int type){
 
     case Snake::Gradient_with_points:
         //set background
-        cvtColor(snake_pupil->vectorField->getConvertedVectorField(0), out, CV_GRAY2RGBA);
+        cvtColor(snake_corona->vectorField->getConvertedVectorField(0), out, CV_GRAY2RGBA);
 
         //draw corona snake
         for(int i=0; i<snake_corona->contour.size(); i++){
@@ -972,7 +1033,7 @@ Mat Snake::showMatrix(Snake *snake_pupil, Snake *snake_corona, int type){
 
     case Snake::Gradient_with_polygons:
         //set background
-        cvtColor(snake_pupil->vectorField->getConvertedVectorField(0), out, CV_GRAY2RGBA);
+        cvtColor(snake_corona->vectorField->getConvertedVectorField(0), out, CV_GRAY2RGBA);
 
         //set points to polygon of corona snake
         for(int i=0; i<snake_corona->contour.size(); i++){

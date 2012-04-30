@@ -1353,14 +1353,14 @@ void MainWindow::on_pushButton_moveSnake_clicked()
     activeContour->edgeStrenghtThreshold = ui->doubleSpinBox_snake_edgeThresh->value();
     activeContour->initSnakeExtField(activeContour, activeContour->vectorField->getTypeOfVectorField(), ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value(), activeContour->possiblePupilCenter);
     //activeContour->saveSnakeToTextFile(activeContour);
-    activeContour->moveSnakeContour(activeContour);
+    ui->actualTime->setText(QString().number( activeContour->moveSnakeContour(activeContour)));
 
     namedWindow("Snake Show Matrix");
     openedCVWindowNames.append("Snake Show Matrix");
     imshow("Snake Show Matrix",activeContour->showMatrix(activeContour, activeContour, Snake::Original_with_polygons));
     namedWindow("Snake Point Matrix");
     openedCVWindowNames.append("Snake Point Matrix");
-    imshow("Snake Point Matrix",activeContour->matrixOfPoints);
+    imshow("Snake Point Matrix",activeContour->showMatrix(activeContour, activeContour, Snake::Gradient_with_lines));
 }
 
 void MainWindow::on_doubleSpinBox_snake_alpha_editingFinished()
@@ -1393,4 +1393,19 @@ void MainWindow::on_doubleSpinBox_snake_weight_intE_editingFinished()
 void MainWindow::on_doubleSpinBox_snake_weight_extE_editingFinished()
 {
     //activeContour->weight_E_ext = ui->doubleSpinBox_snake_weight_extE->value();
+}
+
+void MainWindow::on_pushButton_irisSnake_clicked()
+{
+    if(imagePath.isEmpty()){
+        while(!on_actionLoad_picture_triggered());
+
+    }else{
+       workImg = imread(imagePath.toStdString(),0);
+       origImg = workImg;
+    }
+    namedWindow("Snake Iris Map");
+    openedCVWindowNames.append("Snake Iris Map");
+    workImg = Snake().iris_snake_function(workImg);
+    imshow("Snake Iris Map",workImg);
 }

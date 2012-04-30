@@ -182,6 +182,8 @@ private slots:
 
     void on_doubleSpinBox_snake_weight_extE_editingFinished();
 
+    void on_pushButton_irisSnake_clicked();
+
 private:
     Ui::MainWindow *ui;
     QGraphicsScene *sc_orig;
