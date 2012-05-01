@@ -399,14 +399,18 @@ void MainWindow::destroyAllCVWindows()
 
 void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
     int algTime = 0;
-
+    QElapsedTimer timeConsumed;
     switch(operation)
     {
     case ImageManip::IrisSnakeRun:
-        namedWindow("Snake Iris Map");
-        openedCVWindowNames.append("Snake Iris Map");
+        if(!massRun){
+            namedWindow("Snake Iris Map");
+            openedCVWindowNames.append("Snake Iris Map");
+            imshow("Snake Iris Map",workImg);
+        }
+        timeConsumed.start();
         workImg = Snake().iris_snake_function(workImg);
-        imshow("Snake Iris Map",workImg);
+        algTime = timeConsumed.elapsed();
         break;
 
     case ImageManip::Blur_flag:
@@ -813,7 +817,7 @@ void MainWindow::on_pushButton_massRun_clicked()
             QString actual_file = actual_file_prefix+listOfFiles.at(files)+".jpg";
             QString actual_window = "Processed image: "+listOfFiles.at(files);
             std::string actual_w = actual_window.toStdString();
-
+            //write processed image to file
             imwrite(actual_file.toStdString(),workImg);
             //show the resulting image processed
             if(listOfFiles.size()<50){
