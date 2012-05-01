@@ -56,19 +56,7 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
     snake->contourThreshold = contourThresh;
     snake->edgeStrenghtThreshold = edgeStrenghtThresh;
     snake->contour.clear();
-
-    if(energy_ext_type == EnergyExternalField::GradientMagnitudes_corona){
-        QMessageBox gsgd;
-        gsgd.setText(" 1");
-        gsgd.exec();
-
     snake->showImage = snake->originalImage.clone();
-    imshow(" 1",snake->originalImage);
-
-    imshow(" 2", snake->showImage);
-            gsgd.setText(" 2");
-            gsgd.exec();
-    }
 
     if(snake->contour.isEmpty() || numberOfPoints!=snake->contour.size()){
         for(int i=0; i<numberOfPoints; i++){
@@ -92,7 +80,7 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
         }else if(energy_ext_type == EnergyExternalField::GradientMagnitudes_corona){
             centerX = fastCenter->x;
             centerY = fastCenter->y;
-            radius = 1.1 * (snake->originalImage.cols /6);
+            radius = 1.05 * (snake->originalImage.cols /6);
         }else{
             centerX = fastCenter->x;
             centerY = fastCenter->y;
@@ -230,9 +218,7 @@ void Snake::countTotalEnergyExt(Snake *snake){
 Mat Snake::iris_snake_function(Mat image)
 {
     imshow("test",image);
-    QMessageBox gsgd;
-    gsgd.setText("test");
-    gsgd.exec();
+
     Mat irisMap;
     Snake *snake_pupil = new Snake(image);
     Snake *snake_corona = new Snake(image);
