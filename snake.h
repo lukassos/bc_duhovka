@@ -23,6 +23,7 @@ class Snake
 {//controller of all snake parts and fuctions
 
 public:
+
     QList<SnakePoint*> contour;
 //    EnergyInternalTemplate contourTemplate;
     EnergyExternalField *vectorField;

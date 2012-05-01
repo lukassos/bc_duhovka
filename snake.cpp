@@ -4,6 +4,7 @@ Snake::Snake()
 {
 }
 
+
 Snake::Snake(Mat image)
 {
     this->originalImage = image.clone();
@@ -217,7 +218,7 @@ void Snake::countTotalEnergyExt(Snake *snake){
 
 Mat Snake::iris_snake_function(Mat image)
 {
-    imshow("test",image);
+    //imshow("test",image);
 
     Mat irisMap;
     Snake *snake_pupil = new Snake(image);
@@ -229,18 +230,18 @@ Mat Snake::iris_snake_function(Mat image)
                                     //weights of internal and external energies
                                     1.2, 0.6,
                                     //alpha, beta,
-                                    0.7, 0.55,
+                                    0.70, 0.66,
                                     //thresholds for curvature estimation
                                     1.3, 120,
                                     //gausian deviation, sobel scale factor
-                                    97, 3.5,
+                                    97, 2.5,
                                     //step or neighborhood size where can control point move
                                     3,
                                     possiblePupilCenter);
     moveSnakeContour(snake_pupil);
 
-    imshow("Iris Function after moving snake_pupil orig", showMatrix(snake_pupil, snake_pupil, Original_with_lines));
-    imshow("Iris Function after moving snake_pupil grad", showMatrix(snake_pupil, snake_pupil, Gradient_with_lines));
+    //imshow("Iris Function after moving snake_pupil orig", showMatrix(snake_pupil, snake_pupil, Original_with_lines));
+    //imshow("Iris Function after moving snake_pupil grad", showMatrix(snake_pupil, snake_pupil, Gradient_with_lines));
 
     initSnakeContour(snake_corona, 100,
                                     EnergyInternalTemplate::ClosedContour_Circle,
@@ -248,20 +249,23 @@ Mat Snake::iris_snake_function(Mat image)
                                     //weights of internal and external energies
                                     1.2, 0.6,
                                     //alpha, beta,
-                                    0.75, 0.65,
+                                    0.77, 0.673,
                                     //thresholds for curvature estimation
-                                    1.3, 150,
+                                    1.3, 160,
                                     //gausian deviation, sobel scale factor
-                                    97, 3.5,
+                                    100, 1.8,
                                     //step or neighborhood size where can control point move
                                     3,
                                     possiblePupilCenter);
     moveSnakeContour(snake_corona);
 
-    imshow("Iris Function after moving snake_corona orig", showMatrix(snake_pupil, snake_corona, Original_with_lines));
-    imshow("Iris Function after moving snake_corona grad", showMatrix(snake_pupil, snake_corona, Gradient_with_lines));
+    //imshow("Iris Function after moving snake_corona orig", showMatrix(snake_pupil, snake_corona, Original_with_lines));
+    //imshow("Iris Function after moving snake_corona grad", showMatrix(snake_pupil, snake_corona, Gradient_with_lines));
 
-    irisMap = showMatrix(snake_pupil, snake_corona, IrisMap);
+    //irisMap = showMatrix(snake_pupil, snake_corona, IrisMap);
+    irisMap = showMatrix(snake_pupil, snake_corona, Original_with_lines);
+    delete snake_pupil;
+    delete snake_corona;
     return irisMap;
 }
 
@@ -861,9 +865,9 @@ Mat Snake::showMatrix(Snake *snake_pupil, Snake *snake_corona, int type){
         //draw pupil snake
         for(int i=0; i<snake_pupil->contour.size(); i++){
             if(i < (snake_pupil->contour.size() - 1) ){
-                cv::line(snake_pupil->matrixOfPoints,cv::Point((int)(snake_pupil->contour.at(i)->x), (int)(snake_pupil->contour.at(i)->y)),cv::Point((int)(snake_pupil->contour.at(i+1)->x), (int)(snake_pupil->contour.at(i+1)->y)), cv::Scalar(0,105,230));
+                cv::line(out,cv::Point((int)(snake_pupil->contour.at(i)->x), (int)(snake_pupil->contour.at(i)->y)),cv::Point((int)(snake_pupil->contour.at(i+1)->x), (int)(snake_pupil->contour.at(i+1)->y)), cv::Scalar(0,105,230));
             }else{
-                cv::line(snake_pupil->matrixOfPoints,cv::Point((int)(snake_pupil->contour.at(i)->x), (int)(snake_pupil->contour.at(i)->y)),cv::Point((int)(snake_pupil->contour.at(0)->x), (int)(snake_pupil->contour.at(0)->y)), cv::Scalar(0,105,230));
+                cv::line(out,cv::Point((int)(snake_pupil->contour.at(i)->x), (int)(snake_pupil->contour.at(i)->y)),cv::Point((int)(snake_pupil->contour.at(0)->x), (int)(snake_pupil->contour.at(0)->y)), cv::Scalar(0,105,230));
             }
             out.at<Vec3b>((int)(snake_pupil->contour.at(i)->y), (int)(snake_pupil->contour.at(i)->x))[0] = 255;
             out.at<Vec3b>((int)(snake_pupil->contour.at(i)->y), (int)(snake_pupil->contour.at(i)->x))[1] = 0;
