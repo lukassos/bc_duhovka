@@ -262,7 +262,7 @@ Mat Snake::iris_snake_function(Mat image)
                                     //weights of internal and external energies
                                     1.2, 0.6,
                                     //alpha, beta,
-                                    0.7, 0.55,
+                                    0.75, 0.65,
                                     //thresholds for curvature estimation
                                     1.3, 150,
                                     //gausian deviation, sobel scale factor

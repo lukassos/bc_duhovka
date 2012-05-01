@@ -89,7 +89,8 @@ public:
             HoughCircles_flag,
             //Corner Pre-Detection
             PreCornerDetect_flag,
-            GoodFeatureToTrack_flag
+            GoodFeatureToTrack_flag,
+            IrisSnakeRun
         };
 private:
 

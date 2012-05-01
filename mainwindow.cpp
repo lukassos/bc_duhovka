@@ -402,6 +402,13 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 
     switch(operation)
     {
+    case ImageManip::IrisSnakeRun:
+        namedWindow("Snake Iris Map");
+        openedCVWindowNames.append("Snake Iris Map");
+        workImg = Snake().iris_snake_function(workImg);
+        imshow("Snake Iris Map",workImg);
+        break;
+
     case ImageManip::Blur_flag:
         algTime= ImageManip::doBlur(workImg, intBuffer.at(0));
         if(!massRun){
@@ -1404,8 +1411,8 @@ void MainWindow::on_pushButton_irisSnake_clicked()
        workImg = imread(imagePath.toStdString(),0);
        origImg = workImg;
     }
-    namedWindow("Snake Iris Map");
-    openedCVWindowNames.append("Snake Iris Map");
-    workImg = Snake().iris_snake_function(workImg);
-    imshow("Snake Iris Map",workImg);
+
+    activeSetup.append(ImageManip::IrisSnakeRun);
+    ui->textEdit_setup->append("Automated Iris Search by Snake ACM");
+
 }
