@@ -11,7 +11,7 @@
     <x>0</x>
     <y>0</y>
     <width>740</width>
-    <height>601</height>
+    <height>548</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -65,7 +65,7 @@
      </size>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>2</number>
     </property>
     <widget class="QWidget" name="tab_orig">
      <attribute name="title">
@@ -121,36 +121,9 @@
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="tab_hist">
-     <attribute name="title">
-      <string>Histogram</string>
-     </attribute>
-     <widget class="QGraphicsView" name="graphicsView_hist">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>555</width>
-        <height>395</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-     </widget>
-    </widget>
     <widget class="QWidget" name="tab_active">
      <attribute name="title">
-      <string>Active</string>
+      <string>Output</string>
      </attribute>
      <widget class="QGraphicsView" name="graphicsView_active">
       <property name="geometry">
@@ -205,33 +178,6 @@ p, li { white-space: pre-wrap; }
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="tab_map">
-     <attribute name="title">
-      <string>Map of feature</string>
-     </attribute>
-     <widget class="QGraphicsView" name="graphicsView_map">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>555</width>
-        <height>395</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-     </widget>
-    </widget>
    </widget>
    <widget class="QToolBox" name="toolBox_menu">
     <property name="geometry">
@@ -239,7 +185,7 @@ p, li { white-space: pre-wrap; }
       <x>10</x>
       <y>10</y>
       <width>150</width>
-      <height>561</height>
+      <height>511</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -257,7 +203,7 @@ p, li { white-space: pre-wrap; }
        <x>0</x>
        <y>0</y>
        <width>150</width>
-       <height>399</height>
+       <height>349</height>
       </rect>
      </property>
      <attribute name="label">
@@ -899,7 +845,7 @@ p, li { white-space: pre-wrap; }
        <x>0</x>
        <y>0</y>
        <width>150</width>
-       <height>399</height>
+       <height>349</height>
       </rect>
      </property>
      <attribute name="label">
@@ -1489,7 +1435,7 @@ p, li { white-space: pre-wrap; }
        <x>0</x>
        <y>0</y>
        <width>150</width>
-       <height>399</height>
+       <height>349</height>
       </rect>
      </property>
      <attribute name="label">
@@ -1868,7 +1814,7 @@ p, li { white-space: pre-wrap; }
        <x>0</x>
        <y>0</y>
        <width>150</width>
-       <height>399</height>
+       <height>349</height>
       </rect>
      </property>
      <attribute name="label">
@@ -2135,7 +2081,7 @@ Threshold</string>
        <x>0</x>
        <y>0</y>
        <width>150</width>
-       <height>399</height>
+       <height>349</height>
       </rect>
      </property>
      <attribute name="label">
@@ -2218,7 +2164,7 @@ Threshold</string>
        <x>0</x>
        <y>0</y>
        <width>150</width>
-       <height>399</height>
+       <height>349</height>
       </rect>
      </property>
      <attribute name="label">

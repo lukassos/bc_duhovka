@@ -3,10 +3,6 @@
 
 class SnakePoint
 {//one control point of entire contour
-protected:/*until getre and setre created commented
-    float x, y; // coordnates
-    float alpha, beta, step;
-    float E_int, E_ext, E_snake;*/
 
 public:
     SnakePoint();
@@ -30,7 +26,7 @@ public:
     void setE_snake(float value){this->E_snake = value;}
 
 
-    float x, y; // coordnates
+    float x, y; // coordinates
     float alpha, beta, step;
     float E_int, E_ext, E_snake, C_int;
 };

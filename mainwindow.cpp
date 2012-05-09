@@ -36,7 +36,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     ui->tabWidget->setGeometry(170,40,width()-180,height()-105);
     ui->graphicsView_orig->setGeometry(0,0,width()-186,height()-126);
     ui->graphicsView_gray->setGeometry(0,0,width()-186,height()-126);
-    ui->graphicsView_hist->setGeometry(0,0,width()-186,height()-126);
+
     ui->graphicsView_active->setGeometry(0,0,width()-186,height()-126);
     ui->textEdit_setup->setGeometry(0,0,width()-186,height()-126);
     ui->toolBox_menu->setGeometry(5,10,150,height()-40);
@@ -44,7 +44,6 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     updateGraphics_orig();
     updateGraphics_gray();
     updateGraphics_active();
-    updateGraphics_hist();
     on_lineEdit_refreshRate_editingFinished();
     QWidget::resizeEvent(event);
 }
@@ -76,14 +75,7 @@ void MainWindow::readSettings()
     move(settings.value("pos", QPoint(200, 200)).toPoint());
 }
 
-void MainWindow::update()
- {
-    //deprecated
-    //ak nebola ziadna zmena na obrazku mozem volat
-    restoreImage();
-    //ked sa bude vykraslovat do obrazka treba to prerobit na podmienecne
 
- }
 
  ////////////////////////////////////////
 //   LOAD PICTURE AND GRAPHICS INIT   //
@@ -98,9 +90,13 @@ void MainWindow::on_pushButton_setFilesList_clicked()
     //multithread should be here
     QStringList temp = listOfFiles;
     ui->textEdit_setup->append("---------------\nFor processing: ");
-    while(!temp.isEmpty()){
-        ui->textEdit_setup->append(temp.first());
-        temp.removeFirst();
+    if(temp.size()>50){
+        ui->textEdit_setup->append(QString().number(temp.size())+" files");
+    }else{
+        while(!temp.isEmpty()){
+            ui->textEdit_setup->append(temp.first());
+            temp.removeFirst();
+        }
     }
     ui->textEdit_setup->append("---------------");
 }
@@ -110,7 +106,7 @@ bool MainWindow::on_actionSet_Mass_Save_Directory_triggered()
     QString filePath = QFileDialog::getExistingDirectory(this, tr("Set Save Directory"), QDir::currentPath());
     if (!filePath.isEmpty()){
         imageSaveDir = filePath;
-        workImg = imread(filePath.toStdString(),0);
+        //workImg = imread(filePath.toStdString(),0);
     }else{
         QMessageBox msg;
         msg.setText("Failed opening directory");
@@ -139,7 +135,7 @@ bool MainWindow::on_actionLoad_picture_triggered()
 
 QPixmap* MainWindow::loadPictureToPixmap(QString filePath)
 {
-    Mat image_greyscaled = imread(filePath.toStdString(),0);
+    //Mat image_greyscaled = imread(filePath.toStdString(),0);
     //workImg =  new Mat(640,480,CV_8U);
     //workImg = imread(filePath.toStdString(),0);
     //workImg = imread(filePath.toStdString(),0);
@@ -178,7 +174,7 @@ void MainWindow::initGraphicsImages(QString filePath)
 
     ui->graphicsView_orig->setScene(sc_orig);
     ui->graphicsView_gray->setScene(sc_gray);
-    ui->graphicsView_hist->setScene(sc_hist);
+
     ui->graphicsView_active->setScene(sc_active);
 
 //    ui->graphicsView_orig->show();
@@ -272,9 +268,19 @@ void MainWindow::restartUpdater(int refreshRate){
         if(updater->isActive())
         {
             updater->stop();
+            updater->start(ui->lineEdit_refreshRate->text().toInt());
         }
     }
 }
+
+void MainWindow::stopUpdater(){
+    if(updater->isActive())
+        {
+            updater->stop();
+        }
+
+}
+
 
 void MainWindow::updateGraphics_orig(){
     if(imageRasters.count()>=1){
@@ -320,25 +326,6 @@ void MainWindow::updateGraphics_active(){
     //++framecounter;
 }
 
-void MainWindow::updateGraphics_hist(){
-    if(imageRasters.count()>=2){
-        if(ui->actionScale_pictures->isChecked()){
-            QPixmap *temp0 = imageRasters.at(2);
-            QPixmap temp1 = *temp0;
-            QPixmap temp2;
-            temp2 = temp1.scaled(ui->graphicsView_hist->width()-3, ui->graphicsView_hist->height()-3, Qt::KeepAspectRatio);
-            pxi_hist->setPixmap(temp2);
-            //resize of graphics scene
-//            pxi_orig->setOffset(0,0);
-//            sc_orig->update(0,0,ui->graphicsView_orig->width()-3,ui->graphicsView_orig->height()-3);
-//            pxi_orig->update(0,0,ui->graphicsView_orig->width()-3,ui->graphicsView_orig->height()-3);
-        }else{
-            pxi_hist->setPixmap(*imageRasters.at(2));
-        }
-    }
-
-    //++framecounter;
-}
 
 void MainWindow::updateGraphics_gray(){
     if(imageRasters.count()>=2){
@@ -357,33 +344,6 @@ void MainWindow::updateGraphics_gray(){
     //++framecounter;
 }
 
-void MainWindow::restoreImage()
-{
-    //    QPixmap tempPixmap_orig = QPixmap::fromImage(image,Qt::ColorOnly);
-    //    QPixmap tempPixmap_gray = QPixmap::fromImage(image,Qt::MonoOnly);
-    //    tempPixmap_orig = tempPixmap_orig.scaled(ui->graphicsView_orig->width()-3, ui->graphicsView_orig->height()-3, Qt::KeepAspectRatio);
-    //    tempPixmap_gray = tempPixmap_gray.scaled(ui->graphicsView_gray->width()-3, ui->graphicsView_gray->height()-3, Qt::KeepAspectRatio);
- //        QPixmap *tempPixmap_orig = new QPixmap(10,10) ; // QPixmap::fromImage(image,Qt::ColorOnly);
- //        tempPixmap_orig->fill(Qt::red);
-//         pxi_orig = new QGraphicsPixmapItem;
- //        pxi_gray = new QGraphicsPixmapItem;
-   // pxi_orig->pixmap().fromImage(image,Qt::ColorOnly);
-//    tempPixmap_orig.scaled(ui->graphicsView_orig->width()-3, ui->graphicsView_orig->height()-3, Qt::KeepAspectRatio);
-//    pxi_orig->setPixmap(*tempPixmap_orig);
-// pxi_orig->setPixmap(imageRaster.scaled(ui->graphicsView_orig->width()-3, ui->graphicsView_orig->height()-3, Qt::KeepAspectRatio));
-    //pxi_gray->setPixmap(tempPixmap_gray);
-//    QPixmap tempPixmap_orig = QPixmap::fromImage(image,Qt::ColorOnly);
-    //QPixmap tempPixmap_gray = QPixmap::fromImage(image,Qt::MonoOnly);
-//
-   // pxi_orig->setPixmap(tempPixmap_orig.scaled(ui->graphicsView_orig->width()-3, ui->graphicsView_orig->height()-3, Qt::KeepAspectRatio));
-   // pxi_gray->setPixmap(tempPixmap_gray.scaled(ui->graphicsView_gray->width()-3, ui->graphicsView_gray->height()-3, Qt::KeepAspectRatio));
-
-    //QPixmap pxm(filePath);
-//    QPixmap pxm(filePath);
-   // QSize picSize = ;
-//    pxm.scaled(picSize);
-
-}
 
  ///////////////////////////////
 //     OPEN CV OPERATIONS    //
@@ -399,6 +359,7 @@ void MainWindow::destroyAllCVWindows()
 
 void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
     int algTime = 0;
+     Snake *help;
     QElapsedTimer timeConsumed;
     switch(operation)
     {
@@ -409,7 +370,9 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
             imshow("Snake Iris Map",workImg);
         }
         timeConsumed.start();
-        workImg = Snake().iris_snake_function(workImg);
+        help = new Snake();
+        workImg = help->iris_snake_function(workImg);
+        delete help;
         algTime = timeConsumed.elapsed();
         break;
 
@@ -645,7 +608,8 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 
     default:;
     }
-    ui->actualTime->setText(QString().number(ui->actualTime->text().toFloat()+algTime));
+    if(operation != ImageManip::IrisSnakeRun)
+        ui->actualTime->setText(QString().number(ui->actualTime->text().toFloat()+algTime));
 
 }
 
@@ -720,6 +684,7 @@ void MainWindow::debugWindow(const QString text){
 //      RUN  SETUP     //
 void MainWindow::on_pushButton_massRun_clicked()
 {
+    stopUpdater();
     massRun=true;
     destroyAllCVWindows();
     while(listOfFiles.isEmpty()){
@@ -799,7 +764,9 @@ void MainWindow::on_pushButton_massRun_clicked()
             //begin - processing of image from list
             //debugWindow("work image will be : "+QString().fromStdString(listOfFiles.at(files).toStdString()));
             //tempPath = listOfFilePaths.at(files);
+            workImg.release();
             workImg = imread(listOfFilePaths.at(files).toStdString(),0);
+            origImg.release();
             origImg = workImg;
             //debugWindow("starting OpenCV functions");
             intBuffer = lastIntBuffer;
@@ -839,6 +806,7 @@ void MainWindow::on_pushButton_massRun_clicked()
     }
     ui->textEdit_setup->append("\n-------------------------------\nSetup File\n-------------------------------");
     updateGraphics_active();
+    startUpdater(ui->lineEdit_refreshRate->text().toInt());
 }
 
 void MainWindow::on_pushButton_run_clicked()
@@ -1364,7 +1332,7 @@ void MainWindow::on_pushButton_moveSnake_clicked()
     activeContour->edgeStrenghtThreshold = ui->doubleSpinBox_snake_edgeThresh->value();
     activeContour->initSnakeExtField(activeContour, activeContour->vectorField->getTypeOfVectorField(), ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value(), activeContour->possiblePupilCenter);
     //activeContour->saveSnakeToTextFile(activeContour);
-    ui->actualTime->setText(QString().number( activeContour->moveSnakeContour(activeContour)));
+    ui->actualTime->setText(QString().number( activeContour->moveSnakeContour(activeContour, 200)));
 
     namedWindow("Snake Show Matrix");
     openedCVWindowNames.append("Snake Show Matrix");
@@ -1418,5 +1386,4 @@ void MainWindow::on_pushButton_irisSnake_clicked()
 
     activeSetup.append(ImageManip::IrisSnakeRun);
     ui->textEdit_setup->append("Automated Iris Search by Snake ACM");
-
 }

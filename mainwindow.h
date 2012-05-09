@@ -27,7 +27,6 @@ public:
     QString imageSaveDir;
     QStringList openedCVWindowNames;
     Mat origImg, workImg;
-    Mat histImg;
     vector<Vec3f> circles;
 
     explicit MainWindow(QWidget *parent = 0);
@@ -41,10 +40,10 @@ public:
     void writeSettings();
     void readSettings();
     void initGraphicsImages(QString fileName);
-    void restoreImage();
-    void update();
+
     void startUpdater(int refreshRate);
     void restartUpdater(int refreshRate);
+    void stopUpdater();
     QString readTextFile(QString windowName);
     bool writeTextFile(QString windowName, QString text);
 
@@ -62,9 +61,7 @@ private slots:
     void updateGraphics_orig();
     void updateGraphics_gray();
     void updateGraphics_active();
-    void updateGraphics_hist();
-//    void on_horizontalSlider_sliderMoved(int position);
-//    void on_horizontalSlider_valueChanged(int value);
+
     void on_actionRefresh_interval_triggered();
     void on_lineEdit_refreshRate_editingFinished();
 
@@ -100,7 +97,6 @@ private slots:
 
     void on_pushButton_houghTransform_clicked();
 
-//    void on_actionFull_screen_mode_triggered();
 
     void on_actionExit_triggered();
 

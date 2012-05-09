@@ -196,6 +196,76 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
 
 
         //cv::imshow("EXTERNAL sobel grad_bg", gradient_bg);
+///////////////////////////////////////////////////////////////
+        //set zeros to gradient vector addition
+        gradient_bg = Mat().zeros(gradient_bg.rows, gradient_bg.cols, gradient_bg.type());
+
+        //counting gradient vector field from gradient maximas
+        for(int j = 0; j < gradient_bg.rows; j++){
+            for(int i = 0; i < gradient_bg.cols; i++){
+                if(70 >= sqrt( pow(dx.at<unsigned char>(j,i),2) + pow(dy.at<unsigned char>(j,i),2) )
+                        &&
+                    canny.at<unsigned char>(j,i) == 255){
+
+                    //when canny found then it is 255 = maximal
+                    gradient_bg.at<float>(j,i) += 255;
+
+                    //count distances from borderso of matrix
+                    int dist_l = i;
+                    int dist_r =  abs(i-gradient.cols+1);
+                    int dist_u = j;
+                    int dist_d = abs(j-gradient.rows+1);
+                    //l, r, d, u == left, right, up, down
+
+                    //in four direction make gradient pointing to this point
+                    //short distance term
+                    for(int d = 3; d > 0; d--){
+                        if(d<=dist_l)
+                            gradient.at<float>(j,i-d) += (150 /d);
+                        if(d<=dist_r)
+                            gradient.at<float>(j,i+d) += (150 /d);
+                        if(d<=dist_u)
+                            gradient.at<float>(j-d,i) += (150 /d);
+                        if(d<=dist_d)
+                            gradient.at<float>(j+d,i) += (150 /d);
+                    }
+                    //mid distance term
+                    for(int d = 7; d > 0; d--){
+                        if(d<=dist_l)
+                            gradient.at<float>(j,i-d) += (50 /d);
+                        if(d<=dist_r)
+                            gradient.at<float>(j,i+d) += (50 /d);
+                        if(d<=dist_u)
+                            gradient.at<float>(j-d,i) += (50 /d);
+                        if(d<=dist_d)
+                            gradient.at<float>(j+d,i) += (50 /d);
+                    }
+                    //long distance term
+                    for(int d = dist_l; d > 0; d--){
+                        gradient.at<float>(j,i-d) += (16 / d);
+                    }
+                    for(int d = dist_r; d > 0; d--){
+                        gradient.at<float>(j,i+d) += (16 / d);
+                    }
+                    for(int d = dist_u; d > 0; d--){
+                        gradient.at<float>(j-d,i) += (16 / d);
+                    }
+                    for(int d = dist_d; d > 0; d--){
+                        gradient.at<float>(j+d,i) += (16 / d);
+                    }
+                };
+            }
+        }
+        //this->vectorField.insert(0, gradient_bg);
+        //normalization of gradient vector field
+       // imshow("gradient vector field before normalization",  getConvertedVectorField(0));
+        if(true){
+            double maxGradient_bg = 0;
+            cv::minMaxIdx(gradient_bg, 0, &maxGradient_bg);
+            gradient_bg = ((255 * gradient_bg) / maxGradient_bg);
+
+        }
+//////////////////////////////////////////////
 
         for(int j = 0; j < gradient.rows; j++)
             for(int i = 0; i < gradient.cols; i++){
@@ -245,7 +315,7 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
         //remove noise and scale image for further range of gradient
         GaussianBlur(gradient_bg, gaus, Size(5, 5), this->gausianDeviation, 0);
         Canny(gaus, canny, 30, 90, 5, false);
-        this->vectorField.insert(0, gaus.clone());
+        //this->vectorField.insert(0, gaus.clone());
         //cv::imshow("EXTERNAL GAUSIAN", gaus);
         //derivates of matrices by sobel operator
         Sobel(gaus, dx,  CV_8UC1, 1, 0, 3, this->sobelScale);
@@ -319,7 +389,7 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
                 };
             }
         }
-        this->vectorField.insert(0, gradient_bg);
+        //this->vectorField.insert(0, gradient_bg);
         //normalization of gradient vector field
        // imshow("gradient vector field before normalization",  getConvertedVectorField(0));
         if(true){
@@ -328,7 +398,7 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
             gradient_bg = ((255 * gradient_bg) / maxGradient_bg);
 
         }
-        this->vectorField.insert(0, gradient_bg);
+        //this->vectorField.insert(0, gradient_bg);
         //imshow("gradient vector field", getConvertedVectorField(0));
         for(int j = 0; j < gradient.rows; j++)
             for(int i = 0; i < gradient.cols; i++){
@@ -355,6 +425,13 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
         //imshow("gradient field after convert", getConvertedVectorField(0));
         //imshow("gradient_bg field after convert", getConvertedVectorField(3));
         break;
+        gaus.release();
+        dx.release();
+        dy.release();
+        canny.release();
+        gradient.release();
+        gradient_bg.release();
+
     default:;
     }
 }

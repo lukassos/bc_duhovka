@@ -80,10 +80,11 @@ public:
     void countTotalEnergyExt(Snake *snake);
 
     // ITERATIONS OF SNAKE
-    int moveSnakeContour(Snake *snake);
+    int moveSnakeContour(Snake *snake, int maxCycles);
 
     // preconfigured function for finding iris, output is image map
     Mat iris_snake_function(Mat image);
+    Mat cleanIrisMap(Snake *snake_pupil, Snake *snake_corona);
 
     // visual/output interface functions
     void showMatrix(Snake *snake);
@@ -108,7 +109,8 @@ public:
         Blank_with_points,
         Blank_with_lines,
         Blank_with_polygons,
-        IrisMap
+        IrisMap,
+        IrisMapTransparent
     };
 };
 
