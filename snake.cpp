@@ -1244,16 +1244,16 @@ float Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fast
                     x.append(i);
                     y.append(j);
                 }
-                if(i==xOffset || j == yOffset || i==(xOffset+xMax-1) || j == (yOffset+yMax-1))
-                    sum.at<unsigned char>(j,i) =120;
+                //uncomment below to see area of searching and vision of matrix sum after using this custom kernel
+                //if(i==xOffset || j == yOffset || i==(xOffset+xMax-1) || j == (yOffset+yMax-1))
+                    //sum.at<unsigned char>(j,i) =120;
             }
         }
-        //uncomment this to see area of searching and vision of matrix sum after using this custom kernel
-
-        imshow("Sum Matrix", sum);
-        QMessageBox msg;
-        msg.setText("Custom kernel = "+QString().number(kernelSize));
-        msg.exec();
+        //uncomment below to see area of searching and vision of matrix sum after using this custom kernel
+        //imshow("Sum Matrix", sum);
+        //QMessageBox msg;
+        //msg.setText("Custom kernel = "+QString().number(kernelSize));
+        //msg.exec();
     }
 
     int probableXY[4]={0, (int)(sum.rows/2), 0, yOffset+yMax};
@@ -1268,7 +1268,7 @@ float Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fast
         probableXY[1]=y.at(i);
         i+=(countOfAtI-1);
     }
-
+    sum.release();
     sum = sumBackup.clone();
     probableXY[2] = probableXY[3];
     for(int j = probableXY[1]; j < probableXY[3]; j++){
