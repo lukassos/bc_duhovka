@@ -11,55 +11,15 @@ ImageManip::~ImageManip()
 {
 
 }
-    //treba spravit vypis *Mat do okna huigui
-    //treba spravit obdobu tejto funkcie pre kazdy operato vracat bude *Mat
-//void ImageManip::showImgThoughOpenCV(QString pathToImage)
-//{
-//    //destroyAllCVWindows();
-//    while(pathToImage.isEmpty()){
-//        pathToImage = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::currentPath());
-//        imagePath = pathToImage;
-//    }
-//    Mat image = imread(pathToImage.toStdString(),1);
-//    Mat image_greyscaled = imread(pathToImage.toStdString(),0);
-//    //    namedWindow("My Image");
-//    createCVWindow("My Image");
-//    createCVWindow("My Grey Image");
-//    imshow("My Image", image);
-//    //imwrite();
-//    imshow("My Grey Image", image_greyscaled);
-//    createCVWindow("Blur + Canny edge detection");
-//    //tempMat = image_greyscaled;
-//    imshow("Blur + Canny edge detection", image_greyscaled);
-//    blur(image_greyscaled, tempMat, Size(3,3));
-//    Mat blured = tempMat;
-//    createCVWindow("Blur");
-//    imshow("Blur", blured);
-//    //createTrackbar("Canny threshold", "Blur + Canny edge detection", &tempInt, 100, NULL);
-//    // Show the image
-//    //onTrackbar(0, 0);
-//    Canny(tempMat, edgeMat, ui->sliderValue->value(), ui->sliderValue->value()*3, 3);
-//    imshow("Blur + Canny edge detection", edgeMat);
-//    waitKey(-1);
-//}
 
 Mat* ImageManip::bindIplImage2Mat(const IplImage *iplImage)
 {
     Mat *newMat = new Mat;
     *newMat = cvarrToMat(iplImage);
-    //    ak sa data nekopiruju zdielaju sa z povodnym obrazkom a tym sa da vyhnut konverzii spat
-    //    *newMat = cvarrToMat(iplImage).clone();
+
     return newMat;
 }
 
-//tato konverzia je zbytocne zlozita na vykonavanie real time
-//IplImage* MainWindow:: Mat2IplImage(const Mat *Mat)
-//{
-//    IplImage *newIplImage = new IplImage;
-//    *Mat->
-//    *newIplImage =
-//    return newIplImage;
-//}
 
 IplImage* ImageManip::qImage2IplImage(const QImage& qImage)
 {
@@ -87,13 +47,6 @@ IplImage* ImageManip::qImage2IplImage(const QImage& qImage)
     return img;
 }
 
-//conversion from iplimage
-
-//unsigned char* qImageBuffer = (unsigned char*)(ipl_img->imageData);
-//QImage* temp = new QImage((const unsigned char*)qImageBuffer, ipl_img->width, ipl_img->height, ipl_img->widthStep, QImage::Format_RGB888);
-//QPixmap TEMP_pixmap;
-//TEMP_pixmap.convertFromImage( *temp );
-//this->setPixmap( TEMP_pixmap );
 QImage ImageManip::IplImage2QImage(const IplImage *iplImage)
 {
     int height = iplImage->height;
@@ -123,9 +76,7 @@ QImage ImageManip::IplImage2QImage(const IplImage *iplImage)
 
 void ImageManip::onTrackbar(int, void*) {
     blur(tempMat, tempMat, Size(3,3));
-    // Run the edge detector on grayscale
     Canny(tempMat, tempMat, tempInt, tempInt*3, 3);
-    //    Mat edge = Scalar::all(0);
     Mat edge;
     Mat().copyTo(edge, tempMat);
     imshow("Blur + Canny edge detection", edge);
@@ -143,11 +94,7 @@ int ImageManip::doBlur(Mat processedImage, int size)
 {
     QElapsedTimer algTime;
     algTime.start();
-    //Mat temp1, temp2;
-    //temp1 = processedImage;
-
     blur(processedImage, processedImage, Size(size,size));
-    //processedImage = temp2;
     return algTime.elapsed();
 }
 
@@ -250,10 +197,7 @@ for( size_t i = 0; i < circles.size(); i++ )
    {
        Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
        int radius = cvRound(circles[i][2]);
-       // draw the circle center
        circle( processedImage, center, 3, Scalar(255,0,0), -1, 8, 0 );
-       // draw the circle outline
-       //circle( processedImage, center, radius, Scalar(0,0,0), -radius, 8, 0 );
        circle( processedImage, center, radius, Scalar(255,0,0), 1, 8, 0 );
    }
 }
@@ -263,25 +207,17 @@ int ImageManip::doGoodFeatureToTrack(Mat processedImage, int maxCorners, double 
     QElapsedTimer algTime;
     algTime.start();
     vector<Point2f> corners;
-    //goodFeaturesToTrack( processedImage, vector<Point2f>& corners, maxCorners, qualityLevel, minDistance, const Mat& roiMask=Mat(), blockSize=3, useHarris, k=0.44);
     return algTime.elapsed();
 }
 
 int ImageManip::doPreCornerDetect(Mat processedImage, int apertureSize){
     QElapsedTimer algTime;
     algTime.start();
-//    Mat showka;
-//    namedWindow("showka");
     Mat temp = processedImage.clone();
     preCornerDetect( processedImage, temp, apertureSize, BORDER_DEFAULT );
-//    imshow("showka",showka);
-    processedImage = temp.clone();
+   processedImage = temp.clone();
      return algTime.elapsed();
-//Mat corners, dilated_corners;
-//preCornerDetect(image, corners, 3);
-//// dilation with 3x3 rectangular structuring element
-//dilate(corners, dilated_corners, Mat(), 1);
-//Mat corner_mask = corners == dilated_corners;
+
 }
 
 int fastCenterAlgorithm(Mat processedImage)
@@ -290,25 +226,6 @@ int fastCenterAlgorithm(Mat processedImage)
     algTime.start();
     uchar vertical[processedImage.rows];
     uchar horizontal[processedImage.cols];
-    //only a scetch of fast locenter alg
-
-//    for(int i=1; i<processedImage.cols; i++){
-//        //uchar intensity of actual cell processedImage[i][cvRound(processedImage.rows/2)]
-//        if( processedImage[i][cvRound(processedImage.rows/2)] == processedImage[i-1][cvRound(processedImage.rows/2)]){
-//            horizontal[i] = 0;
-//        }else if( processedImage[i][cvRound(processedImage.rows/2)] < processedImage[i-1][cvRound(processedImage.rows/2)] )
-//        {
-//            horizontal[i] = processedImage[i-1][cvRound(processedImage.rows/2)] - processedImage[i][cvRound(processedImage.rows/2)];
-//        }else{
-//            horizontal[i] = processedImage[i][cvRound(processedImage.rows/2)] - processedImage[i-1][cvRound(processedImage.rows/2)];
-//        }
-//        if(i==1){
-//            horizontal[0] = horizontal[1];
-//        }
-//    }
-    //derivate one row in the middle then find range between two maximas
-    //derivate one col in the middle of range found by previous row then find range between two maximas
-    //derivate one row in the middle of the range found by previous column and then
 
     return algTime.elapsed();
 }
@@ -317,15 +234,7 @@ int ImageManip::doPseudoContrast(Mat processedImage, int amount)
 {
     QElapsedTimer algTime;
     algTime.start();
-    //    for(int y=0; y<processedImage.rows; y++)
-    //        for(int x=0; x<processedImage.cols; x++)
-    //        {
-    //            if(processedImage.at(y,x)>125){
-    //                processedImage.at(y,x)-=amount;
-    //            }else{
-    //                processedImage.at(y,x)+=amount;
-    //            }
-    //        }
+
         return algTime.elapsed();
 }
 
@@ -358,11 +267,9 @@ Mat ImageManip::doHistogram(Mat processedImage){
     float sranges[] = { 0, 256 };
     const float* ranges[] = { hranges, sranges };
     MatND hist;
-    // we compute the histogram from the 0-th and 1-st channels
     int channels[] = {0};//0,1
     calcHist(&hsv, 1, channels, Mat(), /* do not use mask*/ hist, 1, histSize, ranges, true, /* the histogram is uniform*/ false );
-//    calcHist(&hsv, 1, channels, Mat(), /* do not use mask*/ hist, 2, histSize, ranges, true, /* the histogram is uniform*/ false );
-    double maxVal=255;
+   double maxVal=255;
     minMaxLoc(hist, 0, &maxVal, 0, 0);
     int scale = 10;
     Mat histImg = Mat::zeros(sbins*scale, hbins*10, CV_8U);
@@ -374,8 +281,7 @@ Mat ImageManip::doHistogram(Mat processedImage){
             rectangle( histImg, Point(h*scale, s*scale), Point( (h+1)*scale - 1, (s+1)*scale - 1), Scalar::all(intensity), CV_FILLED );
         }
 
-    //namedWindow( "H-S Histograms", 1 );
-    //imshow( "H-S Histograms", histImg );
+
     return histImg;
 }
 
@@ -384,13 +290,8 @@ int ImageManip::doBilateralFiltering(Mat processedImage, double kernel, double s
     QElapsedTimer algTime;
     algTime.start();
     Mat showka;
-    //namedWindow("showka2");
     bilateralFilter(processedImage, showka, kernel, sigmaColor,  sigmaSpace, BORDER_DEFAULT);
-    //imshow("showka2",showka);
-    processedImage = showka;
+   processedImage = showka;
     return algTime.elapsed();
 }
 
-//int downsize(){
-
-//}

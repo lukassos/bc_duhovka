@@ -18,165 +18,44 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
     Mat gaus = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
     Mat dx = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
     Mat dy = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
-   // Mat mdx = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
-   // Mat mdy = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
-    //Mat kernelSobelMdx = Mat(3, 3, CV_8UC1);
-   // Mat kernelSobelMdy = Mat(3, 3, CV_8UC1);
     Mat canny = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
-   // Mat laplace = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_8UC1);
     Mat gradient = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_32FC1);
     Mat gradient_bg = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_32FC1);
-   // Mat modified_corona = Mat(this->vectorField.at(0).rows, this->vectorField.at(0).cols, CV_32FC1);
-    //this->vectorField.at(0).convertTo(gaus, gaus.depth(), 1, 15);
-    //scaleConvertMat(this->vectorField.at(0), gaus);
-
-    //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\input_origina.png",this->vectorField.at(0));
-    //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\input_scaled.png",gaus);
-    //cv::convertScaleAbs(this->vectorField.at(0),  gaus, 1, 15); did not work - uses the same type
-
-    //cv::imshow("Input for E EXT counting", this->vectorField.at(0));
-
-    //cv::imshow("EXTERNAL first gausian", gaus);
-    //saveMatToTextFile(this->vectorField.at(0), "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\input_origina.txt");
-    //saveMatToTextFile(gaus, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\input_scaled.txt");
-    switch(type){
+     switch(type){
     case EnergyExternalField::GradientMagnitudes:
 
         //remove noise and scale image for furher range of gradient
         GaussianBlur(this->vectorField.at(0), gaus, Size(5, 5), this->gausianDeviation, 0);
         Canny(gaus, canny, 30, 90, 5, false);
-      //  imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\canny.png",canny);
-        //saveMatToTextFile(gaus, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gausianBlur.txt");
         this->vectorField.insert(0, gaus.clone());
-        //cv::imshow("EXTERNAL GAUSIAN", gaus);
-        //medianBlur(gaus, gaus, 3);
-     //   imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gausianBlur.png",gaus);
-        //derivates of matrices by sobel operator
-     //   Laplacian(gaus, laplace, gradient.depth(), 3, this->sobelScale);
 
         Sobel(gaus, dx,  CV_8UC1, 1, 0, 3, this->sobelScale);
         Sobel(gaus, dy,  CV_8UC1, 0, 1, 3, this->sobelScale);
-        //getDerivKernels(kernelSobelMdx, kernelSobelMdy, 1, 1, 3);
-        //kernelSobelMdx.at<float>(0,0)= 1;        kernelSobelMdx.at<float>(0,1)= 0;        kernelSobelMdx.at<float>(0,2)= -1;
-        //kernelSobelMdx.at<float>(1,0)= 2;        kernelSobelMdx.at<float>(1,1)= 0;        kernelSobelMdx.at<float>(1,2)= -2;
-        //kernelSobelMdx.at<float>(2,0)= 1;        kernelSobelMdx.at<float>(2,1)= 0;        kernelSobelMdx.at<float>(2,2)= -1;
-
-        //kernelSobelMdy.at<float>(0,0)= 1;        kernelSobelMdy.at<float>(0,1)= 2;        kernelSobelMdy.at<float>(0,2)= 1;
-        //kernelSobelMdy.at<float>(1,0)= 0;        kernelSobelMdy.at<float>(1,1)= 0;        kernelSobelMdy.at<float>(1,2)= 0;
-        //kernelSobelMdy.at<float>(2,0)= -1;        kernelSobelMdy.at<float>(2,1)= -2;        kernelSobelMdy.at<float>(2,2)= -1;
-        //kernelSobelMdy =  kernelSobelMdy * (-1);
-        //filter2D(gaus, mdx, mdx.depth(), kernelSobelMdx);
-        //filter2D(gaus, mdy, mdy.depth(), kernelSobelMdy);
-        //cv::imshow("EXTERNAL sobel DX", dx);
-        //cv::imshow("EXTERNAL sobel DY", dy);
-        //cv::imshow("EXTERNAL sobel -DX", mdx);
-        //cv::imshow("EXTERNAL sobel -DY", mdy);
-
-        //gradient magnitude = sqrt(power_2(derivation by x) + power_2(derivation by y))
-        //        for(int i = 0; i < this->vectorField.rows; i++)
-        //            for(int j = 0; j < this->vectorField.cols; j++){
-        //                this->vectorField.at<Vec3b>(i,j)[0] = dx.at<float>(i,j);
-        //                this->vectorField.at<Vec3b>(i,j)[1] = dy.at<float>(i,j);
-        //                this->vectorField.at<Vec3b>(i,j)[2] = dx.at<float>(i,j) + dy.at<float>(i,j);
-        //                this->vectorField.at<Vec3b>(i,j)[2] = sqrt(sqr(dx.at<float>(i,j)) + sqr(dy.at<float>(i,j))) ;
-        //            }
-        //for clean edge map need to take out small edges
-        medianBlur(dx, dx, 7);medianBlur(dx, dx, 3);
+    medianBlur(dx, dx, 7);medianBlur(dx, dx, 3);
         medianBlur(dy, dy, 7);medianBlur(dy, dy, 3);
-        //saveMatToTextFile(dx, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_scale_0.01.txt");
-        //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_scale_0.01.png",dx);
-        //saveMatToTextFile(dy, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dy_scale_0.01.txt");
-        //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_scale.png",dx);
-        //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dy_scale.png",dy);
-        //cv::pow(dx, 2, dx);
-        //cv::pow(dy, 2, dy);
-
-        //saveMatToTextFile(dx, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_pow_2.txt");
-        //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_pow_2.png",dx);
-        //saveMatToTextFile(dy, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dy_pow_2.txt");
-        //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dy_pow_2.png",dy);
-        //gradient = dx + dy;
-
 
         for(int j = 0; j < gradient.rows; j++)
             for(int i = 0; i < gradient.cols; i++){
                 gradient.at<float>(j,i) = sqrt( pow(dx.at<unsigned char>(j,i),2) + pow(dy.at<unsigned char>(j,i),2) );
-                //gradient.at<float>(j,i) = sqr( (float)dx.at<unsigned char>(j,i) - 125) + sqr( (float)dy.at<unsigned char>(j,i) - 125);// + ((sqr(dy.at<unsigned char>(j,i) - 125) * 255)/6000) ;
-                //dx.at<unsigned char>(j,i) = (((dx.at<unsigned char>(j,i) - 125) * 255)/15625);
-                //dy.at<unsigned char>(j,i) = (((dy.at<unsigned char>(j,i) - 125) * 255)/15625);
                  float dist = (abs(i-centerX+1)+abs(j-centerY+1))/2;
                  if(dist < 10){
                      dist = 500;
                  }
                  if(gradient.at<float>(j,i) < 70){//70-good
-                    //vector to center = ( intensity addition in center ) / ( distance from center )
-
                      gradient.at<float>(j,i) =0;
-                    //gradient.at<float>(j,i) = (abs(gradient.at<float>(j,i) - 255)/ dist);
-
-                    //laplace.at<unsigned char>(j,i); //(1000/ dist);
 
                 }else if(canny.at<unsigned char>(j,i) == 255){
                     gradient.at<float>(j,i) = 255;
                 }
                  if(dist > 150)
-                    ; //gradient.at<float>(j,i) = (1000/ dist);
+                    ;
             }
 
-       // blur(dx, dx, Size(5, 5));
 
-            //set new kernel
-            //kernel = Mat().ones(kernelSize, kernelSize, gradient.type());
-
-//            for(int i = 0; i < kernelSize; i++){
-//                for(int j = 0; j < kernelSize; j++){
-//                    if(j<4){
-//                        if(i<=(((kernelSize-1)/2)-j)){
-//                            kernel.at<unsigned char>(j, i)=1;
-//                        }else if(i>=(kernelSize-((kernelSize-1)/2)+j)){
-//                            kernel.at<unsigned char>(j, i)=1;
-//                        }
-//                    }else if(j>kernelSize-((kernelSize-1)/2)-1){
-//                        if(i<=(kernelSize-1-j)){
-//                            kernel.at<unsigned char>(j, i)=1;
-//                        }else if(kernelSize-1+kernelSize-((kernelSize-1)/2)-j){
-//                            kernel.at<unsigned char>(j, i)=1;
-//                        }
-//                    }
-//                }
-//            }
-            //kernel.at<float>((((kernelSize-1)/2)), (((kernelSize-1)/2)))=2;
-            //apply new kernel
-            //filter2D(gradient, gradient, gradient.type(), kernel);
-        //gradient = gradient * 127.5;
-        //gradient = gradient / 15625;
-        //cv::imshow("EXTERNAL sobel DX", dx);
-        //cv::imshow("EXTERNAL sobel DY", dy);
-
-
-       // saveMatToTextFile(gradient, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\dx_dy_sum.txt");
-        //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gradient_float.png",gradient);
-        //cv::sqrt(gradient, gradient);
-        //scaleVectorField(gaus);
-
-
-        //imshow("gradient field", gradient);
-        //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gradient.png",gaus);
-//        saveMatToTextFile(gradient, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gradient.txt");
-
-        //                for(int i = 0; i < this->vectorField.rows; i++)
-        //                    for(int j = 0; j < this->vectorField.cols; j++){
-        //                        this->vectorField.at<Vec3b>(i,j)[0] = dx.at<float>(i,j);
-        //                        this->vectorField.at<Vec3b>(i,j)[1] = dy.at<float>(i,j);
-        //                        this->vectorField.at<Vec3b>(i,j)[2] = gaus.at<float>(i,j);
-        //                    }
         this->vectorField.insert(0, gradient);
 
-        //imwrite("C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\gradient_uchar.png",this->getConvertedVectorField(0));
         this->vectorField.insert(1, dx);
         this->vectorField.insert(2, dy);
-        //        || equals ||
-        //        cv::magnitude(this->vectorField[0],this->vectorField[1],this->vectorField.channels()[3])
 
         break;
     case EnergyExternalField::GradientMagnitudes_pupil:
@@ -185,17 +64,13 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
         GaussianBlur(this->vectorField.at(0), gaus, Size(5, 5), this->gausianDeviation, 0);
         Canny(gaus, canny, 30, 90, 5, false);
         this->vectorField.insert(0, gaus.clone());
-        //cv::imshow("EXTERNAL GAUSIAN pupil", gaus);
         //derivates of matrices by sobel operator
         Sobel(gaus, dx,  CV_8UC1, 1, 0, 3, this->sobelScale);
         Sobel(gaus, dy,  CV_8UC1, 0, 1, 3, this->sobelScale);
-        //cv::imshow("EXTERNAL sobel DX pupil", dx);
-        //cv::imshow("EXTERNAL sobel DY pupil", dy);
         medianBlur(dx, dx, 7);medianBlur(dx, dx, 3);
         medianBlur(dy, dy, 7);medianBlur(dy, dy, 3);
 
 
-        //cv::imshow("EXTERNAL sobel grad_bg", gradient_bg);
 ///////////////////////////////////////////////////////////////
         //set zeros to gradient vector addition
         gradient_bg = Mat().zeros(gradient_bg.rows, gradient_bg.cols, gradient_bg.type());
@@ -256,10 +131,7 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
                 };
             }
         }
-        //this->vectorField.insert(0, gradient_bg);
-        //normalization of gradient vector field
-       // imshow("gradient vector field before normalization",  getConvertedVectorField(0));
-        if(true){
+      if(true){
             double maxGradient_bg = 0;
             cv::minMaxIdx(gradient_bg, 0, &maxGradient_bg);
             gradient_bg = ((255 * gradient_bg) / maxGradient_bg);
@@ -270,36 +142,25 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
         for(int j = 0; j < gradient.rows; j++)
             for(int i = 0; i < gradient.cols; i++){
                 gradient.at<float>(j,i) = sqrt( pow(dx.at<unsigned char>(j,i),2) + pow(dy.at<unsigned char>(j,i),2) );
-                //gradient.at<float>(j,i) = sqr( (float)dx.at<unsigned char>(j,i) - 125) + sqr( (float)dy.at<unsigned char>(j,i) - 125);// + ((sqr(dy.at<unsigned char>(j,i) - 125) * 255)/6000) ;
-                //dx.at<unsigned char>(j,i) = (((dx.at<unsigned char>(j,i) - 125) * 255)/15625);
-                //dy.at<unsigned char>(j,i) = (((dy.at<unsigned char>(j,i) - 125) * 255)/15625);
                  float dist = (abs(i-centerX+1)+abs(j-centerY+1))/2;
                  if(dist < 10){
                      dist = 500;
                  }
-                 if(gradient.at<float>(j,i) < 70){//70-good
-                    //vector to center = ( intensity addition in center ) / ( distance from center )
+                 if(gradient.at<float>(j,i) < 70){
 
-                     gradient.at<float>(j,i) = 0;// gradient_bg.at<float>(j,i);
-                    //gradient.at<float>(j,i) = (abs(gradient.at<float>(j,i) - 255)/ dist);
-
-                    //laplace.at<unsigned char>(j,i); //(1000/ dist);
+                     gradient.at<float>(j,i) = 0;
 
                 }else if(canny.at<unsigned char>(j,i) == 255){
                     gradient.at<float>(j,i) = 255;
                 }
                  if(dist > 150)
-                    ; //gradient.at<float>(j,i) = (1000/ dist);
+                    ;
             }
 
-        //imshow("gradient field", gradient);
         this->vectorField.insert(0, gradient);
         this->vectorField.insert(1, dx);
         this->vectorField.insert(2, dy);
-
-        //imshow("gradient field after convert pupil", getConvertedVectorField(0));
-        //imshow("gradient_bg field after convert pupil", getConvertedVectorField(3));
-        break;
+       break;
 
     case EnergyExternalField::GradientMagnitudes_corona:
         //input of corona is not the original but modified image then it is the same as pupil gradient
@@ -315,23 +176,13 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
         //remove noise and scale image for further range of gradient
         GaussianBlur(gradient_bg, gaus, Size(5, 5), this->gausianDeviation, 0);
         Canny(gaus, canny, 30, 90, 5, false);
-        //this->vectorField.insert(0, gaus.clone());
-        //cv::imshow("EXTERNAL GAUSIAN", gaus);
         //derivates of matrices by sobel operator
         Sobel(gaus, dx,  CV_8UC1, 1, 0, 3, this->sobelScale);
         Sobel(gaus, dy,  CV_8UC1, 0, 1, 3, this->sobelScale);
-        //cv::imshow("EXTERNAL sobel DX", dx);
-        //cv::imshow("EXTERNAL sobel DY", dy);
-        medianBlur(dx, dx, 7);medianBlur(dx, dx, 3);
+       medianBlur(dx, dx, 7);medianBlur(dx, dx, 3);
         medianBlur(dy, dy, 7);medianBlur(dy, dy, 3);
 
-
-        //        for(float i = 0; i < qAbs(centerX-gradient.cols); i++){
-        //            double value = qAbs(centerX-gradient.cols) / ((i>0) ? i : 1) ;
-        //            cv::circle(gradient_bg, cv::Point(centerX, centerY), i, cv::Scalar(value));
-        //        }
-        //set zeros to gradient vector addition
-        gradient_bg = Mat().zeros(gradient_bg.rows, gradient_bg.cols, gradient_bg.type());
+     gradient_bg = Mat().zeros(gradient_bg.rows, gradient_bg.cols, gradient_bg.type());
 
         //counting gradient vector field from gradient maximas
         for(int j = 0; j < gradient_bg.rows; j++){
@@ -389,27 +240,16 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
                 };
             }
         }
-        //this->vectorField.insert(0, gradient_bg);
-        //normalization of gradient vector field
-       // imshow("gradient vector field before normalization",  getConvertedVectorField(0));
         if(true){
             double maxGradient_bg = 0;
             cv::minMaxIdx(gradient_bg, 0, &maxGradient_bg);
             gradient_bg = ((255 * gradient_bg) / maxGradient_bg);
 
         }
-        //this->vectorField.insert(0, gradient_bg);
-        //imshow("gradient vector field", getConvertedVectorField(0));
-        for(int j = 0; j < gradient.rows; j++)
+       for(int j = 0; j < gradient.rows; j++)
             for(int i = 0; i < gradient.cols; i++){
                 gradient.at<float>(j,i) = sqrt( pow(dx.at<unsigned char>(j,i),2) + pow(dy.at<unsigned char>(j,i),2) );
-                //gradient.at<float>(j,i) = sqr( (float)dx.at<unsigned char>(j,i) - 125) + sqr( (float)dy.at<unsigned char>(j,i) - 125);// + ((sqr(dy.at<unsigned char>(j,i) - 125) * 255)/6000) ;
-                //dx.at<unsigned char>(j,i) = (((dx.at<unsigned char>(j,i) - 125) * 255)/15625);
-                //dy.at<unsigned char>(j,i) = (((dy.at<unsigned char>(j,i) - 125) * 255)/15625);
-//                float dist = (abs(i-centerX+1)+abs(j-centerY+1))/2;
-//                if(dist < 10){
-//                    dist = 500;
-//                }
+
                 if(gradient.at<float>(j,i) < 70){
                     gradient.at<float>(j,i) = gradient_bg.at<float>(j,i);
                 }else if(canny.at<unsigned char>(j,i) == 255){
@@ -417,13 +257,10 @@ void EnergyExternalField::countVectorField(int type, int centerX, int centerY){
                 }
             }
 
-       // imshow("gradient field", gradient);
         this->vectorField.insert(0, gradient);
         this->vectorField.insert(1, dx);
         this->vectorField.insert(2, dy);
         this->vectorField.insert(3, gradient_bg);
-        //imshow("gradient field after convert", getConvertedVectorField(0));
-        //imshow("gradient_bg field after convert", getConvertedVectorField(3));
         break;
         gaus.release();
         dx.release();
@@ -448,7 +285,7 @@ Mat EnergyExternalField::getNeighborhoodExtE(int x, int y, int step, int at){
             {
                 if( actual_x < 0 || actual_x >= this->vectorField.at(at).cols
                         || actual_y < 0 || actual_y >= this->vectorField.at(at).rows)
-                {//if out of image range set 0
+                {
                     temp.at<float>(index_neighbor_y, index_neighbor_x) = 0;
                 }else{
                     temp.at<float>(index_neighbor_y, index_neighbor_x)= this->vectorField.at(at).at<unsigned char>(actual_y, actual_x);
@@ -467,7 +304,7 @@ Mat EnergyExternalField::getNeighborhoodExtE(int x, int y, int step, int at){
             {
                 if( actual_x < 0 || actual_x >= this->vectorField.at(at).cols
                         || actual_y < 0 || actual_y >= this->vectorField.at(at).rows)
-                {//if out of image range set 0
+                {
                     temp.at<float>(index_neighbor_y, index_neighbor_x) = 0;
                 }else{
                     temp.at<float>(index_neighbor_y, index_neighbor_x)= (unsigned char)this->vectorField.at(at).at<float>(actual_y, actual_x);
@@ -478,7 +315,6 @@ Mat EnergyExternalField::getNeighborhoodExtE(int x, int y, int step, int at){
             index_neighbor_x++;
         }
     }
-//    saveMatToTextFile(temp, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_beforeextE.txt");
     return temp;
 }
 

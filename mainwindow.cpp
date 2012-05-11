@@ -8,11 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     updater = new QTimer();
     readSettings();
-    //ui->actualTime->setStyle(QStyle::PE_FrameButtonBevel);
 
-    //ui->actualTime->setStyleSheet("QLCDNumber {background: green; text: red;}");
-
-    //ui->centralWidget->setMouseTracking(true);
 }
 
 MainWindow::~MainWindow()
@@ -22,9 +18,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    //treba zavriet vsetko co inicializovala kniznica opencv
-    //zatial sa zda ze staci zlikvidovat len vsetky okna z highgui
-    //pozor tieto okna museli byt inicializovane aspon raz inac hrozi RTERR
     destroyAllCVWindows();
     writeSettings();
     QMainWindow::closeEvent(event);
@@ -50,13 +43,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
-    //in case of human interaction
-    //QString::number(QCursor::pos().ry())
-//    ui->xposition->setNumDigits(QCursor::pos().x());
-//    ui->yposition->setNumDigits(QCursor::pos().y());
-//    ui->vypis->setText("Mouse at pos:\tx: "+QString::number(QCursor::pos().x())+"\n\ty: "+QString::number(QCursor::pos().y()));
-    //ui->statusBar->showMessage("Mouse at pos:\tx: "+QString::number(QCursor::pos().x())+"\n\t\ty: "+QString::number(QCursor::pos().y()));
-    QWidget::mouseMoveEvent(event);
+  QWidget::mouseMoveEvent(event);
 }
 
 void MainWindow::writeSettings()
@@ -106,7 +93,6 @@ bool MainWindow::on_actionSet_Mass_Save_Directory_triggered()
     QString filePath = QFileDialog::getExistingDirectory(this, tr("Set Save Directory"), QDir::currentPath());
     if (!filePath.isEmpty()){
         imageSaveDir = filePath;
-        //workImg = imread(filePath.toStdString(),0);
     }else{
         QMessageBox msg;
         msg.setText("Failed opening directory");
@@ -135,27 +121,13 @@ bool MainWindow::on_actionLoad_picture_triggered()
 
 QPixmap* MainWindow::loadPictureToPixmap(QString filePath)
 {
-    //Mat image_greyscaled = imread(filePath.toStdString(),0);
-    //workImg =  new Mat(640,480,CV_8U);
-    //workImg = imread(filePath.toStdString(),0);
-    //workImg = imread(filePath.toStdString(),0);
     QPixmap* back = new QPixmap("tempImage.jpg");
-    //back.load("tempImage.jpg")
-    //back.loadFromData(image_greyscaled.data,
-//                      (*image_greyscaled.dataend-*image_greyscaled.datastart),
-//                      0,
-//                      Qt::AutoColor);
     return back;
 }
 
 void MainWindow::initGraphicsImages(QString filePath)
 {
     image.load(filePath);
-    //imageManipulation = new ImageManip(&image);
-
-//here comes auto setup of gui
-    //ui->spinBox_houghTransform_minRadius->setMaximum((Qt::qMin(workImg.cols, workImg.rows))/2);
-    //ui->spinBox_houghTransform_maxRadius->setMaximum((Qt::qMin(workImg.cols, workImg.rows))/2);
 
     sc_orig = new QGraphicsScene;
     sc_gray = new QGraphicsScene;
@@ -177,29 +149,18 @@ void MainWindow::initGraphicsImages(QString filePath)
 
     ui->graphicsView_active->setScene(sc_active);
 
-//    ui->graphicsView_orig->show();
-//    ui->graphicsView_gray->show();
     imageRasters.clear();
 
 
     QPixmap *tempPixmap_orig = new QPixmap(filePath);
-    //*tempPixmap_orig = QPixmap::load(,0,Qt::ColorOnly);
-    imageRasters.append(tempPixmap_orig);
+     imageRasters.append(tempPixmap_orig);
     pxi_orig->setPixmap(*imageRasters.at(0));
 
-    //ui->vypis->setGeometry(0,0,ui->tab->width(),ui->tab->height());
-    //ui->vypis->setPixmap(*tempPixmap_orig);
 
     QPixmap *tempPixmap_gray = tempPixmap_orig;
-    //*tempPixmap_gray = loadPictureToPixmap(filePath);//QPixmap::fromImage(image,Qt::ColorOnly);
-    //*tempPixmap_gray = QPixmap::fromImage(image,Qt::ColorOnly);
-    imageRasters.append(tempPixmap_gray);
+     imageRasters.append(tempPixmap_gray);
     pxi_gray->setPixmap(*imageRasters.at(1));
-//    histImg=ImageManip::doHistogram(workImg);
-//    openedCVWindowNames.append("H-S Histogram");
-//    namedWindow( "H-S Histogram", 1 );
-//    imshow( "H-S Histogram", histImg );
-    QPixmap *tempPixmap_hist = tempPixmap_orig;
+  QPixmap *tempPixmap_hist = tempPixmap_orig;
     imageRasters.append(tempPixmap_hist);
     pxi_hist->setPixmap(*imageRasters.at(2));
 
@@ -207,13 +168,7 @@ void MainWindow::initGraphicsImages(QString filePath)
     imageRasters.append(tempPixmap_active);
     pxi_active->setPixmap(*imageRasters.at(3));
 
-    //tempPixmap_orig = tempPixmap_orig.scaled(ui->graphicsView_orig->width()-3, ui->graphicsView_orig->height()-3, Qt::KeepAspectRatio);
-    //tempPixmap_gray = tempPixmap_gray.scaled(ui->graphicsView_gray->width()-3, ui->graphicsView_gray->height()-3, Qt::KeepAspectRatio);
-
-    //pxi_gray->setPixmap(tempPixmap_gray);
-    //pxi_orig->setPixmap(imageRaster.scaled(ui->graphicsView_orig->width()-3, ui->graphicsView_orig->height()-3, Qt::KeepAspectRatio));
-    // pxi_gray->setPixmap(tempPixmap_gray.scaled(ui->graphicsView_gray->width()-3, ui->graphicsView_gray->height()-3, Qt::KeepAspectRatio));
-    startUpdater(ui->lineEdit_refreshRate->text().toInt());
+   startUpdater(ui->lineEdit_refreshRate->text().toInt());
 }
 
  /////////////////////////
@@ -244,14 +199,6 @@ void MainWindow::on_lineEdit_refreshRate_editingFinished()
 void MainWindow::startUpdater(int refreshRate){
     if(refreshRate>0){
         updater = new QTimer(this);
-//        QObject::connect(updater,SIGNAL(timeout()),
-//                         this,SLOT(updateGraphics_orig()));
-
-//        QObject::connect(updater,SIGNAL(timeout()),
-//                         this,SLOT(updateGraphics_gray()));
-
-//        QObject::connect(updater,SIGNAL(timeout()),
-//                         this,SLOT(updateGraphics_hist()));
 
         QObject::connect(updater,SIGNAL(timeout()),
                          this,SLOT(updateGraphics_active()));
@@ -290,11 +237,7 @@ void MainWindow::updateGraphics_orig(){
             QPixmap temp2;
             temp2 = temp1.scaled(ui->graphicsView_orig->width()-3, ui->graphicsView_orig->height()-3, Qt::KeepAspectRatio);
             pxi_orig->setPixmap(temp2);
-            //resize of graphics scene
-//            pxi_orig->setOffset(0,0);
-//            sc_orig->update(0,0,ui->graphicsView_orig->width()-3,ui->graphicsView_orig->height()-3);
-//            pxi_orig->update(0,0,ui->graphicsView_orig->width()-3,ui->graphicsView_orig->height()-3);
-        }else{
+      }else{
             pxi_orig->setPixmap(*imageRasters.at(0));
         }
     }
@@ -312,11 +255,7 @@ void MainWindow::updateGraphics_active(){
             QPixmap temp2;
             temp2 = temp1.scaled(ui->graphicsView_active->width()-3, ui->graphicsView_active->height()-3, Qt::KeepAspectRatio);
             pxi_active->setPixmap(temp2);
-            //resize of graphics scene
-//            pxi_orig->setOffset(0,0);
-//            sc_orig->update(0,0,ui->graphicsView_orig->width()-3,ui->graphicsView_orig->height()-3);
-//            pxi_orig->update(0,0,ui->graphicsView_orig->width()-3,ui->graphicsView_orig->height()-3);
-        }else{
+      }else{
             imageRasters.removeAt(3);
             imageRasters.insert(2,new QPixmap("tempImage.jpg"));
             pxi_active->setPixmap(*imageRasters.at(3));
@@ -554,11 +493,6 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
             namedWindow("Hough Transform");
         openedCVWindowNames.append("Hough Transform");
         imshow("Hough Transform",workImg);
-//        origImg = imread(imagePath.toStdString(),1);
-//        ImageManip::drawCircles(origImg, circles);
-//        namedWindow("Hough Transform2");
-//        openedCVWindowNames.append("Hough Transform2");
-//        imshow("Hough Transform2",origImg);
 
             ui->textEdit_setup->append(QString::number(algTime)+"ms : Hough Transform { "+QString::number(doubleBuffer.at(0))+"; "+QString::number(doubleBuffer.at(1))+"; "+QString::number(doubleBuffer.at(2))+"; "+QString::number(doubleBuffer.at(3))+"; "+QString::number(intBuffer.at(0))+"; "+QString::number(intBuffer.at(1))+"; }\nFound Circles: ");
             for(uint i=0; i<circles.size(); i++){
@@ -615,23 +549,6 @@ void MainWindow::callCVoperation(ImageManip::SetupFlags operation){
 
 
 
-//void MainWindow::on_horizontalSlider_sliderMoved(int position)
-//{
-//    ui->sliderValue->display(position+1);
-//    ui->sliderValue->setFrameStyle(QFrame::Box | QFrame::Raised);
-//    //ui->sliderValue->setWidth(1);
-//    ui->sliderValue->setLineWidth(2);
-//    ui->sliderValue->setStyleSheet("QLCDNumber {background: green; color: red;}");
-////    if(openedCVWindowNames.indexOf("Blur + Canny edge detection")!=-1){
-////        Canny(tempMat, edgeMat, position+1, (position+1)*3, 3);
-////        imshow("Blur + Canny edge detection", edgeMat);
-////    }
-//}
-
-//void MainWindow::on_horizontalSlider_valueChanged(int value)
-//{
-//    on_horizontalSlider_sliderMoved(value);
-//}
 
 void MainWindow::messageOutStringList(const QString listName, QStringList list){
     QMessageBox msg;
@@ -690,11 +607,8 @@ void MainWindow::on_pushButton_massRun_clicked()
     while(listOfFiles.isEmpty()){
         on_pushButton_setFilesList_clicked();
     }
-    //QStringList temp = listOfFiles;
     if(listOfFiles.size()<50)
         messageOutStringList("listOFiles",listOfFiles);
-    //messageOutStringList("activeSetup",QStringList(activeSetup));
-    //init setup
     if(!activeSetup.isEmpty()){
         lastSetup = activeSetup;
         lastIntBuffer = intBuffer;
@@ -738,9 +652,7 @@ void MainWindow::on_pushButton_massRun_clicked()
             }
         }
 
-        //debugWindow("directory created");
-        //QList <ImageManip::SetupFlags> temp_setup = activeSetup;
-        QString actual_file_prefix = imageSaveDir+"\\"+subdir_name+"\\processedImg_";
+       QString actual_file_prefix = imageSaveDir+"\\"+subdir_name+"\\processedImg_";
 
         //for all is time counted together
         ui->actualTime->setText("0");
@@ -768,13 +680,10 @@ void MainWindow::on_pushButton_massRun_clicked()
             workImg = imread(listOfFilePaths.at(files).toStdString(),0);
             origImg.release();
             origImg = workImg;
-            //debugWindow("starting OpenCV functions");
             intBuffer = lastIntBuffer;
             doubleBuffer = lastDoubleBuffer;
             boolBuffer = lastBoolBuffer;
             for(int i=0; i<activeSetup.size(); i++){
-                //messageOutBuffersLists(QString().number(i)+" run "+QString().number(activeSetup.at(i)), intBuffer, doubleBuffer, boolBuffer);
-
                 if (progressDialog.wasCanceled())
                     break;
 
@@ -789,8 +698,7 @@ void MainWindow::on_pushButton_massRun_clicked()
             //show the resulting image processed
             if(listOfFiles.size()<50){
                 ui->textEdit_setup->append("Processed: "+listOfFiles.at(files)+"\n------------");
-                //debugWindow("starting creation of window");
-                namedWindow(actual_w);
+               namedWindow(actual_w);
                 openedCVWindowNames.append(actual_window);
                 imshow(actual_w,workImg);
             }else{
@@ -848,13 +756,7 @@ void MainWindow::on_pushButton_run_clicked()
     openedCVWindowNames.append("Active");
     imshow("Active",workImg);
 
-    //namedWindow("Histogram");
-    //openedCVWindowNames.append("Histogram");
-    //imshow("Histogram",calcHist(workImg,1,workImg[0].channels(),););
 
-//    ui->graphicsView->setMouseTracking(true);
-//    showImgThoughOpenCV(imagePath);
-    //createCVWindow();
 }
 
 void MainWindow::on_pushButton_clear_clicked()
@@ -868,9 +770,6 @@ void MainWindow::on_pushButton_clear_clicked()
 
 void MainWindow::on_pushButton_undo_clicked()
 {
-//    switch( activeSetup.end()):
-      //sem prijde kopia hotoveho funkcneho volania operacie CV osekaneho aby si nemusel dva krat pisat
-//    activeSetup.pop_back();
 }
 
  ////////////////////////////
@@ -880,7 +779,6 @@ void MainWindow::on_pushButton_thresholdUnder_clicked()
     activeSetup.append(ImageManip::ThresholdUnder_flag);
     ui->textEdit_setup->append("Threshold Under { "+ui->spinBox_thresholdUnder_value->text()+"; }");
     intBuffer.append(ui->spinBox_thresholdUnder_value->value());
-//    callCVoperation(ImageManip::ThresholdUnder_flag);
 }
 
 
@@ -889,7 +787,6 @@ void MainWindow::on_pushButton_thresholdAbove_clicked()
     activeSetup.append(ImageManip::ThresholdAbove_flag);
     ui->textEdit_setup->append("Threshold Above { "+ui->spinBox_thresholdAbove_value->text()+"; }");
     intBuffer.append(ui->spinBox_thresholdAbove_value->value());
-//    callCVoperation(ImageManip::ThresholdAbove_flag);
 }
 
 void MainWindow::on_pushButton_blur_clicked()
@@ -897,7 +794,6 @@ void MainWindow::on_pushButton_blur_clicked()
     activeSetup.append(ImageManip::Blur_flag);
     ui->textEdit_setup->append("Blur { "+ui->comboBox_blur_ksize->currentText()+"; }");
     intBuffer.append(ui->comboBox_blur_ksize->currentText().toInt());
-    //   callCVoperation(ImageManip::Blur_flag);
 }
 
 
@@ -906,7 +802,6 @@ void MainWindow::on_pushButton_medianBlur_clicked()
     activeSetup.append(ImageManip::MedianBlur_flag);
     ui->textEdit_setup->append("Median Blur { "+ui->comboBox_medianBlur_ksize->currentText()+"; }");
     intBuffer.append(ui->comboBox_medianBlur_ksize->currentText().toInt());
-//    callCVoperation(ImageManip::MedianBlur_flag);
 }
 
 void MainWindow::on_pushButton_gausBlur_clicked()
@@ -916,7 +811,6 @@ void MainWindow::on_pushButton_gausBlur_clicked()
     intBuffer.append(ui->comboBox_gausianBlur_ksize->currentText().toInt());
     doubleBuffer.append(ui->doubleSpinBox_gausianSigmaX->value());
     doubleBuffer.append(ui->doubleSpinBox_gausianSigmaY->value());
-    //    callCVoperation(ImageManip::GausianBlur_flag);
 }
 
 void MainWindow::on_pushButton_laplacian_clicked()
@@ -1143,21 +1037,6 @@ void MainWindow::on_actionBilateral_Filtering_triggered()
  //////////////////////////
 //     GUI ACTIONS      //
 
-//needs to be resized properely to take effect of firefox f11
-//void MainWindow::on_actionFull_screen_mode_triggered()
-//{
-//    if(ui->actionFull_screen_mode->isChecked() || this->isFullScreen()){
-//        this->setWindowState(this->windowState() ^ Qt::WindowMaximized);
-//    }else{
-//        if(ui->actionFull_screen_mode->isChecked())
-//            this->setWindowState(this->windowState() ^ Qt::WindowMaximized);
-//        if(!ui->actionFull_screen_mode->isChecked())
-//            this->setWindowState(this->windowState() ^ Qt::WindowFullScreen);
-//        if(this->isFullScreen())
-//            this->setWindowState(this->windowState() ^ Qt::WindowMaximized);
-
-//    }
-//}
 void MainWindow::on_actionExit_triggered()
 {
     this->close();
@@ -1195,10 +1074,8 @@ void MainWindow::on_actionSave_Setup_File_triggered()
 bool MainWindow::writeTextFile(QString windowName, QString text)
 {
     QString path;
-    //while(path.isEmpty()){
         path = QFileDialog::getSaveFileName(this, windowName, QDir::currentPath(), tr("Text files(*.txt)"));
-    //}
-    QFile outputFile(path);
+   QFile outputFile(path);
     if(outputFile.open(QIODevice::WriteOnly | QFile::Text)){
         QTextStream outText(&outputFile);
         outText << text;
@@ -1228,9 +1105,7 @@ QString MainWindow::readTextFile(QString windowName)
 {
     QString retVal;
     QString path;
-    //while(path.isEmpty()){
         path = QFileDialog::getOpenFileName(this, windowName, QDir::currentPath(), tr("Text files(*.txt)"));
-    //}
         QFile inputFile(path);
         if (!inputFile.open(QIODevice::ReadOnly | QIODevice::Text)){
             QMessageBox mess;
@@ -1313,8 +1188,6 @@ void MainWindow::on_pushButton_snakePromo_clicked()
     openedCVWindowNames.append("Snake Point Matrix");
     imshow("Snake Point Matrix",activeContour->matrixOfPoints);
 
-//    activeContour->moveSnakeContour(activeContour);
-
     namedWindow("Snake Show Matrix");
     openedCVWindowNames.append("Snake Show Matrix");
     imshow("Snake Show Matrix",activeContour->showImage);
@@ -1331,7 +1204,6 @@ void MainWindow::on_pushButton_moveSnake_clicked()
     activeContour->contourThreshold = ui->doubleSpinBox_snake_curvThresh->value();
     activeContour->edgeStrenghtThreshold = ui->doubleSpinBox_snake_edgeThresh->value();
     activeContour->initSnakeExtField(activeContour, activeContour->vectorField->getTypeOfVectorField(), ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value(), activeContour->possiblePupilCenter);
-    //activeContour->saveSnakeToTextFile(activeContour);
     ui->actualTime->setText(QString().number( activeContour->moveSnakeContour(activeContour, 200)));
 
     namedWindow("Snake Show Matrix");
@@ -1344,45 +1216,33 @@ void MainWindow::on_pushButton_moveSnake_clicked()
 
 void MainWindow::on_doubleSpinBox_snake_alpha_editingFinished()
 {
-    //activeContour->setAlphaToAllPoints(ui->doubleSpinBox_snake_alpha->value());
 }
 
 void MainWindow::on_doubleSpinBox_snake_beta_editingFinished()
 {
-    //activeContour->setBetaToAllPoints(ui->doubleSpinBox_snake_beta->value());
 }
 
 void MainWindow::on_doubleSpinBox_snake_sobelScale_editingFinished()
 {
 
-    //activeContour->initSnakeExtField(activeContour, EnergyExternalField::GradientMagnitudes, ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value());
 }
 
 void MainWindow::on_doubleSpinBox_snake_gausianDeviation_editingFinished()
 {
-    //activeContour->initSnakeExtField(activeContour, EnergyExternalField::GradientMagnitudes, ui->doubleSpinBox_snake_gausianDeviation->value(), ui->doubleSpinBox_snake_sobelScale->value());
 }
 
 
 void MainWindow::on_doubleSpinBox_snake_weight_intE_editingFinished()
 {
-    //activeContour->weight_E_int = ui->doubleSpinBox_snake_weight_intE->value();
 }
 
 void MainWindow::on_doubleSpinBox_snake_weight_extE_editingFinished()
 {
-    //activeContour->weight_E_ext = ui->doubleSpinBox_snake_weight_extE->value();
 }
 
 void MainWindow::on_pushButton_irisSnake_clicked()
 {
-    if(imagePath.isEmpty()){
-        while(!on_actionLoad_picture_triggered());
 
-    }else{
-       workImg = imread(imagePath.toStdString(),0);
-       origImg = workImg;
-    }
 
     activeSetup.append(ImageManip::IrisSnakeRun);
     ui->textEdit_setup->append("Automated Iris Search by Snake ACM");

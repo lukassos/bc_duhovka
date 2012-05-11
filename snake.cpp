@@ -17,26 +17,6 @@ Snake::Snake(Mat image, QList<SnakePoint*> points)
 }
 
 
-//void Snake::initSnakeContour(Snake snake, int numberOfPoints, EnergyInternalTemplate::ContourType decision){
-//    snake.contour.clear();
-
-//    snake.typeOfContour = decision;
-//    for(int i=0; i<numberOfPoints; i++){
-//        SnakePoint temp;
-//        temp.setAlpha(0.2);
-//        temp.setBeta(0);
-//        temp.setStep(1);
-//        snake.contour.append(&temp);
-//    }
-
-//    switch(decision){
-//        case EnergyInternalTemplate::ClosedContour_Circle:
-
-//        break;
-//        default:;
-//    }
-//}
-
 void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
                              int energy_int_type, int energy_ext_type,
                              float weight_Eext, float weight_Eint,
@@ -90,18 +70,17 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
         snake->possiblePupilCenter = *fastCenter;
         //set coordinates to circle
         snake->setCirclePositions(snake->contour,  centerX, centerY, radius, snake->getImageOriginal().cols, snake->getImageOriginal().rows);
-        //e_int_computer->countTotalEnergyInt(snake);
+
         break;
     case EnergyInternalTemplate::ClosedContour_Rectangle:
         //set appropriate rectangle, as corona is mostly taking about 1/3 of picure it is forced meassure
         snake->setRectanglePositions(snake->contour,  offsetX, offsetY, 0.33 * snake->originalImage.cols, 0.33 * snake->originalImage.rows, snake->getImageOriginal().cols, snake->getImageOriginal().rows);
         snake->possiblePupilCenter = *fastCenter;
-        //e_int_computer->countTotalEnergyInt(snake);
+
         break;
     default:;
     }
-    //creation of external energy and control class
-    if(energy_ext_type == EnergyExternalField::GradientMagnitudes_pupil || energy_ext_type == EnergyExternalField::GradientMagnitudes_corona){
+   if(energy_ext_type == EnergyExternalField::GradientMagnitudes_pupil || energy_ext_type == EnergyExternalField::GradientMagnitudes_corona){
         initSnakeExtField(snake, energy_ext_type, deviation, scale, *fastCenter);
     }else{
         initSnakeExtField(snake, energy_ext_type, deviation, scale);
@@ -113,28 +92,23 @@ void Snake::initSnakeContour(Snake* snake, int numberOfPoints,
 void Snake::setCirclePositions(QList <SnakePoint*> points, float centerX, float centerY, float radius, int maxX, int maxY){
     int count = points.size();
     float angle = (2*M_PI)/count;
-//    QFile outputFile("c:\\Temp\\testovaciebodykruhu.xls");
-//    outputFile.open(QIODevice::WriteOnly | QFile::Text);
-//    QTextStream outText(&outputFile);
-    for(int i=0; i<count ;i++){
-        //count and set coordinate X
+   for(int i=0; i<count ;i++){
         points.at(i)->x = (centerX+(radius*cos(i*angle)));
         if(points.at(i)->x < 0){
             points.at(i)->x = 0;
         }else if(points.at(i)->x > maxX){
             points.at(i)->x = maxX;
         }
-        //count and set coordinate Y
-        points.at(i)->y = (centerY+(radius*sin(i*angle)));
+       points.at(i)->y = (centerY+(radius*sin(i*angle)));
         if(points.at(i)->y < 0){
             points.at(i)->y = 0;
         }else if(points.at(i)->y > maxY){
             points.at(i)->y = maxY;
         }
-//        outText << "x\t" << QString().number(points.at(i)->x) << "\ty\t" << QString().number(points.at(i)->y) << "\n";
+
     }
 
-//        outputFile.close();
+
 }
 
 void Snake::setRectanglePositions(QList <SnakePoint*> points, float offsetX, float offsetY, float side_a, float side_b, int maxX, int maxY){
@@ -190,7 +164,7 @@ void Snake::initSnakeExtField(Snake *snake, int energy_ext_type, float deviation
 
     default:;
     }
-    //countTotalEnergyExt(snake);
+
 }
 
 void Snake::setAlphaToAllPoints(float alpha){
@@ -218,7 +192,7 @@ void Snake::countTotalEnergyExt(Snake *snake){
 
 Mat Snake::iris_snake_function(Mat image)
 {
-    //imshow("test",image);
+
 
     Mat irisMap;
     Snake *snake_pupil = new Snake(image);
@@ -240,9 +214,6 @@ Mat Snake::iris_snake_function(Mat image)
                                     possiblePupilCenter);
     snake_pupil->moveSnakeContour(snake_pupil, 200);
 
-    //imshow("Iris Function after moving snake_pupil orig", showMatrix(snake_pupil, snake_pupil, Original_with_lines));
-    //imshow("Iris Function after moving snake_pupil grad", showMatrix(snake_pupil, snake_pupil, Gradient_with_lines));
-
     snake_corona->initSnakeContour(snake_corona, 150,
                                     EnergyInternalTemplate::ClosedContour_Circle,
                                     EnergyExternalField::GradientMagnitudes_corona,
@@ -258,6 +229,8 @@ Mat Snake::iris_snake_function(Mat image)
                                     5,
                                     possiblePupilCenter);
     snake_corona->moveSnakeContour(snake_corona, 350);
+
+   //uncomment below for another output types, in blocks
 
 //    //iris map
 //    irisMap = showMatrix(snake_pupil, snake_corona, IrisMap);
@@ -277,17 +250,6 @@ Mat Snake::iris_snake_function(Mat image)
     snake_pupil->showImage = cleanIrisMap(snake_pupil, snake_corona);
     irisMap = showMatrix(snake_pupil, snake_corona, IrisMapTransparent);
 
-
-//    //imshow("Iris Function after moving snake_corona orig", showMatrix(snake_pupil, snake_corona, Original_with_lines));
-
-//    //irisMap = cleanIrisMap(snake_pupil, snake_corona);
-//    snake_pupil->showImage = cleanIrisMap(snake_pupil, snake_corona);
-//    //snake_pupil->showImage = cleanIrisMap(snake_pupil, snake_corona);
-//    irisMap = showMatrix(snake_pupil, snake_corona, IrisMapTransparent);
-//    irisMap = showMatrix(snake_pupil, snake_corona, IrisMap);
-//    //irisMap = showMatrix(snake_pupil, snake_corona, Original_with_lines);
-//    //image = showMatrix(snake_pupil, snake_corona, Gradient_with_lines);
-//    //imshow("Iris Function after moving snake_corona orig", showMatrix(snake_pupil, snake_corona, Original_with_lines));
 
     delete snake_pupil;
     delete snake_corona;
@@ -310,8 +272,6 @@ Mat Snake::cleanIrisMap(Snake *snake_pupil, Snake *snake_corona){
 
 int Snake::moveSnakeContour(Snake *snake, int maxCycles)
 {
-    //int n = snake->contour.size();
-    //saveSnakeToTextFile(snake);
     bool equilibrium = false;
     int cycles = 0;
 
@@ -324,14 +284,10 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
     Mat actual_local_ext_E_norm;
 
     switch(snake->vectorField->getTypeOfVectorField()){
-    //this switch is only for future improvement of code
     case EnergyExternalField::GradientMagnitudes:
-        //while(!equilibrium) iterate through all points in cycles
         while(!equilibrium && (cycles < maxCycles)){
             int movedCount = 0;
             if (!equilibrium){
-            //for all points count locally external and internal energy and look if is in neighborhood point witl lower energy
-
                 for (int n=0; n <= snake->contour.size(); n++){
                     int i = n%snake->contour.size();
                     int neighborhoodSize = (snake->contour.at(i)->step * 2) + 1 ;
@@ -350,7 +306,6 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
 
                     actual_local_ext_E = Mat(snake->vectorField->getNeighborhoodExtE(snake->contour.at(i)->x, snake->contour.at(i)->y, snake->contour.at(i)->step, 0).clone());
                     actual_local_ext_E_norm = Mat(neighborhoodSize, neighborhoodSize, CV_32FC1);
-//                    snake->vectorField->saveMatToTextFile(actual_local_ext_E, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_extE.txt");
                     double minExtE = 0;
                     double maxExtE = 0;
                     cv::minMaxIdx(actual_local_ext_E, &minExtE, &maxExtE);
@@ -362,8 +317,7 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
                     snake->avgDist = e_int_computer->getAverageDistance(*snake);
 
 
-                    //for steps*steps points around snake->contour.at(i)
-                    int index_neighbor_x = 0;
+                   int index_neighbor_x = 0;
                     int index_neighbor_y = 0;
                     for (int actual_y = (snake->contour.at(i)->y - snake->contour.at(i)->step); actual_y <= (snake->contour.at(i)->y + snake->contour.at(i)->step); actual_y++)
                     {
@@ -372,8 +326,7 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
                         {
                             //1st Stage of Internal Energy
 
-                            //actual_local_int_E_1stg.at<float>(index_neighbor_y, index_neighbor_x) = 4;
-                            actual_local_int_E_1stg.at<float>(index_neighbor_y, index_neighbor_x) =
+                           actual_local_int_E_1stg.at<float>(index_neighbor_y, index_neighbor_x) =
                                     e_int_computer->countLocalEnergyInt1stage(*snake, i, actual_x, actual_y);
                             //2nd Stage of Internal Energy
                             actual_local_int_E_2stg.at<float>(index_neighbor_y, index_neighbor_x) =
@@ -406,11 +359,6 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
                         }
                         index_neighbor_y++;
                     }
-//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_1stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_1stage.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_2stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_2stage.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_local_ext_E_norm, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_extNorm.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_x_coordinate, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_coordinatesX.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_y_coordinate, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_coordinatesY.txt");
 
                     double maxIntE_1stg = 0;
                     double maxIntE_2stg = 0;
@@ -419,9 +367,6 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
                     //normalization of internal energy
                     actual_local_int_E_1stg = actual_local_int_E_1stg/maxIntE_1stg;
                     actual_local_int_E_2stg = actual_local_int_E_2stg/maxIntE_2stg;
-//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_1stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_1stageNorm.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_2stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_2stageNorm.txt");
-
 
                     int best_x = -1;
                     int best_intex_x = snake->contour.at(i)->step;
@@ -507,7 +452,6 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
         }
         break;
     case EnergyExternalField::GradientMagnitudes_pupil:
-        //while(!equilibrium) iterate through all points in cycles
         while(!equilibrium && (cycles < 200)){
             int movedCount = 0;
             if (!equilibrium){
@@ -531,7 +475,6 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
 
                     actual_local_ext_E = Mat(snake->vectorField->getNeighborhoodExtE(snake->contour.at(i)->x, snake->contour.at(i)->y, snake->contour.at(i)->step, 0).clone());
                     actual_local_ext_E_norm = Mat(neighborhoodSize, neighborhoodSize, CV_32FC1);
-//                    snake->vectorField->saveMatToTextFile(actual_local_ext_E, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_extE.txt");
                     double minExtE = 0;
                     double maxExtE = 0;
                     cv::minMaxIdx(actual_local_ext_E, &minExtE, &maxExtE);
@@ -543,7 +486,6 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
                     snake->avgDist = e_int_computer->getAverageDistance(*snake);
 
 
-                    //for steps*steps points around snake->contour.at(i)
                     int index_neighbor_x = 0;
                     int index_neighbor_y = 0;
                     for (int actual_y = (snake->contour.at(i)->y - snake->contour.at(i)->step); actual_y <= (snake->contour.at(i)->y + snake->contour.at(i)->step); actual_y++)
@@ -587,21 +529,13 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
                         }
                         index_neighbor_y++;
                     }
-//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_1stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_1stage.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_2stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_2stage.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_local_ext_E_norm, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_extNorm.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_x_coordinate, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_coordinatesX.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_y_coordinate, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_coordinatesY.txt");
-
-                    double maxIntE_1stg = 0;
+                   double maxIntE_1stg = 0;
                     double maxIntE_2stg = 0;
                     cv::minMaxIdx(actual_local_int_E_1stg, 0, &maxIntE_1stg);
                     cv::minMaxIdx(actual_local_int_E_2stg, 0, &maxIntE_2stg);
                     //normalization of internal energy
                     actual_local_int_E_1stg = actual_local_int_E_1stg/maxIntE_1stg;
                     actual_local_int_E_2stg = actual_local_int_E_2stg/maxIntE_2stg;
-//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_1stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_1stageNorm.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_2stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_2stageNorm.txt");
 
 
                     int best_x = -1;
@@ -689,11 +623,9 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
 
         break;
     case EnergyExternalField::GradientMagnitudes_corona:
-        //while(!equilibrium) iterate through all points in cycles
         while(!equilibrium && (cycles < 200)){
             int movedCount = 0;
             if (!equilibrium){
-            //for all points count locally external and internal energy and look if is in neighborhood point witl lower energy
 
                 for (int n=0; n <= snake->contour.size(); n++){
                     int i = n%snake->contour.size();
@@ -713,7 +645,6 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
 
                     actual_local_ext_E = Mat(snake->vectorField->getNeighborhoodExtE(snake->contour.at(i)->x, snake->contour.at(i)->y, snake->contour.at(i)->step, 0).clone());
                     actual_local_ext_E_norm = Mat(neighborhoodSize, neighborhoodSize, CV_32FC1);
-//                    snake->vectorField->saveMatToTextFile(actual_local_ext_E, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_extE.txt");
                     double minExtE = 0;
                     double maxExtE = 0;
                     cv::minMaxIdx(actual_local_ext_E, &minExtE, &maxExtE);
@@ -769,11 +700,6 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
                         }
                         index_neighbor_y++;
                     }
-//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_1stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_1stage.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_2stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_2stage.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_local_ext_E_norm, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_extNorm.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_x_coordinate, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_coordinatesX.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_y_coordinate, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_coordinatesY.txt");
 
                     double maxIntE_1stg = 0;
                     double maxIntE_2stg = 0;
@@ -782,9 +708,6 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
                     //normalization of internal energy
                     actual_local_int_E_1stg = actual_local_int_E_1stg/maxIntE_1stg;
                     actual_local_int_E_2stg = actual_local_int_E_2stg/maxIntE_2stg;
-//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_1stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_1stageNorm.txt");
-//                    snake->vectorField->saveMatToTextFile(actual_local_int_E_2stg, "C:\\Users\\lukassos\\Documents\\kodenie\\duhovecka-build-desktop-Qt_4_7_4_for_Desktop_-_MinGW_4_4__Qt_SDK__Debug\\_debugimg\\moving_2stageNorm.txt");
-
 
                     int best_x = -1;
                     int best_intex_x = snake->contour.at(i)->step;
@@ -884,25 +807,19 @@ int Snake::moveSnakeContour(Snake *snake, int maxCycles)
 
     //write snake points into image matrix for showing
     showMatrix(snake);
-    //saveSnakeToTextFile(snake);
     return cycles;
 }
 
 
 void Snake::showMatrix(Snake *snake){
-    //Mat zeromat = Mat().zeros(snake->originalImage.rows,snake->originalImage.cols, CV_8U);
     snake->matrixOfPoints.release();
     snake->matrixOfPoints = Mat(snake->originalImage.rows,snake->originalImage.cols, CV_32FC3, 0);
     cvtColor(snake->vectorField->getConvertedVectorField(0), snake->matrixOfPoints, CV_GRAY2RGBA);
-    //cvtColor(zeromat, snake->matrixOfPoints, CV_GRAY2RGBA);
     snake->showImage.release();
     snake->showImage = Mat(snake->originalImage.rows,snake->originalImage.cols, CV_32FC3, 0);
     cvtColor(snake->originalImage, snake->showImage, CV_GRAY2RGBA);
 
-    //    for(int i = 0; i < imageToShow.rows; i++)
-    //        for(int j = 0; j < imageToShow.cols; j++)
-    //            imageToShow.at<Vec3b>(i,j)[2]=155;
-        for(int i=0; i<snake->contour.size(); i++){
+       for(int i=0; i<snake->contour.size(); i++){
             if(i < (snake->contour.size() - 1) ){
                 cv::line(snake->matrixOfPoints,cv::Point((int)(snake->contour.at(i)->x), (int)(snake->contour.at(i)->y)),cv::Point((int)(snake->contour.at(i+1)->x), (int)(snake->contour.at(i+1)->y)), cv::Scalar(0,105,230));
             }else{
@@ -1192,13 +1109,6 @@ bool Snake::saveSnakeToTextFile(Snake *snake)
                 << "---"<< endl
                 << snake->matrixOfPoints.data << snake->matrixOfPoints.datastart << snake->matrixOfPoints.dataend << endl
                 << "---"<< endl ;
-//            for(int i = 0; i < snake->matrixOfPoints.rows; i++)
-//                for(int j = 0; j < snake->matrixOfPoints.cols; j++){
-//                    outText << snake->matrixOfPoints.at<Vec3b>(i,j)[0] <<  endl
-//                            << snake->matrixOfPoints.at<Vec3b>(i,j)[1] <<  endl
-//                            << snake->matrixOfPoints.at<Vec3b>(i,j)[2] <<  endl;
-
-//                }
 
         outputFile.close();
         return true;
@@ -1343,7 +1253,6 @@ float Snake::fastCenterLocalizationAlgorithm(Mat processedImage, cv::Point *fast
                 probableXY[1]=probableXY[2]-radiusXY[0];
                 correctionOfX[0] = probableXY[0];
                 correctionOfX[1] = probableXY[0];
-                //int correctionOfX[2] = {probableXY[0],probableXY[0]}; //{old x/ most left x, old x/most right x}
                 notFound = true;
                 while(notFound){
                     if(sum.at<unsigned char>(probableXY[1],correctionOfX[1]) == sum.at<unsigned char>(probableXY[1],correctionOfX[1]+1)){
