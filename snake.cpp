@@ -259,16 +259,36 @@ Mat Snake::iris_snake_function(Mat image)
                                     possiblePupilCenter);
     snake_corona->moveSnakeContour(snake_corona, 350);
 
-    //imshow("Iris Function after moving snake_corona orig", showMatrix(snake_pupil, snake_corona, Original_with_lines));
+//    //iris map
+//    irisMap = showMatrix(snake_pupil, snake_corona, IrisMap);
 
-    irisMap = cleanIrisMap(snake_pupil, snake_corona);
+//    //visible map
+//    snake_pupil->showImage = showMatrix(snake_pupil, snake_corona, IrisMap);
+//    irisMap = showMatrix(snake_pupil, snake_corona, IrisMapTransparent);
 
-    //snake_pupil->showImage = cleanIrisMap(snake_pupil, snake_corona);
-    //irisMap = showMatrix(snake_pupil, snake_corona, IrisMapTransparent);
+//    //line map
+//    irisMap = showMatrix(snake_pupil, snake_corona, Original_with_lines);
 
-    //irisMap = showMatrix(snake_pupil, snake_corona, Original_with_lines);
-    //image = showMatrix(snake_pupil, snake_corona, Gradient_with_lines);
-    //imshow("Iris Function after moving snake_corona orig", showMatrix(snake_pupil, snake_corona, Original_with_lines));
+
+//    //iris map with cleaning
+//    irisMap = cleanIrisMap(snake_pupil, snake_corona);
+
+    //visible map with cleaning
+    snake_pupil->showImage = cleanIrisMap(snake_pupil, snake_corona);
+    irisMap = showMatrix(snake_pupil, snake_corona, IrisMapTransparent);
+
+
+//    //imshow("Iris Function after moving snake_corona orig", showMatrix(snake_pupil, snake_corona, Original_with_lines));
+
+//    //irisMap = cleanIrisMap(snake_pupil, snake_corona);
+//    snake_pupil->showImage = cleanIrisMap(snake_pupil, snake_corona);
+//    //snake_pupil->showImage = cleanIrisMap(snake_pupil, snake_corona);
+//    irisMap = showMatrix(snake_pupil, snake_corona, IrisMapTransparent);
+//    irisMap = showMatrix(snake_pupil, snake_corona, IrisMap);
+//    //irisMap = showMatrix(snake_pupil, snake_corona, Original_with_lines);
+//    //image = showMatrix(snake_pupil, snake_corona, Gradient_with_lines);
+//    //imshow("Iris Function after moving snake_corona orig", showMatrix(snake_pupil, snake_corona, Original_with_lines));
+
     delete snake_pupil;
     delete snake_corona;
     return irisMap;
